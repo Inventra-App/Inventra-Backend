@@ -1,0 +1,126 @@
+openapi: 3.0.3
+info:
+  title: Inventra Backend API
+  description: API documentation for Inventra backend user registration.
+  version: 1.0.0
+servers:
+  - url: http://localhost:1002
+    description: Local development server
+paths:
+  /api/v1/user:
+    post:
+      summary: Register a new user
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSignUpRequest'
+      responses:
+        '201':
+          description: User registered successfully and OTP sent by email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSuccessResponse'
+        '400':
+          description: Validation error or user already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    UserSignUpRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - businessName
+        - phoneNumber
+        - password
+        - confirmPassword
+      properties:
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        businessName:
+          type: string
+          example: Inventra Inc.
+        phoneNumber:
+          type: string
+          example: +1234567890
+        password:
+          type: string
+          format: password
+          example: strongPassword123
+        confirmPassword:
+          type: string
+          format: password
+          example: strongPassword123
+    UserData:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6421f2b2a8c4a9e7d3f9c1a2
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        businessName:
+          type: string
+          example: Inventra Inc.
+        phoneNumber:
+          type: string
+          example: +1234567890
+        otp:
+          type: string
+          example: '123456'
+        otpExpires:
+          type: string
+          example: '1716240000000'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2026-05-25T12:34:56.789Z'
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2026-05-25T12:34:56.789Z'
+    RegistrationSuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Welcome to Inventra! Please check your email for the OTP to complete your registration.
+        data:
+          $ref: '#/components/schemas/UserData'
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: User already exists. Please proceed to login

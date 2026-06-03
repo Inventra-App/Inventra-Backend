@@ -39,7 +39,20 @@ const userSchema = new mongoose.Schema({
     otpExpires: {
         type: String,
         trim: true
-    }
+    },
+
+    isVerified:{
+     type: Boolean,
+     default: false
+    },
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+
+    lockUntil: {
+        type: Date
+    },
 }, {timeStamps: true})
 
 const UserModel = mongoose.model('User', userSchema)

@@ -48,3 +48,49 @@ exports.signUpValidator = (req, res, next) => {
     }
     next()
 }
+
+exports.verifyUserValidator = (req, res, next) => {
+    const schema = Joi.object({
+        email: Joi.string().trim().email().required().messages({
+            'string.email': 'Please enter a valid email',
+            'string.empty': 'Email is required',
+            'any.required': 'Email is required'
+        }),
+        otp: Joi.string().trim().length(6).required().messages({
+            'string.empty': 'OTP is required',
+            'string.length': 'OTP must be 6 characters long',
+            'any.required': 'OTP is required'
+        })
+    })
+
+    const { error } = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({
+            message: error.details[0].message
+        })
+    }
+    next()
+}
+
+exports.loginValidator = (req, res, next) => {
+    const schema = Joi.object({
+        email: Joi.string().trim().email().required().messages({
+            'string.email': 'Please enter a valid email',
+            'string.empty': 'Email is required',
+            'any.required': 'Email is required'
+        }),
+        password: Joi.string().required().messages({
+            'string.empty': 'Password is required',
+            'any.required': 'Password is required'
+        })
+    })
+
+    const { error } = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({
+            message: error.details[0].message
+        })
+    }
+    next()
+}
+

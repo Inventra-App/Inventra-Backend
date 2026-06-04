@@ -94,3 +94,53 @@ exports.loginValidator = (req, res, next) => {
     next()
 }
 
+exports.forgotPasswordValidator = (req, res, next) => {
+    const schema = Joi.object({
+        email: Joi.string().trim().email().required().messages({
+            'string.email': 'Please enter a valid email',
+            'string.empty': 'Email is required',
+            'any.required': 'Email is required'
+        })
+    })
+
+    const { error } = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({
+            message: error.details[0].message
+        })
+    }
+    next()
+}
+
+exports.resetPasswordValidator = (req, res, next) => {
+    const schema = Joi.object({
+        email: Joi.string().trim().email().required().messages({
+            'string.email': 'Please enter a valid email',
+            'string.empty': 'Email is required',
+            'any.required': 'Email is required'
+        }),
+        otp: Joi.string().trim().length(6).required().messages({
+            'string.empty': 'OTP is required',
+            'string.length': 'OTP must be 6 characters long',
+            'any.required': 'OTP is required'
+        }),
+        password: Joi.string().pattern(passwordPattern).required().messages({
+            'any.required': 'Password is required',
+            'string.empty': 'Password cannot be empty',
+            'string.pattern.base': 'Password must be at least 8 characters and include upper and lower case'
+        })
+    })
+
+    const { error } = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({
+            message: error.details[0].message
+        })
+    }
+    next()
+}
+
+
+
+
+

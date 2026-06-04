@@ -106,3 +106,5 @@ const signUpOtpTemplate = (userName, otp) => {
 module.exports = {
     signUpOtpTemplate
 }
+
+

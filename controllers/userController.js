@@ -188,3 +188,92 @@ exports.login = async( req, res, next) => {
 }
 
 
+exports.forgotPassword = async (req,res,next) =>{
+    try {
+        
+        const {email} = req.body
+        const user = await clientModel.findOne({email: email.toLowerCase()})
+
+        if(!user) {
+            return res.status(404).json({
+                message: "Client not found"
+            })
+        }
+        const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
+
+        const expires = new Date(Date.now() + 1000 * 60 * 5);
+
+        if (Date.now() > user.otpExpires || otp !== user.otp){
+            return res.status(400).json({
+                message: 'Invalid or expired OTP'
+            })
+        }
+
+        const emailData = {
+            name: user.fullName,
+            otp: OTP
+        }
+        await brevo(user.email, user.fullName, resetPasswordTemplate(emailData))
+         
+        user.otp = OTP;
+        user.otpExpires = expires;
+
+        await user.save();
+
+        res.status(200).json({
+            message: 'Please check your email for password OTP'
+        })
+
+
+
+    } catch (error) {
+             if (isEmailDeliveryError(error)) {
+              return res.status(503).json({
+                message: "Unable to send password OTP. Please try again."
+            })
+        }
+
+        console.log(error.message)       
+         res.status(500).json({
+            message: "Something went wrong"
+        })
+    }
+}
+
+
+
+exports.resetPassword = async (req,res,next) => {
+    try {
+        const {email, password} = req.body
+        const user = await clientModel.findOne({email: email.toLowerCase()})
+    
+        if(!user) {
+            return res.status(404).json({
+                message: "Client not found"
+            })
+        }
+        if (!password) {
+            return res.status(400).json({
+                message: "Password is required"
+            })
+        }
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(password, salt)
+        user.password = hashedPassword
+        
+        await user.save()
+
+        await brevo(user.email, user.fullName, resetPasswordSuccessfulTemplate(user.fullName))
+
+        res.status(200).json({
+            message: "Password reset successfully"
+        })
+    
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            message: "Something went wrong"
+        })
+    }
+}
+

@@ -3,7 +3,7 @@ const { signUpOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 exports.signUp = async (req, res, next) => {
     try {
@@ -25,7 +25,7 @@ exports.signUp = async (req, res, next) => {
         }
 
         const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
-        const otpExpires = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+        const otpExpires = Date.now() + 10 * 60 * 1000;
 
         brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
@@ -45,7 +45,6 @@ exports.signUp = async (req, res, next) => {
             message: "Welcome to Inventra! Please check your email for the OTP to complete your registration.",
             data: user
         })
-        // console.log(`New user created: `, newUser)
 
     }catch (error) {
         next(error)
@@ -146,7 +145,6 @@ exports.login = async( req, res, next) => {
                 statusCode:404
             })
         }
-        //  check if account is locked due to too many failed login attempts
         if(user.lockUntil && user.lockUntil > Date.now()){
             return next({
                 message: 'Account is locke until ${user.lockUntil}.',
@@ -163,7 +161,7 @@ exports.login = async( req, res, next) => {
             user.loginAttempts += 1;
             if (user.loginAttempts >= 3) {
                 user.lockUntil = new Date(Date.now() + 2 * 60000);
-                user.loginAttempts = 0; // Reset login attempts
+                user.loginAttempts = 0; 
             }
 
             await user.save();

@@ -51,7 +51,7 @@ exports.signUp = async (req, res, next) => {
     } 
 }
 
-exports.verifyUser = async (req,res,next) =>{
+exports.verifyUser = async (req,res,next) => {
     try{
    
         const {email,otp} = req.body;
@@ -275,3 +275,4 @@ exports.resetPassword = async (req,res,next) => {
     }
 }
 
+  

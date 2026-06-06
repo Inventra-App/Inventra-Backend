@@ -20,10 +20,10 @@ const swaggerDefinition = {
     version: '2.0.0',
     description:
       `This is a REST API application made with Express. It retrieves data from JSONPlaceholder.
-       The base Url is:http://localhost:7878`,
+       The base Url is:https://localhost:7878`,
     license: {
       name: 'Official Url',
-      url: 'http://google.com',
+      url: 'https://google.com',
     },
     contact: {
       name: 'JSONPlaceholder',

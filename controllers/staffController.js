@@ -1,11 +1,11 @@
-const staffModel = require('../models/staffModel');
+const staffModel = require('../models/staff');
 const userModel = require('../models/supermarket');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.createStaff = async (req, res, next) => {
     try {
-        const { adminId } = req.user.id;
+        const adminId = req.user.id;
         console.log(adminId)
         const admin = await userModel.findById(adminId);
 
@@ -18,7 +18,6 @@ exports.createStaff = async (req, res, next) => {
         const {
             firstName,
             lastName,
-            username,
             password,
             role
         } = req.body;
@@ -64,11 +63,22 @@ exports.loginStaff = async (req, res, next) => {
             })
         }
 
-        const token = await jwt.sign(
-            {staffId: staff._id, role: staff.role, name: staff.firstName},
-            process.env.SECRET_KEY,
-            { expiresIn: '1day'}
-        )
+
+    
+       const token = jwt.sign(
+        { 
+        id: staff._id,      
+        role: staff.role, 
+        name: staff.firstName },
+        process.env.SECRET_KEY,
+       { expiresIn: '1day' }
+)
+
+        // const token = await jwt.sign(
+        //     {staffId: staff._id, role: staff.role, name: staff.firstName},
+        //     process.env.SECRET_KEY,
+        //     { expiresIn: '1day'}
+        // )
 
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,
@@ -81,7 +91,7 @@ exports.loginStaff = async (req, res, next) => {
     }
 }
 
-exports.requestPasswordChange = async (res, req, next) => {
+exports.requestPasswordChange = async (req, res, next) => {
     try {
         const { username } = req.body;
 

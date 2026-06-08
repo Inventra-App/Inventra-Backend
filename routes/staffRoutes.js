@@ -1,7 +1,8 @@
 const router = require('express').Router();
 
-const { createStaff } = require('../controllers/staffController');
-const authentication = require('../middlewares/auth');
+const { createStaff,loginStaff } = require('../controllers/staffController');
+const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
+const { authentication } = require('../middlewares/auth');
 /**
  * @swagger
  * tags:
@@ -108,7 +109,86 @@ const authentication = require('../middlewares/auth');
  *       500:
  *         description: Internal server error
  */
-router.post('/create-staff/:adminId', authentication, createStaff);
+router.post('/create-staff', authentication, createStaffValidator,  createStaff);
+
+
+
+/**
+ * @swagger
+ * /api/v1/staff/login:
+ *   post:
+ *     tags: [Staff]
+ *     summary: Login as a staff member
+ *     description: Authenticates a staff member with username and password. Returns a JWT token valid for 1 day.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: The staff member's auto-generated username
+ *                 example: john4523
+ *               password:
+ *                 type: string
+ *                 description: The staff member's password
+ *                 example: Secret123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Login sucesssful. You may pass!
+ *                 data:
+ *                   $ref: '#/components/schemas/Staff'
+ *                 token:
+ *                   type: string
+ *                   description: JWT authentication token
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *       400:
+ *         description: Invalid password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid credentials. Please contact your administrator
+ *       404:
+ *         description: Staff member not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid credentials. Please contact your administrator.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ *             example: Something went wrong
+ */
+
+router.post('/staff/login', loginStaffValidator, loginStaff);
 
 
 module.exports = router;

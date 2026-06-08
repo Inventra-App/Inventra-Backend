@@ -183,7 +183,10 @@ exports.login = async( req, res, next) => {
        supermarket.lockUntil = null;
        await supermarket.save();
 
-        const token = await jwt.sign({ id: supermarket._id, email: supermarket.email }, process.env.SECRET_KEY, { expiresIn: '1day' });
+        const token = jwt.sign(
+            { id: supermarket._id}, 
+            // { email: supermarket.email }, 
+            process.env.SECRET_KEY, { expiresIn: '1day' });
 
         res.status(200).json({
             message: 'Login Successful',
@@ -330,7 +333,7 @@ exports.addBusinessName = async (req, res, next) => {
         console.log(supermarket);
 
         res.status(200).json({
-            message: `You ate that!`
+            message: `Business name updated successfully`
         });
 
     } catch (error) {

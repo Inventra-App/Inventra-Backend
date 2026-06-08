@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const supermarketRoutes = require('./routes/supermarketRoutes');
 const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
+const staffRoutes = require('./routes/staffRoutes')
 const express_session= require('express-session')
 const { passport } = require('./middlewares/passport')
 
@@ -29,7 +30,8 @@ app.use(passport.session());
 app.use(express.json());
 app.use('/api/v1', supermarketRoutes);
 app.use('/api/v1', subscriptionPlanRoutes);
-app.use('/api/v1/', categoryRoutes)
+app.use('/api/v1', categoryRoutes);
+app.use('/api/v1', staffRoutes);
 // app.use(rateLimiter);
 
 const swaggerDefinition = {

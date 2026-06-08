@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 
 exports.createStaff = async (req, res, next) => {
     try {
-        const { adminId } = req.user;
+        const { adminId } = req.user.id;
         console.log(adminId)
         const admin = await userModel.findById(adminId);
 

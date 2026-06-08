@@ -14,7 +14,7 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
  * @swagger
  * components:
  *   schemas:
- *     User:
+ *      Supermarket:
  *       type: object
  *       properties:
  *         firstName:
@@ -45,9 +45,9 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
 
 /**
  * @swagger
- * /api/v1/supermarket/signup:
+ * /api/v1/user:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Register a new user
  *     description: Creates a new user account, hashes the password with bcrypt, generates a 6-digit OTP and sends it to the provided email. OTP expires in 10 minutes.
  *     requestBody:
@@ -134,9 +134,9 @@ router.post('/user', signUpValidator, signUp);
 
 /**
  * @swagger
- * /api/v1/supermarket/verify:
+ * /api/v1/verify:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Verify email with OTP
  *     description: Validates the 6-digit OTP sent to the user's email after sign up. Marks the account as verified and clears the OTP. OTP expires after 10 minutes.
  *     requestBody:
@@ -195,9 +195,9 @@ router.post('/verify', verifyUserValidator, verifyUser);
 
 /**
  * @swagger
- * /api/v1/supermarket/login:
+ * /api/v1/login:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Login
  *     description: Autghenticates the user with email and password. Returns a JWT token valid for 1 day. After 3 failed attempts the account is locked for 2 minutes. Login attempts and lock are reset on success.
  *     requestBody:
@@ -280,9 +280,9 @@ router.post('/login', loginValidator, login);
 
 /**
  * @swagger
- * /api/v1/users/resend-otp:
+ * /api/v1/resend-otp:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Resend OTP
  *     description: Generates a fresh 6-digit OTP and sends it to the user's registered email. The previous OTP is overwritten. New OTP expires in 10 minutes.
  *     requestBody:
@@ -325,9 +325,9 @@ router.post('/resend-otp',resendOtpValidator, resendOTP);
 
 /**
  * @swagger
- * /api/v1/supermarket/forgot:
+ * /api/v1/forgot:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Forgot password
  *     description: Sends a 6-digit OTP to the user's registered email to initiate a password reset. OTP expires after 5 minutes.
  *     requestBody:
@@ -380,9 +380,9 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
 
 /**
  * @swagger
- * /api/v1/users/reset:
+ * /api/v1/reset:
  *   post:
- *     tags:
+ *     tags: [supermarket]
  *     summary: Reset password
  *     description: Resets the user's password after verifying the OTP from the forgot-password step. The OTP is cleared after a successful reset and a confirmation email is sent.
  *     requestBody:

@@ -1,7 +1,10 @@
 const router = require('express').Router();
 // const rateLimiter = require('../middleware/rateLimiter');
-const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/supermarketController');
+const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword, loginWithGoogle, addBusinessName } = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
+const { profile, loginProfile } = require('../middlewares/passport')
+const { authentication } = require('../middlewares/auth')
+
 
 /**
  * @swagger
@@ -454,7 +457,79 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
 
 router.post('/reset', resetPasswordValidator, resetPassword);
 
+
+/**
+ * @swagger
+ * /api/v1/business-name:
+ *   patch:
+ *     tags: [supermarket]
+ *     summary: Update business name
+ *     description: Allows an authenticated supermarket owner to update their business name.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - businessName
+ *             properties:
+ *               businessName:
+ *                 type: string
+ *                 description: The new business name
+ *                 example: SmartMart Ltd
+ *     responses:
+ *       200:
+ *         description: Business name updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You ate that!
+ *       403:
+ *         description: Supermarket not found - not a registered business
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You are not a registered business!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+router.patch('/business-name', authentication, addBusinessName)
+
+router.get('/auth/google', profile)
+router.get('/auth/google/callback', loginProfile, loginWithGoogle)
+
 module.exports = router;
+
+
 
 
 

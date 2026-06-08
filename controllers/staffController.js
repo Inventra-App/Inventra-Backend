@@ -63,11 +63,22 @@ exports.loginStaff = async (req, res, next) => {
             })
         }
 
-        const token = await jwt.sign(
-            {staffId: staff._id, role: staff.role, name: staff.firstName},
-            process.env.SECRET_KEY,
-            { expiresIn: '1day'}
-        )
+
+    
+       const token = jwt.sign(
+        { 
+        id: staff._id,      
+        role: staff.role, 
+        name: staff.firstName },
+        process.env.SECRET_KEY,
+       { expiresIn: '1day' }
+)
+
+        // const token = await jwt.sign(
+        //     {staffId: staff._id, role: staff.role, name: staff.firstName},
+        //     process.env.SECRET_KEY,
+        //     { expiresIn: '1day'}
+        // )
 
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,
@@ -80,7 +91,7 @@ exports.loginStaff = async (req, res, next) => {
     }
 }
 
-exports.requestPasswordChange = async (res, req, next) => {
+exports.requestPasswordChange = async (req, res, next) => {
     try {
         const { username } = req.body;
 

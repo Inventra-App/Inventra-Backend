@@ -5,6 +5,7 @@ const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 
+
 exports.signUp = async (req, res, next) => {
     try {
         const {
@@ -27,8 +28,6 @@ exports.signUp = async (req, res, next) => {
         const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
         const otpExpires = Date.now() + 10 * 60 * 1000;
 
-        brevo(email, firstName, signUpOtpTemplate(firstName, otp))
-
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new UserModel({
             firstName,
@@ -39,11 +38,15 @@ exports.signUp = async (req, res, next) => {
             password: hashedPassword,
             otp,
             otpExpires
-        })                                              
+        })
+        
+        await user.save();
+       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+
 
         res.status(201).json({
             message: "Welcome to Inventra! Please check your email for the OTP to complete your registration.",
-            data: user
+        
         })
 
     }catch (error) {
@@ -51,11 +54,11 @@ exports.signUp = async (req, res, next) => {
     } 
 }
 
-exports.verifyUser = async (req,res,next) => {
+exports.verifyUser = async (req,res,next) =>{
     try{
    
         const {email,otp} = req.body;
-        const user = await UserModel.findOne({email:email.toLowerCase})
+        const user = await UserModel.findOne({email:email.toLowerCase()})
 
         if (!user) {
         return next({
@@ -91,7 +94,7 @@ exports.resendOTP = async (req, res, next) => {
     try {
         const { email } = req.body;
 
-        const user = await userModel.findOne({ email })
+        const user = await UserModel.findOne({ email })
         if (!user) {
             return next({
                 message: 'User not found',
@@ -99,7 +102,7 @@ exports.resendOTP = async (req, res, next) => {
             })
         }
 
-        const OTP = otpGenerator.generate(4, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
+        const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
 
         const expires = new Date(Date.now() + 10 * 60000);
 
@@ -131,7 +134,7 @@ exports.login = async( req, res, next) => {
     try {
         const { email, password } = req.body
 
-        const user = await userModel.findOne({ email })
+        const user = await UserModel.findOne({ email })
         if (!user) {
             return next({
                 message: 'User not found',
@@ -170,8 +173,14 @@ exports.login = async( req, res, next) => {
                 statusCode:400
             })
         }
+       user.loginAttempts =0
+       user.lockUntil = null
+       await user .save()
 
-        const token = await jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1day'});
+        const token = await jwt.sign(
+            { id: user._id, email: user.email },
+             process.env.JWT_SECRET, 
+             { expiresIn: '1day'});
 
         res.status(200).json({
             message: 'Login Successful',
@@ -190,11 +199,11 @@ exports.forgotPassword = async (req,res,next) =>{
     try {
         
         const {email} = req.body
-        const user = await clientModel.findOne({email: email.toLowerCase()})
+        const user = await UserModel.findOne({email: email.toLowerCase()})
 
         if(!user) {
             return res.status(404).json({
-                message: "Client not found"
+                message: "User not found"
             })
         }
         const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
@@ -243,21 +252,23 @@ exports.forgotPassword = async (req,res,next) =>{
 exports.resetPassword = async (req,res,next) => {
     try {
         const {email, password} = req.body
-        const user = await clientModel.findOne({email: email.toLowerCase()})
+        const user = await usertModel.findOne({email: email.toLowerCase()})
     
         if(!user) {
             return res.status(404).json({
-                message: "Client not found"
+                message: "user not found"
             })
         }
-        if (!password) {
+        if (Date.now() > user.otpExpires || user.otp !== otp) {
             return res.status(400).json({
-                message: "Password is required"
-            })
+                 message: 'Invalid or expired OTP' });
         }
+
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
         user.password = hashedPassword
+        user.otp = null,
+        user.otpExpires = null
         
         await user.save()
 
@@ -274,5 +285,3 @@ exports.resetPassword = async (req,res,next) => {
         })
     }
 }
-
-  

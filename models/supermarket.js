@@ -21,7 +21,6 @@ const supermarketSchema = new mongoose.Schema({
     businessName: {
         type: String,
         trim: true,
-        required: true
     },
     phoneNumber: {
         type: String,
@@ -29,12 +28,11 @@ const supermarketSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-        trin: true
+        trim: true
     },
     password: {
         type: String,
         trim: true,
-        required: true
     },
     otp: {
         type: String,

@@ -1,12 +1,12 @@
 const router = require('express').Router();
 // const rateLimiter = require('../middleware/rateLimiter');
 const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/supermarketController');
-const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator } = require('../middlewares/validator');
+const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
  * tags:
- *   name: users
+ *   name: supermarket
  *   description: User authentication and account management
  */
 
@@ -45,7 +45,7 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
 
 /**
  * @swagger
- * /api/auth/signup:
+ * /api/v1/supermarket/signup:
  *   post:
  *     tags:
  *     summary: Register a new user
@@ -68,15 +68,15 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
  *               firstName:
  *                 type: string
  *                 description: The user's first name
- *                 example: Jane
+ *                 example: John
  *               lastName:
  *                 type: string
  *                 description: The user's last name
- *                 example: Benneth
+ *                 example: Smith
  *               email:
  *                 type: string
  *                 description: The user's email address
- *                 example: onyebenneth20@gmail.com
+ *                 example: onyebenneth30@gmail.com
  *               businessName:
  *                 type: string
  *                 description: The user's business name
@@ -88,11 +88,11 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
  *               password:
  *                 type: string
  *                 description: The user's password
- *                 example: smart123
+ *                 example: Smart123
  *               confirmPassword:
  *                 type: string
  *                 description: Must match password
- *                 example: smart123
+ *                 example: Smart123
  *     responses:
  *       201:
  *         description: User registered successfully. OTP sent to email.
@@ -134,7 +134,7 @@ router.post('/user', signUpValidator, signUp);
 
 /**
  * @swagger
- * /api/v1/verify:
+ * /api/v1/supermarket/verify:
  *   post:
  *     tags:
  *     summary: Verify email with OTP
@@ -195,7 +195,7 @@ router.post('/verify', verifyUserValidator, verifyUser);
 
 /**
  * @swagger
- * /api/v1/login:
+ * /api/v1/supermarket/login:
  *   post:
  *     tags:
  *     summary: Login
@@ -280,7 +280,7 @@ router.post('/login', loginValidator, login);
 
 /**
  * @swagger
- * /api/v1/resend-otp:
+ * /api/v1/users/resend-otp:
  *   post:
  *     tags:
  *     summary: Resend OTP
@@ -321,11 +321,11 @@ router.post('/login', loginValidator, login);
  *                   type: string
  *                   example: User not found
  */
-router.post('/resend-otp', verifyUserValidator, resendOTP);
+router.post('/resend-otp',resendOtpValidator, resendOTP);
 
 /**
  * @swagger
- * /api/v1/forgot:
+ * /api/v1/supermarket/forgot:
  *   post:
  *     tags:
  *     summary: Forgot password
@@ -380,7 +380,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
 
 /**
  * @swagger
- * /api/v1/reset:
+ * /api/v1/users/reset:
  *   post:
  *     tags:
  *     summary: Reset password

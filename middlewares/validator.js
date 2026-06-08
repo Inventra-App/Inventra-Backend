@@ -50,13 +50,13 @@ exports.signUpValidator = (req, res, next) => {
 }
 
 exports.verifyUserValidator = (req, res, next) => {
-    const schema = Joi.object({
-        email: Joi.string().trim().email().required().messages({
+    const schema = joi.object({
+        email: joi.string().trim().email().required().messages({
             'string.email': 'Please enter a valid email',
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
         }),
-        otp: Joi.string().trim().length(6).required().messages({
+        otp: joi.string().trim().length(6).required().messages({
             'string.empty': 'OTP is required',
             'string.length': 'OTP must be 6 characters long',
             'any.required': 'OTP is required'
@@ -73,13 +73,13 @@ exports.verifyUserValidator = (req, res, next) => {
 }
 
 exports.loginValidator = (req, res, next) => {
-    const schema = Joi.object({
-        email: Joi.string().trim().email().required().messages({
+    const schema = joi.object({
+        email: joi.string().trim().email().required().messages({
             'string.email': 'Please enter a valid email',
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
         }),
-        password: Joi.string().required().messages({
+        password: joi.string().required().messages({
             'string.empty': 'Password is required',
             'any.required': 'Password is required'
         })
@@ -95,8 +95,8 @@ exports.loginValidator = (req, res, next) => {
 }
 
 exports.forgotPasswordValidator = (req, res, next) => {
-    const schema = Joi.object({
-        email: Joi.string().trim().email().required().messages({
+    const schema = joi.object({
+        email: joi.string().trim().email().required().messages({
             'string.email': 'Please enter a valid email',
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
@@ -113,18 +113,18 @@ exports.forgotPasswordValidator = (req, res, next) => {
 }
 
 exports.resetPasswordValidator = (req, res, next) => {
-    const schema = Joi.object({
-        email: Joi.string().trim().email().required().messages({
+    const schema = joi.object({
+        email: joi.string().trim().email().required().messages({
             'string.email': 'Please enter a valid email',
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
         }),
-        otp: Joi.string().trim().length(6).required().messages({
+        otp: joi.string().trim().length(6).required().messages({
             'string.empty': 'OTP is required',
             'string.length': 'OTP must be 6 characters long',
             'any.required': 'OTP is required'
         }),
-        password: Joi.string().pattern(passwordPattern).required().messages({
+        password: joi.string().pattern(passwordPattern).required().messages({
             'any.required': 'Password is required',
             'string.empty': 'Password cannot be empty',
             'string.pattern.base': 'Password must be at least 8 characters and include upper and lower case'

@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const staffSchema = new mongoose.Schema({
+    adminId: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'admin'
+    },
     firstName: {
         type: String,
         required: true,

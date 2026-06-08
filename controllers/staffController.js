@@ -1,11 +1,12 @@
 const staffModel = require('../models/staffModel');
-const userModel = require('../models/user');
+const userModel = require('../models/supermarket');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.createStaff = async (req, res, next) => {
     try {
         const { adminId } = req.user;
+        console.log(adminId)
         const admin = await userModel.findById(adminId);
 
         if (!admin) {

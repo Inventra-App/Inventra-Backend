@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const SubscriptionPlan = require('./subscriptionPlan');
 
-const userSchema = new mongoose.Schema({
+const supermarketSchema = new mongoose.Schema({
     firstName: {
         type: String,
         trim: true,
@@ -24,8 +25,11 @@ const userSchema = new mongoose.Schema({
     },
     phoneNumber: {
         type: String,
-        trim: true,
         required: true
+    },
+    address: {
+        type: String,
+        trin: true
     },
     password: {
         type: String,
@@ -36,25 +40,37 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    otpExpires: {
+    otpExpires: {  
         type: String,
         trim: true
     },
-
+    subscriptionPlanId: {
+        type: mongoose.SchemaTypes.ObjectId,
+        ref: 'plan_id'
+    },
+    subscriptionStatus: {
+        type: String,
+        enum: ['inactive', 'active', 'cancelled'],
+    },
     isVerified:{
      type: Boolean,
      default: false
+    },
+    createdAt: {
+        type: Date
+    },
+    updatedAt: {
+        type: Date
     },
     loginAttempts: {
         type: Number,
         default: 0
     },
-
     lockUntil: {
         type: Date
     },
-}, {timeStamps: true})
+}, {timestamps: true})
 
-const UserModel = mongoose.model('User', userSchema)
+const SupermarketModel = mongoose.model('Supermarket', supermarketSchema)
 
-module.exports = UserModel;
+module.exports = SupermarketModel;

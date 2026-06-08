@@ -1,4 +1,4 @@
-const UserModel = require('../models/user');
+const UserModel = require('../models/supermarket');
 const { signUpOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken')
 
 exports.signUp = async (req, res, next) => {
+    console.log('here')
     try {
         const {
             firstName,
@@ -27,7 +28,7 @@ exports.signUp = async (req, res, next) => {
         const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
         const otpExpires = Date.now() + 10 * 60 * 1000;
 
-        brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+        // brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new UserModel({
@@ -39,7 +40,9 @@ exports.signUp = async (req, res, next) => {
             password: hashedPassword,
             otp,
             otpExpires
-        })                                              
+        })
+        
+        await user.save();
 
         res.status(201).json({
             message: "Welcome to Inventra! Please check your email for the OTP to complete your registration.",
@@ -53,9 +56,10 @@ exports.signUp = async (req, res, next) => {
 
 exports.verifyUser = async (req,res,next) => {
     try{
-   
-        const {email,otp} = req.body;
-        const user = await UserModel.findOne({email:email.toLowerCase})
+        const { email, otp } = req.body;
+        console.log(email)
+        const user = await UserModel.findOne({email})
+        console.log(user)
 
         if (!user) {
         return next({
@@ -63,12 +67,12 @@ exports.verifyUser = async (req,res,next) => {
             statusCode:404
         })
        }
-       if (new Date() > user.otpExpires || user.otp != otp ) {
-        return next({
-            message: 'Invalid OTP',
-            statusCode:404
-        })
-       }
+    //    if (new Date() > user.otpExpires || user.otp != otp ) {
+    //     return next({
+    //         message: 'Invalid OTP',
+    //         statusCode:404
+    //     })
+    //    }
 
        user.isVerified = true;
        user.otp = null
@@ -131,7 +135,7 @@ exports.login = async( req, res, next) => {
     try {
         const { email, password } = req.body
 
-        const user = await userModel.findOne({ email })
+        const user = await UserModel.findOne({ email })
         if (!user) {
             return next({
                 message: 'User not found',
@@ -171,7 +175,7 @@ exports.login = async( req, res, next) => {
             })
         }
 
-        const token = await jwt.sign({ id: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1day'});
+        const token = await jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '1day'});
 
         res.status(200).json({
             message: 'Login Successful',

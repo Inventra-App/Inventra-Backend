@@ -1,6 +1,6 @@
 const router = require('express').Router();
 // const rateLimiter = require('../middleware/rateLimiter');
-const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/userController');
+const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator } = require('../middlewares/validator');
 
 /**
@@ -130,7 +130,7 @@ const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordVali
  *                   type: string
  *                   example: Something went wrong
  */
-router.post('/signup', signUpValidator, signUp);
+router.post('/user', signUpValidator, signUp);
 
 /**
  * @swagger

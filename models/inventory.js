@@ -9,7 +9,7 @@ const inventorySchema = new mongoose.Schema({
     productName: {
         type: String,
         required: true,
-        trim: true
+        trim: tru
     },
     categoryId: {
         type: mongoose.SchemaTypes.ObjectId,
@@ -58,8 +58,25 @@ const inventorySchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
+    },
+    packageType: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    unitPerPackage: {
+        type: Number,
+        required: true
+    },
+    expiryDate: {
+        type: String,
+        required: true,
+    },
+    unitPrice: {
+        type: Number,
+        required: true
     }
-})
+}, { timestamps: true });
 
 const InventoryModel = mongoose.model('Inventory', inventorySchema);
 module.exports = InventoryModel

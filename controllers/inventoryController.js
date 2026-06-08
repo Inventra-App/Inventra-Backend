@@ -1,1 +1,1 @@
-const 
+const InventoryModel = require('../models/inventory')

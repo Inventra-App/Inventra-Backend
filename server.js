@@ -6,9 +6,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const mongoose = require('mongoose');
 const supermarketRoutes = require('./routes/supermarketRoutes');
-const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
-const categoryRoutes = require('./routes/categoryRoutes')
-
+const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const staffRoutes = require('./routes/staffRoutes');
 
 const cors = require('cors');
 
@@ -18,7 +18,8 @@ app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use('/api/v1', supermarketRoutes);
 app.use('/api/v1', subscriptionPlanRoutes);
-app.use('/api/v1/', categoryRoutes)
+app.use('/api/v1', categoryRoutes);
+app.use('/api/v1', staffRoutes);
 // app.use(rateLimiter);
 
 const swaggerDefinition = {

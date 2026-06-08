@@ -1,11 +1,11 @@
-const staffModel = require('../models/staffModel');
+const staffModel = require('../models/staff');
 const userModel = require('../models/supermarket');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 exports.createStaff = async (req, res, next) => {
     try {
-        const { adminId } = req.user.id;
+        const adminId = req.user.id;
         console.log(adminId)
         const admin = await userModel.findById(adminId);
 
@@ -18,7 +18,6 @@ exports.createStaff = async (req, res, next) => {
         const {
             firstName,
             lastName,
-            username,
             password,
             role
         } = req.body;

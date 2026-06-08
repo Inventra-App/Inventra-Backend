@@ -15,7 +15,7 @@ const staffSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    userName: {
+    userame: {
         type: String,
         required: true,
         unique: true,

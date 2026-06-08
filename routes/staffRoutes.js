@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { createStaff } = require('../controllers/staffController');
-const authentication = require('../middlewares/auth');
+const { authentication } = require('../middlewares/auth');
 /**
  * @swagger
  * tags:

@@ -1,4 +1,4 @@
-const UserModel = require('../models/supermarket');
+const SupermarketModel = require('../models/supermarket');
 const { signUpOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
@@ -19,10 +19,10 @@ exports.signUp = async (req, res, next) => {
             confirmPassword
         } = req.body;
 
-        const existingUser = await UserModel.findOne({email});
-        if (existingUser) {
+        const existingSupermarket = await SupermarketModel.findOne({email});
+        if (existingSupermarket) {
             return res.status(400).json({
-                message: `User already exists. Please proceed to login`
+                message: `Supermarket already exists. Please proceed to login`
             })
         }
 
@@ -30,7 +30,7 @@ exports.signUp = async (req, res, next) => {
         const otpExpires = Date.now() + 10 * 60 * 1000;
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new UserModel({
+        const supermarket = new SupermarketModel({
             firstName,
             lastName,
             email,
@@ -41,8 +41,9 @@ exports.signUp = async (req, res, next) => {
             otpExpires
         })
         
-        await user.save();
-       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+        await supermarket.save();
+        console.log(supermarket)
+    //    await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
 
         res.status(201).json({
@@ -59,12 +60,12 @@ exports.verifyUser = async (req,res,next) =>{
     try{
         const { email, otp } = req.body;
         console.log(email)
-        const user = await UserModel.findOne({email})
-        console.log(user)
+        const supermarket = await SupermarketModel.findOne({email})
+        console.log(supermarket)
 
-        if (!user) {
+        if (!supermarket) {
         return next({
-            message: 'User not found',
+            message: 'Supermarket not found',
             statusCode:404
         })
        }
@@ -75,14 +76,14 @@ exports.verifyUser = async (req,res,next) =>{
     //     })
     //    }
 
-       user.isVerified = true;
-       user.otp = null
-       user.otpExpires = null
+       supermarket.isVerified = true;
+       supermarket.otp = null
+       supermarket.otpExpires = null
 
-       await user.save()
+       await supermarket.save()
 
        res.status(200).json({
-        message: 'User verified successfully'
+        message: 'Supermarket verified successfully'
        })
 
 
@@ -96,10 +97,10 @@ exports.resendOTP = async (req, res, next) => {
     try {
         const { email } = req.body;
 
-        const user = await UserModel.findOne({ email })
-        if (!user) {
+        const supermarket = await SupermarketModel.findOne({ email })
+        if (!supermarket) {
             return next({
-                message: 'User not found',
+                message: 'Supermarket not found',
                 statusCode:404
             })
         }
@@ -108,18 +109,20 @@ exports.resendOTP = async (req, res, next) => {
 
         const expires = new Date(Date.now() + 10 * 60000);
 
-        user.otp = OTP;
-        user.otpExpires = expires;
+        supermarket.otp = OTP;
+        supermarket.otpExpires = expires;
 
-        const emailOptions = {
-            email: newUser.email,
-            subject: 'New otp confirmation',
-            html: signUpTemplate(newUser.name, OTP)
-        }
+        // const emailOptions = {
+        //     email: supermarket.email,
+        //     subject: 'New otp confirmation',
+        //     html: signUpTemplate(supermarket.firstName, OTP)
+        // }
 
-        await sendMail(emailOptions);
+        // await sendMail(emailOptions);
 
-        await user.save()
+        await supermarket.save()
+
+        console.log(OTP)
 
         res.status(200).json({
             message: 'OTP resent successfully'
@@ -136,50 +139,50 @@ exports.login = async( req, res, next) => {
     try {
         const { email, password } = req.body
 
-        const user = await UserModel.findOne({ email })
-        if (!user) {
+        const supermarket = await SupermarketModel.findOne({ email })
+        if (!supermarket) {
             return next({
-                message: 'User not found',
+                message: 'Supermarket not found',
                 statusCode:404
             })
         }
 
-        if (user.isVerified == false) {
+        if (supermarket.isVerified == false) {
             return next({
                 message: 'Please verify your email',
                 statusCode:404
             })
         }
-        if(user.lockUntil && user.lockUntil > Date.now()){
-            return next({
-                message: 'Account is locke until ${user.lockUntil}.',
-                statusCode:403
-            })
-        }
+        // if(supermarket.lockUntil && supermarket.lockUntil > Date.now()){
+        //     return next({
+        //         message: 'Account is locke until ${supermarket.lockUntil}.',
+        //         statusCode:403
+        //     })
+        // }
 
 
 
-        const passwordCorrect = await bcrypt.compare(password, user.password);
+        const passwordCorrect = await bcrypt.compare(password, supermarket.password);
 
         if (!passwordCorrect) {
             // increment login attaempt and lock account if necessary
-            user.loginAttempts += 1;
-            if (user.loginAttempts >= 3) {
-                user.lockUntil = new Date(Date.now() + 2 * 60000);
-                user.loginAttempts = 0; 
+            supermarket.loginAttempts += 1;
+            if (supermarket.loginAttempts >= 3) {
+                supermarket.lockUntil = new Date(Date.now() + 2 * 60000);
+                supermarket.loginAttempts = 0; 
             }
 
-            await user.save();
+            await supermarket.save();
             return next({
                 message: 'Invalid credentials',
                 statusCode:400
             })
         }
-       user.loginAttempts =0
-       user.lockUntil = null
-       await user .save()
+       supermarket.loginAttempts = 0;
+       supermarket.lockUntil = null;
+       await supermarket.save();
 
-        const token = await jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '1day'});
+        const token = await jwt.sign({ id: supermarket._id, email: supermarket.email }, process.env.SECRET_KEY, { expiresIn: '1day' });
 
         res.status(200).json({
             message: 'Login Successful',
@@ -194,93 +197,87 @@ exports.login = async( req, res, next) => {
 }
 
 
-exports.forgotPassword = async (req,res,next) =>{
+exports.forgotPassword = async (req, res, next) => {
     try {
-        
-        const {email} = req.body
-        const user = await UserModel.findOne({email: email.toLowerCase()})
+        const { email } = req.body;
+        const supermarket= await SupermarketModel.findOne({ email: email.toLowerCase() });
 
-        if(!user) {
+        if (!supermarket) {
             return res.status(404).json({
-                message: "User not found"
-            })
+                message: "Supermarket not found"
+            });
         }
+
         const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false });
 
         const expires = new Date(Date.now() + 1000 * 60 * 5);
 
-        if (Date.now() > user.otpExpires || otp !== user.otp){
-            return res.status(400).json({
-                message: 'Invalid or expired OTP'
-            })
-        }
 
         const emailData = {
-            name: user.fullName,
+            name: supermarket.fullName,
             otp: OTP
-        }
-        await brevo(user.email, user.fullName, resetPasswordTemplate(emailData))
-         
-        user.otp = OTP;
-        user.otpExpires = expires;
+        };
 
-        await user.save();
+        // await brevo(supermarket.email, supermarket.fullName, resetPasswordTemplate(emailData))
+
+        supermarket.otp = OTP;
+        supermarket.otpExpires = expires;
+
+        await supermarket.save();
+        console.log(OTP)
 
         res.status(200).json({
             message: 'Please check your email for password OTP'
-        })
-
-
+        });
 
     } catch (error) {
-             if (isEmailDeliveryError(error)) {
-              return res.status(503).json({
+        if (isEmailDeliveryError(error)) {
+            return res.status(503).json({
                 message: "Unable to send password OTP. Please try again."
-            })
+            });
         }
-
-        console.log(error.message)       
-         res.status(500).json({
+        console.log(error.message);
+        res.status(500).json({
             message: "Something went wrong"
-        })
+        });
     }
-}
+};
 
-
-
-exports.resetPassword = async (req,res,next) => {
+exports.resetPassword = async (req, res, next) => {
     try {
-        const {email, password} = req.body
-        const user = await usertModel.findOne({email: email.toLowerCase()})
-    
-        if(!user) {
+        const { email, password, otp } = req.body;
+        const supermarket = await SupermarketModel.findOne({ email: email.toLowerCase() });
+
+        if (!supermarket) {
             return res.status(404).json({
-                message: "user not found"
-            })
+                message: "Supermarket not found"
+            });
         }
-        if (Date.now() > user.otpExpires || user.otp !== otp) {
+
+        if (!supermarket.otp || Date.now() > new Date(supermarket.otpExpires) || supermarket.otp !== otp) {
             return res.status(400).json({
-                 message: 'Invalid or expired OTP' });
+                message: 'Invalid or expired OTP'
+            });
         }
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(password, salt)
-        user.password = hashedPassword
-        user.otp = null,
-        user.otpExpires = null
-        
-        await user.save()
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        supermarket.password = hashedPassword;
+        supermarket.otp = null;
+        supermarket.otpExpires = null;
 
-        await brevo(user.email, user.fullName, resetPasswordSuccessfulTemplate(user.fullName))
+        await supermarket.save();
+
+        // await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
 
         res.status(200).json({
             message: "Password reset successfully"
-        })
-    
+        });
+
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
         res.status(500).json({
             message: "Something went wrong"
-        })
+        });
     }
-}
+};

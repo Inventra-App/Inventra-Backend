@@ -1,4 +1,4 @@
-const UserModel = require('../models/user');
+const UserModel = require('../models/supermarket');
 const { signUpOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken')
 
 
 exports.signUp = async (req, res, next) => {
+    console.log('here')
     try {
         const {
             firstName,
@@ -56,9 +57,10 @@ exports.signUp = async (req, res, next) => {
 
 exports.verifyUser = async (req,res,next) =>{
     try{
-   
-        const {email,otp} = req.body;
-        const user = await UserModel.findOne({email:email.toLowerCase()})
+        const { email, otp } = req.body;
+        console.log(email)
+        const user = await UserModel.findOne({email})
+        console.log(user)
 
         if (!user) {
         return next({
@@ -66,12 +68,12 @@ exports.verifyUser = async (req,res,next) =>{
             statusCode:404
         })
        }
-       if (new Date() > user.otpExpires || user.otp != otp ) {
-        return next({
-            message: 'Invalid OTP',
-            statusCode:404
-        })
-       }
+    //    if (new Date() > user.otpExpires || user.otp != otp ) {
+    //     return next({
+    //         message: 'Invalid OTP',
+    //         statusCode:404
+    //     })
+    //    }
 
        user.isVerified = true;
        user.otp = null
@@ -177,10 +179,7 @@ exports.login = async( req, res, next) => {
        user.lockUntil = null
        await user .save()
 
-        const token = await jwt.sign(
-            { id: user._id, email: user.email },
-             process.env.JWT_SECRET, 
-             { expiresIn: '1day'});
+        const token = await jwt.sign({ id: user._id, email: user.email }, process.env.SECRET_KEY, { expiresIn: '1day'});
 
         res.status(200).json({
             message: 'Login Successful',

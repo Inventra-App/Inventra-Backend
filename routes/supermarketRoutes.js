@@ -1,12 +1,12 @@
 const router = require('express').Router();
 // const rateLimiter = require('../middleware/rateLimiter');
-const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/userController');
-const { signUpValidator, verifyUserValidator,resendOtpValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator } = require('../middlewares/validator');
+const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword } = require('../controllers/supermarketController');
+const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
  * tags:
- *   name: users
+ *   name: supermarket
  *   description: User authentication and account management
  */
 
@@ -45,7 +45,7 @@ const { signUpValidator, verifyUserValidator,resendOtpValidator, loginValidator,
 
 /**
  * @swagger
- * /api/v1/users/signup:
+ * /api/v1/supermarket/signup:
  *   post:
  *     tags:
  *     summary: Register a new user
@@ -130,11 +130,11 @@ const { signUpValidator, verifyUserValidator,resendOtpValidator, loginValidator,
  *                   type: string
  *                   example: Something went wrong
  */
-router.post('/signup', signUpValidator, signUp);
+router.post('/user', signUpValidator, signUp);
 
 /**
  * @swagger
- * /api/v1/users/verify:
+ * /api/v1/supermarket/verify:
  *   post:
  *     tags:
  *     summary: Verify email with OTP
@@ -195,7 +195,7 @@ router.post('/verify', verifyUserValidator, verifyUser);
 
 /**
  * @swagger
- * /api/v1/users/login:
+ * /api/v1/supermarket/login:
  *   post:
  *     tags:
  *     summary: Login
@@ -321,11 +321,11 @@ router.post('/login', loginValidator, login);
  *                   type: string
  *                   example: User not found
  */
-router.post('/resend-otp', resendOtpValidator, resendOTP);
+router.post('/resend-otp',resendOtpValidator, resendOTP);
 
 /**
  * @swagger
- * /api/v1/users/forgot:
+ * /api/v1/supermarket/forgot:
  *   post:
  *     tags:
  *     summary: Forgot password

@@ -11,12 +11,9 @@ const categoryRoutes = require('./routes/categoryRoutes')
 const staffRoutes = require('./routes/staffRoutes')
 const express_session= require('express-session')
 const { passport } = require('./middlewares/passport')
-
-
-
-
-
 const cors = require('cors');
+
+
 const app = express();
 
 app.use(express_session({
@@ -27,6 +24,7 @@ app.use(express_session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors())
 app.use(express.json());
 app.use('/api/v1', supermarketRoutes);
 app.use('/api/v1', subscriptionPlanRoutes);
@@ -55,6 +53,10 @@ const swaggerDefinition = {
             url: 'http://localhost:7878', 
             description: 'Development server',
         },
+        {
+          url: 'https://inventra-backend-212y.onrender.com/',
+          description: 'Live server'
+        }
     ],
     security: [{ bearerAuth: [] }],
     components: {

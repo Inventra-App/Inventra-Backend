@@ -3,7 +3,8 @@ const { signUpOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const SupermarketModel = require('../models/supermarket');
 
 
 exports.signUp = async (req, res, next) => {
@@ -42,7 +43,7 @@ exports.signUp = async (req, res, next) => {
         })
         
         await user.save();
-       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+        // await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
 
         res.status(201).json({
@@ -51,6 +52,7 @@ exports.signUp = async (req, res, next) => {
         })
 
     }catch (error) {
+        console.log(error)
         next(error)
     } 
 }
@@ -282,5 +284,61 @@ exports.resetPassword = async (req,res,next) => {
         res.status(500).json({
             message: "Something went wrong"
         })
+    }
+}
+
+
+exports.loginWithGoogle = async (req, res, next) => {
+  try {
+    const token = await jwt.sign(
+      {
+        id: req.user._id,
+        role: req.user.role,
+      },
+      process.env.SECRET_KEY,
+      { expiresIn: "1d" },
+    );
+
+    res.status(200).json({
+      message: "Login Successful",
+      data: `${req.user.firstName} ${req.user.lastName}`,
+      token,
+    });
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+};
+
+exports.addBusinessName = async (req, res, next) => {
+    try {
+        console.log(req.user)
+       const supermarketId = req.user.id;
+
+       const ifSupermarket = await SupermarketModel.findById(supermarketId)
+       if (!ifSupermarket) {
+        return res.status(403).json({
+            message: `You are not a registered business!`
+        })
+       };
+
+        const { businessName } = req.body;
+
+        const supermarket = await SupermarketModel.findByIdAndUpdate(
+            supermarketId,
+            {businessName: businessName},
+            { new: true, runValidators: true }
+        );
+
+        await supermarket.save();
+        console.log(supermarket);
+
+        res.status(200).json({
+            message: `You ate that!`
+        });
+
+    } catch (error) {
+        console.log(error)
+        next(error)
     }
 }

@@ -1,7 +1,8 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const SupermarketModel = require('../models/supermarket')
 
-const userModel = require('../models/user')
+
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -11,13 +12,16 @@ passport.use(new GoogleStrategy({
     try {
         console.log('profile', profile)
         //Check if the user has already signed up 
-      let user = await userModel.findOne({email: profile._json.email});
+        let user = await SupermarketModel.findOne({email: profile._json.email});
 
+        const names = profile._json.name.split(" ")
+    
       //If the user has not signed up, create a new user with the details from the google profile
-      if(!user){
+        if(!user){
         //Disclaimer, nothing should be hard coded
-        user = new userModel({
-            fullName: profile._json.name,
+        user = new SupermarketModel({
+            firstName: names[0],
+            lastName: names[1],
             phoneNumber: `${Math.floor(Math.random() * 1E11)}`,
             email: profile._json.email,
             isVerified: profile._json.email_verified,

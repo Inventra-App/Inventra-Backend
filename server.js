@@ -8,15 +8,28 @@ const mongoose = require('mongoose');
 const supermarketRoutes = require('./routes/supermarketRoutes');
 const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
+const express_session= require('express-session')
+const { passport } = require('./middlewares/passport')
+
+
+
 
 
 const cors = require('cors');
-
 const app = express();
 
-app.use(cors({ origin: '*' }));
+app.use(express_session({
+    secret: 'Oshio-Ella',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.json());
-app.use('/api/v1/supermarket', supermarketRoutes);
+
+app.use(cors({ origin: '*' })); 
+app.use('/api/v1/', supermarketRoutes);
 app.use('/api/v1/subs', subscriptionPlanRoutes);
 app.use('/api/v1/c', categoryRoutes)
 // app.use(rateLimiter);
@@ -39,7 +52,7 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:7878',  // ✅ http not https
+            url: 'http://localhost:7878',
             description: 'Development server',
         },
     ],

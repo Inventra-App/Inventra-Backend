@@ -32,3 +32,13 @@ exports.PLAN_FEATURES = {
         multi_branch: true
     }
 };
+
+
+const year = new Date().getFullYear()
+const month = new Date().getMonth()
+const day = new Date().getDate()
+
+exports.generateBatchCode = () => {
+   return `BTH-${year}0${month}0${day}-`
+}
+

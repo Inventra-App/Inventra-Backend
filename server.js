@@ -27,11 +27,9 @@ app.use(express_session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
-
-app.use(cors({ origin: '*' })); 
-app.use('/api/v1/', supermarketRoutes);
-app.use('/api/v1/subs', subscriptionPlanRoutes);
-app.use('/api/v1/c', categoryRoutes)
+app.use('/api/v1', supermarketRoutes);
+app.use('/api/v1', subscriptionPlanRoutes);
+app.use('/api/v1/', categoryRoutes)
 // app.use(rateLimiter);
 
 const swaggerDefinition = {
@@ -40,7 +38,7 @@ const swaggerDefinition = {
         title: 'Inventra API Documentation',
         version: '2.0.0',
         description: `This is a REST API application made with Express.
-                      The base Url is: http://localhost:7878`,
+                      The base Url is: http://localhost:7878/api/v1`,
         license: {
             name: 'Official Url',
             url: 'https://google.com',
@@ -52,7 +50,7 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:7878',
+            url: 'http://localhost:7878', 
             description: 'Development server',
         },
     ],
@@ -74,7 +72,7 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-app.use('/api/v1/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // ✅ fixed typo
+app.use('/api/v1/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); 
 
 
     app.use((err, req, res, next) => {

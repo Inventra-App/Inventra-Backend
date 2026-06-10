@@ -4,6 +4,9 @@
 
 // console.log(`${year}0${month}0${day}`)
 
-const {generateBatchCode} = require('./helpers/helpers')
+// const {generateBatchCode} = require('./helpers/helpers')
 
-console.log(generateBatchCode())
+// console.log(generateBatchCode())
+
+
+console.log(this.padStart(443))

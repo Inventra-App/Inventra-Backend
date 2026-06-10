@@ -34,6 +34,11 @@ const supermarketSchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
+    role: {
+        type: String,
+        default: 'admin',
+        required: true
+    },
     otp: {
         type: String,
         trim: true

@@ -56,12 +56,12 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:7878', 
-            description: 'Development server',
-        },
-        {
           url: 'https://inventra-backend-212y.onrender.com/',
           description: 'Live server'
+        },
+        {
+            url: 'http://localhost:7878', 
+            description: 'Development server',
         }
     ],
     security: [{ bearerAuth: [] }],

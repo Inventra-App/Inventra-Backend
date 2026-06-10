@@ -16,7 +16,7 @@ const { passport } = require('./middlewares/passport')
 
 
 
-const cors = require('cors');
+// const cors = require('cors');
 const app = express();
 
 app.use(express_session({

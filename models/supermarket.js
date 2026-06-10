@@ -58,7 +58,7 @@ const supermarketSchema = new mongoose.Schema({
         type: Date
     },
     updatedAt: {
-        type: Date
+        type: Date 
     },
     loginAttempts: {
         type: Number,

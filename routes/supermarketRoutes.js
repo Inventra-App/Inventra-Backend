@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword, loginWithGoogle, addBusinessName } = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 const { profile, loginProfile } = require('../middlewares/passport')
-const { authentication } = require('../middlewares/auth')
+const { authenticate } = require('../middlewares/auth')
 
 
 /**
@@ -522,7 +522,7 @@ router.post('/reset', resetPasswordValidator, resetPassword);
  *                   type: string
  *                   example: Something went wrong
  */
-router.patch('/business-name', authentication, addBusinessName)
+router.patch('/business-name', authenticate, addBusinessName)
 
 router.get('/auth/google', profile)
 router.get('/auth/google/callback', loginProfile, loginWithGoogle)

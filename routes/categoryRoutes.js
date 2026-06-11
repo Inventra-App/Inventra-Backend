@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { createCategory, getCategories } = require('../controllers/categoryConroller');
-const {authentication} = require('../middlewares/auth')
+const {authenticate} = require('../middlewares/auth')
 
 
 
@@ -82,8 +82,8 @@ const {authentication} = require('../middlewares/auth')
  *       500:
  *         description: Internal server error
  */
-router.post('/category', authentication, createCategory);
+router.post('/category', authenticate, createCategory);
 
-router.get('/f/category', authentication, getCategories);
+router.get('/f/category', authenticate, getCategories);
 
 module.exports = router;

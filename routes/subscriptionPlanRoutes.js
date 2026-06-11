@@ -1,7 +1,7 @@
 const router = require('express').Router();
 
 const { createSubscriptionPlan } = require('../controllers/subscriptionPlanController');
-const suthentication = require('../middlewares/auth');
+const authenticate = require('../middlewares/auth');
 
 
 

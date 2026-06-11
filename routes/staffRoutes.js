@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const { createStaff,loginStaff } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
-const { authentication } = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
 
 /**
@@ -111,7 +111,7 @@ const { authentication } = require('../middlewares/auth');
  *       500:
  *         description: Internal server error
  */
-router.post('/create-staff', authentication, createStaffValidator,  createStaff);
+router.post('/create-staff', authenticate, createStaffValidator,  createStaff);
 
 
 

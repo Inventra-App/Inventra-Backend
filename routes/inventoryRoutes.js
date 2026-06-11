@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 const { addProducts } = require('../controllers/inventoryController');
-const { authentication } = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
 
 
@@ -49,6 +49,25 @@ const { authentication } = require('../middlewares/auth');
  *           description: ID of the staff who last updated the inventory
  *           example: 64abc123def456ghi792
  */
+
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Dashboard:
+ *       type: object
+ *       properties:
+ *         totalStockUnits:
+ *           type: number
+ *           description: Total stock units across all inventory items
+ *           example: 5000
+ *         totalProducts:
+ *           type: number
+ *           description: Total count of all products in the system
+ *           example: 120
+ */
+
+
 
 /**
  * @swagger
@@ -235,6 +254,6 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.post('/product', authentication, addProducts);
+router.post('/product', authenticate, addProducts);
 
 module.exports = router

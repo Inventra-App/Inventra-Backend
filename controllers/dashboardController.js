@@ -1,5 +1,5 @@
 const InventoryModel = require('../models/inventory');
-const Productodel = require('../models/product')
+const ProductModel = require('../models/product')
 const { mapPricesAndAdd } = require('../helpers/helpers')
 
 

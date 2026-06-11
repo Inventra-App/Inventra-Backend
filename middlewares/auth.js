@@ -18,8 +18,9 @@ exports.authentication = async(req, res, next)=>{
         }
 
         const data = jwt.verify(token, jwtSecret)
-
+        console.log(data)
         req.user = data
+        
         next()
     
     } 
@@ -42,3 +43,5 @@ exports.authentication = async(req, res, next)=>{
         
     }
 }
+
+exports.authenticate = exports.authentication;

@@ -184,13 +184,15 @@ exports.login = async( req, res, next) => {
        await supermarket.save();
 
         const token = jwt.sign(
-            { id: supermarket._id}, 
-            // { email: supermarket.email }, 
-            process.env.SECRET_KEY, { expiresIn: '1day' });
+            { id: supermarket._id, role: supermarket.role }, 
+            process.env.SECRET_KEY, 
+            { expiresIn: '1day' }
+        );
 
         res.status(200).json({
             message: 'Login Successful',
-            token
+            token,
+            data: supermarket
         })
     } catch (error) {
         next({

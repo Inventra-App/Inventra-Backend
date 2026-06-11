@@ -15,11 +15,12 @@ const staffSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    userame: {
+    username: {
         type: String,
         required: true,
         unique: true,
-        trim: true
+        trim: true,
+        lowercase: true
     },
     password: {
         type: String,

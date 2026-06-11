@@ -219,7 +219,7 @@ router.post('/verify', verifyUserValidator, verifyUser);
  *                 example: onyebenneth20@gmail.com
  *               password:
  *                 type: string
- *                 description: The user's password
+ *                 description: The user's password                             
  *                 example: Secret123
  *     responses:
  *       200:

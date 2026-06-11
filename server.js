@@ -9,14 +9,16 @@ const supermarketRoutes = require('./routes/supermarketRoutes');
 const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
 const categoryRoutes = require('./routes/categoryRoutes')
 const staffRoutes = require('./routes/staffRoutes')
+const productRoutes = require('./routes/product')
+const inventoryRoutes = require('./routes/inventoryRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes')
+const batchRoutes = require('./routes/batch')
+const contactUsRoutes = require('./routes/contactUsRoutes')
 const express_session= require('express-session')
 const { passport } = require('./middlewares/passport')
+const cors = require('cors');
 
 
-
-
-
-// const cors = require('cors');
 const app = express();
 
 app.use(express_session({
@@ -27,11 +29,19 @@ app.use(express_session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(cors())
 app.use(express.json());
 app.use('/api/v1', supermarketRoutes);
 app.use('/api/v1', subscriptionPlanRoutes);
 app.use('/api/v1', categoryRoutes);
 app.use('/api/v1', staffRoutes);
+app.use('/api/v1/product', productRoutes);
+app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/api/v1', dashboardRoutes);
+app.use('/api/v1/batch', batchRoutes);
+app.use('/api/v1', contactUsRoutes);
+
+
 // app.use(rateLimiter);
 
 const swaggerDefinition = {
@@ -55,6 +65,10 @@ const swaggerDefinition = {
             url: 'http://localhost:7878', 
             description: 'Development server',
         },
+        {
+          url: 'https://inventra-backend-212y.onrender.com/',
+          description: 'Live server'
+        }
     ],
     security: [{ bearerAuth: [] }],
     components: {
@@ -99,3 +113,7 @@ mongoose
     .catch((error) => {
         console.log('Unable to connect: ', error.message);
     });
+
+
+
+    

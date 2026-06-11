@@ -24,8 +24,10 @@ exports.createStaff = async (req, res, next) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
+        console.log(username)
 
         const staff = new staffModel({
+            adminId,
             firstName,
             lastName,
             username,

@@ -1,2 +1,5 @@
 node_modules
 .env
+cart.js
+cartItem.js
+salesController.js

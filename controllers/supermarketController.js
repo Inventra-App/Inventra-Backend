@@ -43,7 +43,7 @@ exports.signUp = async (req, res, next) => {
         
         await supermarket.save();
         console.log(supermarket)
-    //    await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
 
         res.status(201).json({

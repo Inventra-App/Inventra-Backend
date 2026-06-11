@@ -8,7 +8,7 @@ const brevo = async (userEmail, userName, html) => {
     const data = {
         htmlContent: `<html><head></head><body><p>Hello ${userName} ,</p>Welcome to backend!.</p></body></html>`,
         sender: {
-            email: "nnaemekanoble7@gmail.com",
+            email: "app.inventra@gmail.com",
             name: "Nana from Inventra",
         },
         subject: "Welcome to Inventra!",

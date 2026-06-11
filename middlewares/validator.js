@@ -29,7 +29,7 @@ exports.signUpValidator = (req, res, next) => {
             'string.pattern.base':'Phone Number must be between 10 and 15 digits'
         }),
         password: joi.string()
-        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])[A-Za-z\d[^A-Za-z0-9]]{8,}$/)
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
         .required()
         .messages({
             'any.required': 'Password is required',

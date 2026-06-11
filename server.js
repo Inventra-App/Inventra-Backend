@@ -11,7 +11,7 @@ const categoryRoutes = require('./routes/categoryRoutes')
 const staffRoutes = require('./routes/staffRoutes')
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const salesRoutes = require('./routes/salesRoute');
+// const salesRoutes = require('./routes/salesRoute');
 const express_session = require('express-session');
 const { passport } = require('./middlewares/passport')
 const cors = require('cors');
@@ -35,7 +35,7 @@ app.use('/api/v1', categoryRoutes);
 app.use('/api/v1', staffRoutes);
 app.use('/api/v1', inventoryRoutes);
 app.use('/api/v1', dashboardRoutes);
-app.use('/api/v1', salesRoutes);
+// app.use('/api/v1', salesRoutes);
 
 
 // app.use(rateLimiter);

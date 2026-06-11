@@ -85,3 +85,24 @@ exports.mapPricesAndAdd = (serviceArray) => {
     const servicePrices = serviceArray.map(service => service.totalStock)
     return servicePrices.reduce((acc, curr) => acc + curr, 0)
 }
+exports.mapPricesAndAddCart = (serviceArray) => {
+    const servicePrices = serviceArray.map(service => service.subtotal)
+    return servicePrices.reduce((acc, curr) => acc + curr, 0)
+}
+
+const staffModel = require('../models/staff')
+
+let SId;
+exports.filterRole = async (id, role) => {
+    console.log(id)
+    if (role === 'admin') {
+        return id
+    } else {
+        const staff = await staffModel.findById(id);
+        Sid = staff.adminId
+        const extId = Sid.toString()
+        // console.log(Sid.toString())
+        return extId;
+    }
+    return " ";
+}

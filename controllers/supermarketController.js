@@ -43,7 +43,7 @@ exports.signUp = async (req, res, next) => {
         
         await supermarket.save();
         console.log(supermarket)
-    //    await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
 
 
         res.status(201).json({
@@ -224,7 +224,7 @@ exports.forgotPassword = async (req, res, next) => {
             otp: OTP
         };
 
-        // await brevo(supermarket.email, supermarket.fullName, resetPasswordTemplate(emailData))
+        await brevo(supermarket.email, supermarket.fullName, resetPasswordTemplate(emailData))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
@@ -274,7 +274,7 @@ exports.resetPassword = async (req, res, next) => {
 
         await supermarket.save();
 
-        // await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+        await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
 
         res.status(200).json({
             message: "Password reset successfully"

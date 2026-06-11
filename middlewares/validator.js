@@ -28,16 +28,22 @@ exports.signUpValidator = (req, res, next) => {
             'string.empty':'Phone Number cannot be Empty',
             'string.pattern.base':'Phone Number must be between 10 and 15 digits'
         }),
-        password: joi.string().pattern(/^(?=.*[a-z])(?=.*[A-Z]).{8,}$/).required().messages({
-            'any required':'Password is required',
-            'string.empty':'Password cannot be Empty',
-            'string.pattern.base':'Password must be 8 chracters must include only lower case'
-        }),
-        confirmPassword: joi.string().pattern(/^(?=.*[a-z])(?=.*[A-Z]).{8,}$/).required().messages({
-            'any required':'Please confirm password',
-            'string.empty':'Please confirm password',
-            'string.pattern.base':'Password must be 8 chracters must include only lower case',
-            'any.only':'Password does not match'
+        password: joi.string()
+        .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/)
+        .required()
+        .messages({
+            'any.required': 'Password is required',
+            'string.empty': 'Password cannot be empty',
+            'string.pattern.base': 'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'
+            }),
+
+        confirmPassword: joi.string()
+        .valid(joi.ref('password'))
+        .required()
+        .messages({
+            'any.required': 'Please confirm password',
+            'string.empty': 'Please confirm password',
+            'any.only': 'Passwords do not match'
         })
     })
 

@@ -6,16 +6,16 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const mongoose = require('mongoose');
 const supermarketRoutes = require('./routes/supermarketRoutes');
-const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
-const categoryRoutes = require('./routes/categoryRoutes')
-const staffRoutes = require('./routes/staffRoutes')
-const productRoutes = require('./routes/product')
+const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const staffRoutes = require('./routes/staffRoutes');
+const productRoutes = require('./routes/product');
 const inventoryRoutes = require('./routes/inventoryRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes')
-const batchRoutes = require('./routes/batch')
-const contactUsRoutes = require('./routes/contactUsRoutes')
-const express_session= require('express-session')
-const { passport } = require('./middlewares/passport')
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const batchRoutes = require('./routes/batch');
+const contactUsRoutes = require('./routes/contactUsRoutes');
+const express_session = require('express-session');
+const { passport } = require('./middlewares/passport');
 const cors = require('cors');
 
 
@@ -62,12 +62,12 @@ const swaggerDefinition = {
     },
     servers: [
         {
-            url: 'http://localhost:7878', 
-            description: 'Development server',
-        },
-        {
           url: 'https://inventra-backend-212y.onrender.com/',
           description: 'Live server'
+        },
+        {
+            url: 'http://localhost:7878', 
+            description: 'Development server',
         }
     ],
     security: [{ bearerAuth: [] }],

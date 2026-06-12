@@ -10,7 +10,7 @@ exports.authentication = async(req, res, next)=>{
             })
         }
 
-        const jwtSecret = process.env.JWT_SECRET || process.env.SECRET_KEY;
+        const jwtSecret = process.env.SECRET_KEY;
         if (!jwtSecret) {
             return res.status(500).json({
                 message: 'JWT secret is not configured. Please set JWT_SECRET or SECRET_KEY in .env'

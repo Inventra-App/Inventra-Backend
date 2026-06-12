@@ -6,36 +6,38 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const mongoose = require('mongoose');
 const supermarketRoutes = require('./routes/supermarketRoutes');
-const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes')
-const categoryRoutes = require('./routes/categoryRoutes')
-const staffRoutes = require('./routes/staffRoutes')
+const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
+const staffRoutes = require('./routes/staffRoutes');
+const productRoutes = require('./routes/product');
 const inventoryRoutes = require('./routes/inventoryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-// const salesRoutes = require('./routes/salesRoute');
+const batchRoutes = require('./routes/batch');
+const contactUsRoutes = require('./routes/contactUsRoutes');
 const express_session = require('express-session');
-const { passport } = require('./middlewares/passport')
+const { passport } = require('./middlewares/passport');
 const cors = require('cors');
 
 
 const app = express();
-
+app.use(cors({origin:'*'}))
 app.use(express_session({
     secret: 'Oshio-Ella',
     resave: false,
     saveUninitialized: false
 }));
-
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cors())
 app.use(express.json());
 app.use('/api/v1', supermarketRoutes);
 app.use('/api/v1', subscriptionPlanRoutes);
 app.use('/api/v1', categoryRoutes);
 app.use('/api/v1', staffRoutes);
-app.use('/api/v1', inventoryRoutes);
+app.use('/api/v1/product', productRoutes);
+app.use('/api/v1/inventory', inventoryRoutes);
 app.use('/api/v1', dashboardRoutes);
-// app.use('/api/v1', salesRoutes);
+app.use('/api/v1/batch', batchRoutes);
+app.use('/api/v1', contactUsRoutes);
 
 
 // app.use(rateLimiter);
@@ -109,3 +111,7 @@ mongoose
     .catch((error) => {
         console.log('Unable to connect: ', error.message);
     });
+
+
+
+    

@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 const { addProducts } = require('../controllers/inventoryController');
-const { authenticate } = require('../middlewares/auth');
+const { authentication } = require('../middlewares/auth');
 
 
 
@@ -254,6 +254,6 @@ const { authenticate } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.post('/product', authenticate, addProducts);
+router.post('/product', authentication , addProducts);
 
 module.exports = router

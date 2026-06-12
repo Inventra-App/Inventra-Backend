@@ -1,7 +1,7 @@
 const router = require('express').Router()
 const { Router } = require('express')
 const {getAllProducts, getOneProduct} = require('../controllers/productController')
-const {authenticate} = require('../middlewares/auth')
+const {authentication} = require('../middlewares/auth')
 
 
 
@@ -117,7 +117,7 @@ const {authenticate} = require('../middlewares/auth')
  *                   example: Something went wrong
  */
 
-router.get('/getAll', authenticate,getAllProducts)
+router.get('/getAll', authentication ,getAllProducts)
 
 /**
  * @swagger
@@ -184,7 +184,7 @@ router.get('/getAll', authenticate,getAllProducts)
 
 
 
-router.get('/getOne/:id',authenticate,getOneProduct)
+router.get('/getOne/:id', authentication ,getOneProduct)
 
 
 module.exports = router

@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 const {getAllBatches, getOneBatch}= require('../controllers/batchController')
-const {authenticate} = require('../middlewares/auth')
+const {authentication} = require('../middlewares/auth')
 
 
 
@@ -113,7 +113,7 @@ const {authenticate} = require('../middlewares/auth')
 
 
 
-router.get('/getAll',authenticate,getAllBatches)
+router.get('/getAll',authentication ,getAllBatches)
 
 
 
@@ -179,6 +179,6 @@ router.get('/getAll',authenticate,getAllBatches)
  *                   example: Something went wrong
  */
 
-router.get('/getOne/:id',authenticate,getOneBatch)
+router.get('/getOne/:id',authentication ,getOneBatch)
 
 module.exports = router;

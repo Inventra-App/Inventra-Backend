@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-const authenticate = async (req, res, next) => {
+exports.authentication = async (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1]
         console.log(token)
@@ -41,6 +41,5 @@ const authenticate = async (req, res, next) => {
     }
 }
 
-exports.authenticate = authenticate
 
   

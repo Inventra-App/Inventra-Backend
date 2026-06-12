@@ -1,6 +1,6 @@
 const router = require('express').Router();
 // const rateLimiter = require('../middleware/rateLimiter');
-const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword, loginWithGoogle, addBusinessName } = require('../controllers/supermarketController');
+const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword, loginWithGoogle, addBusinessName, logout, verifyPasswordOtp } = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 const { profile, loginProfile } = require('../middlewares/passport')
 const { authenticate } = require('../middlewares/auth')
@@ -195,7 +195,6 @@ router.post('/user', signUpValidator, signUp);
  */
 router.post('/verify', verifyUserValidator, verifyUser);
 
-
 /**
  * @swagger
  * /api/v1/login:
@@ -279,7 +278,6 @@ router.post('/verify', verifyUserValidator, verifyUser);
  *                   example: Something went wrong
  */
 router.post('/login', loginValidator, login);
-
 
 /**
  * @swagger
@@ -454,9 +452,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   type: string
  *                   example: Something went wrong
  */
-
 router.post('/reset', resetPasswordValidator, resetPassword);
-
 
 /**
  * @swagger
@@ -523,6 +519,96 @@ router.post('/reset', resetPasswordValidator, resetPassword);
  *                   example: Something went wrong
  */
 router.patch('/business-name', authenticate, addBusinessName)
+
+/**
+ * @swagger
+ * /api/v1/auth/logout:
+ *   post:
+ *     summary: Logout user
+ *     description: Logs out the authenticated user. Since JWT is stateless, the client must discard the token.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
+ *
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/logout', authentication, logout);
+
+/**
+ * @swagger
+ * /api/v1/p/verify:
+ *   post:
+ *     tags: [supermarket]
+ *     summary: Verify email with OTP
+ *     description: Validates the 6-digit OTP sent to the user's email after sign up. Marks the account as verified and clears the OTP. OTP expires after 10 minutes.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - otp
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 description: The user's email address
+ *                 example: onyebenneth20@gmail.com
+ *               otp:
+ *                 type: string
+ *                 description: The 6-digit OTP received via email
+ *                 example: "482910"
+ *     responses:
+ *       200:
+ *         description: User verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A success message
+ *                   example: User verified successfully
+ *       400:
+ *         description: Invalid or expired OTP
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid OTP
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found
+ */
+router.post('/p/verify', verifyUserValidator, verifyPasswordOtp);
 
 router.get('/auth/google', profile)
 router.get('/auth/google/callback', loginProfile, loginWithGoogle)

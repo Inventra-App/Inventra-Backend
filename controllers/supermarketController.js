@@ -1,5 +1,5 @@
 const SupermarketModel = require('../models/supermarket');
-const { signUpOtpTemplate } = require('../helpers/emailTemplates');
+const { signUpOtpTemplate, resetPasswordOtpTemplate, resetPasswordSuccessfulTemplate, resendOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
@@ -112,14 +112,15 @@ exports.resendOTP = async (req, res, next) => {
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
+        supermarket.verificationType = 'onboarding'
 
-        // const emailOptions = {
-        //     email: supermarket.email,
-        //     subject: 'New otp confirmation',
-        //     html: signUpTemplate(supermarket.firstName, OTP)
-        // }
+        const emailOptions = {
+            email: supermarket.email,
+            subject: 'New otp confirmation',
+            html: resendOtpTemplate(supermarket.firstName, OTP)
+        }
 
-        // await sendMail(emailOptions);
+        await sendMail(emailOptions);
 
         await supermarket.save()
 
@@ -202,7 +203,6 @@ exports.login = async( req, res, next) => {
     }
 }
 
-
 exports.forgotPassword = async (req, res, next) => {
     try {
         const { email } = req.body;
@@ -224,10 +224,11 @@ exports.forgotPassword = async (req, res, next) => {
             otp: OTP
         };
 
-        await brevo(supermarket.email, supermarket.fullName, resetPasswordTemplate(emailData))
+        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
+        supermarket.verificationType = 'password'
 
         await supermarket.save();
         console.log(OTP)
@@ -237,21 +238,45 @@ exports.forgotPassword = async (req, res, next) => {
         });
 
     } catch (error) {
-        if (isEmailDeliveryError(error)) {
-            return res.status(503).json({
-                message: "Unable to send password OTP. Please try again."
-            });
-        }
-        console.log(error.message);
-        res.status(500).json({
-            message: "Something went wrong"
-        });
+        console.log(error);
+        next(error)
     }
 };
 
+exports.verifyPasswordOtp = async (req,res,next) =>{
+    try{
+        const { email, otp } = req.body;
+        console.log(email)
+        const supermarket = await SupermarketModel.findOne({email})
+        console.log(supermarket)
+
+        if (!supermarket) {
+        return next({
+            message: 'Supermarket not found',
+            statusCode:404
+        })
+       };
+
+       supermarket.isVerified = true;
+       supermarket.otp = null
+       supermarket.otpExpires = null;
+       supermarket.verificationType = 'password'
+
+       await supermarket.save()
+
+       res.status(200).json({
+        message: 'Supermarket verified successfully, proceed to reset your password'
+       })
+
+
+    }catch(error){
+        next(error)
+    }
+}
+
 exports.resetPassword = async (req, res, next) => {
     try {
-        const { email, password, otp } = req.body;
+        const { email, password, confirmPassword } = req.body;
         const supermarket = await SupermarketModel.findOne({ email: email.toLowerCase() });
 
         if (!supermarket) {
@@ -260,17 +285,16 @@ exports.resetPassword = async (req, res, next) => {
             });
         }
 
-        if (!supermarket.otp || Date.now() > new Date(supermarket.otpExpires) || supermarket.otp !== otp) {
+        if (supermarket.verificationType !== 'password') {
             return res.status(400).json({
-                message: 'Invalid or expired OTP'
+                message: 'Please request for a new OTP'
             });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         supermarket.password = hashedPassword;
-        supermarket.otp = null;
-        supermarket.otpExpires = null;
+        
 
         await supermarket.save();
 
@@ -287,7 +311,6 @@ exports.resetPassword = async (req, res, next) => {
         });
     }
 }
-
 
 exports.loginWithGoogle = async (req, res, next) => {
   try {
@@ -341,5 +364,41 @@ exports.addBusinessName = async (req, res, next) => {
     } catch (error) {
         console.log(error)
         next(error)
+    }
+};
+
+// exports.logout = async (req, res, next) => {
+//     try {
+//         const { id } = req.user;
+
+//         const user = await SupermarketModel.findById(id);
+
+//         if (!user) {
+//             return res.status(404).json({
+//                 message: "User not found"
+//             });
+//         }
+
+//         // Remove refresh token
+//         user.refreshToken = null;
+
+//         await user.save();
+
+//         return res.status(200).json({
+//             message: "Logged out successfully"
+//         });
+
+//     } catch (error) {
+//         next(error);
+//     }
+// };
+
+exports.logout = async (req, res, next) => {
+    try {
+        return res.status(200).json({
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        next(error);
     }
 };

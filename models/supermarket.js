@@ -55,6 +55,10 @@ const supermarketSchema = new mongoose.Schema({
         type: String,
         enum: ['inactive', 'active', 'cancelled'],
     },
+    verificationType: {
+        type: String,
+        enum: ['password', 'onboarding']
+    },
     isVerified:{
      type: Boolean,
      default: false

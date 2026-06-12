@@ -224,7 +224,7 @@ exports.forgotPassword = async (req, res, next) => {
             otp: OTP
         };
 
-        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData))
+        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;

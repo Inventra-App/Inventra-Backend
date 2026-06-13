@@ -70,13 +70,7 @@ exports.verifyUser = async (req,res,next) =>{
             statusCode:404
         })
        }
-    //    if (new Date() > user.otpExpires || user.otp != otp ) {
-    //     return next({
-    //         message: 'Invalid OTP',
-    //         statusCode:404
-    //     })
-    //    }
-
+     
        supermarket.isVerified = true;
        supermarket.otp = null
        supermarket.otpExpires = null
@@ -92,7 +86,6 @@ exports.verifyUser = async (req,res,next) =>{
         next(error)
     }
 }
-
 
 exports.resendOTP = async (req, res, next) => {
     try {

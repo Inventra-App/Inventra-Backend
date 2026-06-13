@@ -522,7 +522,7 @@ router.patch('/business-name', authentication, addBusinessName)
 
 /**
  * @swagger
- * /api/v1/auth/logout:
+ * /api/v1/logout:
  *   post:
  *     summary: Logout user
  *     description: Logs out the authenticated user. Since JWT is stateless, the client must discard the token.

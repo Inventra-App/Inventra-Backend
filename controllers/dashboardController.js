@@ -1,12 +1,12 @@
 const InventoryModel = require('../models/inventory');
-const Productodel = require('../models/product')
+const ProductModel = require('../models/product')
 const { mapPricesAndAdd } = require('../helpers/helpers')
 
 
 exports.getTotalStockUnits = async(req, res, next) => {
     try {
         const allStockUnits = await InventoryModel.find()
-
+        
         const totalStockUnits = mapPricesAndAdd(allStockUnits)
         console.log(totalStockUnits)
 

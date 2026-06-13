@@ -3,7 +3,7 @@ const SupermarketModel = require('../models/supermarket');
 const CategoryModel = require('../models/category');
 const { generateBatchCode, padStart, generateUserSlug } = require('../helpers/helpers');
 const staffModel = require('../models/staff');
-const BatchModel = require('../models/batches');
+const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
 
 
@@ -116,3 +116,5 @@ exports.addProducts = async (req, res, next) => {
         next(error)
     }
 } 
+
+

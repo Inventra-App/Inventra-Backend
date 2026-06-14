@@ -1,5 +1,6 @@
 const { Error } = require('mongoose');
 const CategoryModel = require('../models/category');
+const ProductModel = require('../models/product');
 const UserModel = require('../models/supermarket');
 
 exports.createCategory = async (req, res, next) => {
@@ -51,31 +52,70 @@ exports.getCategories = async (req, res, next) => {
         next(error)
     }
 }
-exports.getOneCategory = async (req, res, next) => {
+exports.getOneCategory = async(req,res,next) =>{
+              try {
+                const { id } = req.params;
+        
+                if (!mongoose.isValidObjectId(id)) {
+                    return res.status(400).json({
+                        message: 'Invalid category ID format.'
+                    });
+                }
+        
+                const category = await ProductModel.findById(id);
+        
+                if (!category) {
+                    return res.status(404).json({
+                        message: `category not found!`
+                    })
+                }
+        
+                res.status(200).json({
+                    message: `category found  successfully`,
+                    data: product
+                })
+    } catch (error) {
+        console.log(error)
+        next(error)
+        
+    }
+}
+
+
+exports.deleteCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
-
-        // if (!mongoose.isValidObjectId(id)) {
-        //     return res.status(400).json({
-        //         message: 'Invalid category ID format.'
-        //     });
-        // }
 
         const category = await CategoryModel.findById(id);
 
         if (!category) {
             return res.status(404).json({
-                message: `Category not found!`
-            })
+                message: 'Category not found!'
+            });
         }
 
+        const products = await ProductModel.find({
+            categoryId: id
+        });
+
+        if (products.length > 0) {
+            return res.status(400).json({
+                message: 'Cannot delete category. Products are attached to it.'
+            });
+        }
+
+        await CategoryModel.findByIdAndDelete(id);
+
         res.status(200).json({
-            message: `Category found successfully`,
-            data: category
-        })
+            message: 'Category deleted successfully'
+        });
 
     } catch (error) {
-        console.log(error)
-        next(error)
+        console.log(error);
+        next(error);
     }
 }
+
+
+
+

@@ -41,6 +41,10 @@ const InventorySchema = new mongoose.Schema(
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'staff'
+    },
+    isComplete: {
+      type: Boolean,
+      default: false
     }
   },
   {

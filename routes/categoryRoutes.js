@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { createCategory, getCategories, getOneCategory } = require('../controllers/categoryConroller');
+const { createCategory, getCategories, getOneCategory, deleteCategory } = require('../controllers/categoryConroller');
 const {authentication} = require('../middlewares/auth')
 
 
@@ -205,5 +205,72 @@ router.get('/allCategories', authentication, getCategories);
  */
 
 router.get('/category/:id', authentication, getOneCategory);
+
+
+
+/**
+ * @swagger
+ * /api/v1/category/{Id}:
+ *   delete:
+ *     summary: Delete a category by ID
+ *     tags: [Category]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: Id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The category ID
+ *         example: 64abc123def456ghi789
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category deleted successfully
+ *       400:
+ *         description: Cannot delete category - products are attached to it
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Cannot delete category. Products are attached to it.
+ *       404:
+ *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category not found!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.delete('/category/:id', authentication, deleteCategory);
+
+
 
 module.exports = router;

@@ -82,6 +82,8 @@ exports.addProducts = async (req, res, next) => {
             updatedBy: id
         }
         const newInventoryInput = new InventoryModel(inventoryInput)
+        InventoryModel.isUpdated = true
+        // activityModel.InventoryUpdate += 1
         await newInventoryInput.save()
         console.log(`INVENTORY: `, inventoryInput)
 

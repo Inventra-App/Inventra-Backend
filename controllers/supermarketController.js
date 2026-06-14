@@ -70,12 +70,17 @@ exports.verifyUser = async (req,res,next) =>{
             statusCode:404
         })
        }
-       if (new Date() > user.otpExpires || user.otp != otp ) {
-        return next({
-            message: 'Invalid OTP',
-            statusCode:404
-        })
-       }
+       
+     if(supermarket.otp !== otp){
+            return res.status(400).json({
+                message: "Invalid OTP credentials"
+            })
+        }
+        if(Date.now()> supermarket.otpExpires){
+            return res.status(400).json({
+                message:"OTP Expired"
+            })
+        }
 
        supermarket.isVerified = true;
        supermarket.otp = null

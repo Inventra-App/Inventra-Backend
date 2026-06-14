@@ -1,7 +1,7 @@
 const InventoryModel = require('../models/inventory');
 const SupermarketModel = require('../models/supermarket');
 const CategoryModel = require('../models/category');
-const { generateBatchCode, padStart, generateUserSlug } = require('../helpers/helpers');
+const { generateBatchCode, padStart, generateUserSlug, filterRole } = require('../helpers/helpers');
 const staffModel = require('../models/staff');
 const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
@@ -117,4 +117,25 @@ exports.addProducts = async (req, res, next) => {
     }
 } 
 
+exports.moveProducts = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+           if (role === 'admin' && role === 'sales') {
+            return res.status(403).json({
+                message: `You are not authorised to perform this action`
+            })
+        }
+
+        const supermarketId = await filterRole(id, role);
+        console.log(supermarketId)
+
+        const { availableStock, reservedStock } = req.body;
+        const { productId } = req.params;
+
+        const product = await ProductModel.fin
+    } catch (error) {
+        console.log(error),
+        next(error)
+    }
+}
 

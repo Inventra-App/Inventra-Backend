@@ -128,10 +128,10 @@ const saleSchema = new mongoose.Schema({
         required: true
     },
 
-    subtotal: {
-        type: Number,
-        required: true
-    },
+    // subtotal: {
+    //     type: Number,
+    //     required: true
+    // },
 
     discount: {
         type: Number,

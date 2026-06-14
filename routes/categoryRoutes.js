@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { createCategory, getCategories } = require('../controllers/categoryConroller');
+const { createCategory, getCategories, getOneCategory } = require('../controllers/categoryConroller');
 const {authentication} = require('../middlewares/auth')
 
 
@@ -84,6 +84,126 @@ const {authentication} = require('../middlewares/auth')
  */
 router.post('/category', authentication, createCategory);
 
-router.get('/f/category', authentication, getCategories);
+
+
+
+/**
+ * @swagger
+ * /api/v1/allCategories:
+ *   get:
+ *     summary: Get all categories
+ *     tags: [Category]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Categories retrieved successfully
+ *                 count:
+ *                   type: number
+ *                   description: Total number of categories
+ *                   example: 10
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Category'
+ *       404:
+ *         description: No categories found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No categories found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.get('/allCategories', authentication, getCategories);
+
+
+/**
+ * @swagger
+ * /api/v1/category/{id}:
+ *   get:
+ *     summary: Get a single category by ID
+ *     tags: [Category]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The category ID
+ *         example: 64abc123def456ghi789
+ *     responses:
+ *       200:
+ *         description: Category found successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category found successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Category'
+ *       400:
+ *         description: Invalid category ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid category ID format.
+ *       404:
+ *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category not found!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.get('/category/:id', authentication, getOneCategory);
 
 module.exports = router;

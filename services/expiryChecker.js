@@ -1,5 +1,6 @@
 const BatchModel = require('../models/batch');
-const { sendMail } = require('../helpers/brevo');
+require('dotenv').config();
+const { brevo } = require('../helpers/brevo');
 
 const checkExpiringProducts = async () => {
     try {
@@ -30,7 +31,9 @@ const checkExpiringProducts = async () => {
 
             let urgencyLevel = 'NOTICE';
 
-            if (daysLeft <= 7) urgencyLevel = 'CRITICAL';
+            
+            if (daysLeft <= 0) urgencyLevel = 'EXPIRED';
+            else if (daysLeft >= 1 && daysLeft <= 7) urgencyLevel = 'CRITICAL';
             else if (daysLeft <= 14) urgencyLevel = 'URGENT';
             else if (daysLeft <= 30) urgencyLevel = 'WARNING';
 
@@ -42,24 +45,25 @@ const checkExpiringProducts = async () => {
                 urgency: urgencyLevel
             });
 
-            await sendMail({
-                to: process.env.ADMIN_EMAIL,
-                subject: `Expiry Alert - ${batch.productId?.name || 'Unknown Product'}`,
-                text: `
-            Product: ${batch.productId?.name || 'Unknown Product'}
-            Batch Code: ${batch.batchCode}
-            Quantity Remaining: ${batch.quantityRemaining}
-            Expiry Date: ${expiryDate.toDateString()}
-            Days Left: ${daysLeft}
-            Urgency Level: ${urgencyLevel}
-                `
-            });
+            await brevo(
+    process.env.ADMIN_EMAIL,
+    "Admin",
+    `
+    <h2>Expiry Alert</h2>
+    <p>Product: ${batch.productId?.name || 'Unknown Product'}</p>
+    <p>Batch Code: ${batch.batchCode}</p>
+    <p>Quantity Remaining: ${batch.quantityRemaining}</p>
+    <p>Expiry Date: ${expiryDate.toDateString()}</p>
+    <p>Days Left: ${daysLeft}</p>
+    <p>Urgency Level: ${urgencyLevel}</p>
+    `
+);
         }
 
         return batches;
 
     } catch (error) {
-        console.log(error);
+        console.log(error.message);
         throw error;
     }
 };

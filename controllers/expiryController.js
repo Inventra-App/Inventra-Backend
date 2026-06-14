@@ -1,3 +1,4 @@
+
 const { checkExpiringProducts } = require('../services/expiryChecker');
 
 exports.getExpiringProducts = async (req, res, next) => {

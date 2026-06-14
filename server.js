@@ -14,6 +14,7 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const batchRoutes = require('./routes/batch');
 const contactUsRoutes = require('./routes/contactUsRoutes');
+// const salesRoutes = require('./routes/saleRoutes')
 const express_session = require('express-session');
 const { passport } = require('./middlewares/passport');
 const cors = require('cors');
@@ -38,6 +39,7 @@ app.use('/api/v1/inventory', inventoryRoutes);
 app.use('/api/v1', dashboardRoutes);
 app.use('/api/v1/batch', batchRoutes);
 app.use('/api/v1', contactUsRoutes);
+// app.use('/api/v1', salesRoutes);
 
 
 // app.use(rateLimiter);

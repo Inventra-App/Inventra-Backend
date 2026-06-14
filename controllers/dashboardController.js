@@ -26,7 +26,7 @@ exports.getTotalProducts = async(req, res, next) => {
         const allProducts = await Productodel.countDocuments()
 
         res.status(200).json({
-            message: `Products Fetced Successfully`,
+            message: `Products Fetched Successfully`,
             data: allProducts
         })
     } catch (error) {

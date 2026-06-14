@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const {getAllBatches, getOneBatch}= require('../controllers/batchController')
+const {getAllBatches, getOneBatch, checkExpiringProducts}= require('../controllers/batchController')
 const {authentication} = require('../middlewares/auth')
 
 

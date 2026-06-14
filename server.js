@@ -1,10 +1,11 @@
 const express = require('express');
 require('dotenv').config();
 const PORT = process.env.PORT || 7878;
-// const rateLimiter = require('./middlewares/rateLimiter')
+ const rateLimiter = require('./middlewares/rateLimiter')
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const mongoose = require('mongoose');
+const startExpiryJob = require('./jobs/expiryJob');
 const supermarketRoutes = require('./routes/supermarketRoutes');
 const subscriptionPlanRoutes = require('./routes/subscriptionPlanRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
@@ -16,6 +17,10 @@ const batchRoutes = require('./routes/batch');
 const contactUsRoutes = require('./routes/contactUsRoutes');
 const express_session = require('express-session');
 const { passport } = require('./middlewares/passport');
+const expiryRoutes = require('./routes/expiryRoutes');
+const startLowStockJob = require('./jobs/lowStockJob');
+const lowStockRoutes = require('./routes/lowStockRoutes');
+
 const cors = require('cors');
 
 
@@ -26,6 +31,8 @@ app.use(express_session({
     resave: false,
     saveUninitialized: false
 }));
+startExpiryJob();
+startLowStockJob();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
@@ -38,8 +45,8 @@ app.use('/api/v1/inventory', inventoryRoutes);
 app.use('/api/v1', dashboardRoutes);
 app.use('/api/v1/batch', batchRoutes);
 app.use('/api/v1', contactUsRoutes);
-
-
+app.use('/api/v1', expiryRoutes);
+app.use('/api/v1', lowStockRoutes);
 // app.use(rateLimiter);
 
 const swaggerDefinition = {

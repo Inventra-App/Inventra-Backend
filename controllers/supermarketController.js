@@ -93,7 +93,6 @@ exports.verifyUser = async (req,res,next) =>{
     }
 }
 
-
 exports.resendOTP = async (req, res, next) => {
     try {
         const { email } = req.body;
@@ -222,7 +221,7 @@ exports.forgotPassword = async (req, res, next) => {
             otp: OTP
         };
 
-        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData))
+        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
@@ -254,6 +253,17 @@ exports.verifyPasswordOtp = async (req,res,next) =>{
             statusCode:404
         })
        };
+       
+       if(supermarket.otp !== otp){
+            return res.status(400).json({
+                message: "Invalid OTP credentials"
+            })
+        }
+        if(Date.now()> supermarket.otpExpires){
+            return res.status(400).json({
+                message:"OTP Expired"
+            })
+        }
 
        supermarket.isVerified = true;
        supermarket.otp = null

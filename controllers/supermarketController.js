@@ -70,12 +70,12 @@ exports.verifyUser = async (req,res,next) =>{
             statusCode:404
         })
        }
-    //    if (new Date() > user.otpExpires || user.otp != otp ) {
-    //     return next({
-    //         message: 'Invalid OTP',
-    //         statusCode:404
-    //     })
-    //    }
+       if (new Date() > user.otpExpires || user.otp != otp ) {
+        return next({
+            message: 'Invalid OTP',
+            statusCode:404
+        })
+       }
 
        supermarket.isVerified = true;
        supermarket.otp = null
@@ -155,14 +155,12 @@ exports.login = async( req, res, next) => {
                 statusCode:404
             })
         }
-        // if(supermarket.lockUntil && supermarket.lockUntil > Date.now()){
-        //     return next({
-        //         message: 'Account is locke until ${supermarket.lockUntil}.',
-        //         statusCode:403
-        //     })
-        // }
-
-
+        if(supermarket.lockUntil && supermarket.lockUntil > Date.now()){
+            return next({
+                message: 'Account is locked until ${supermarket.lockUntil}.',
+                statusCode:403
+            })
+        }
 
         const passwordCorrect = await bcrypt.compare(password, supermarket.password);
 

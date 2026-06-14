@@ -1,3 +1,4 @@
+const { Error } = require('mongoose');
 const CategoryModel = require('../models/category');
 const UserModel = require('../models/supermarket');
 
@@ -42,9 +43,37 @@ exports.getCategories = async (req, res, next) => {
         }
 
         res.status(200).json({
-            message: `Feteched Sucessfuly`,
+            message: `All categories Feteched Sucessfuly`,
             data: allCategories
         })
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+exports.getOneCategory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // if (!mongoose.isValidObjectId(id)) {
+        //     return res.status(400).json({
+        //         message: 'Invalid category ID format.'
+        //     });
+        // }
+
+        const category = await CategoryModel.findById(id);
+
+        if (!category) {
+            return res.status(404).json({
+                message: `Category not found!`
+            })
+        }
+
+        res.status(200).json({
+            message: `Category found successfully`,
+            data: category
+        })
+
     } catch (error) {
         console.log(error)
         next(error)

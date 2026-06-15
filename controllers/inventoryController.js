@@ -79,7 +79,7 @@ exports.addProducts = async (req, res, next) => {
             productName: newProduct.productName,
             categoryName: newProduct.categoryName,
             totalStock: unitPerPackage * packageQuantity,
-            updatedBy: id
+            updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
         const newInventoryInput = new InventoryModel(inventoryInput)
         await newInventoryInput.save()

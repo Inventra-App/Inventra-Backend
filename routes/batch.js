@@ -110,12 +110,7 @@ const {authentication} = require('../middlewares/auth')
  *                   example: Something went wrong
  */
 
-
-
-
 router.get('/getAll',authentication ,getAllBatches)
-
-
 
 /**
  * @swagger

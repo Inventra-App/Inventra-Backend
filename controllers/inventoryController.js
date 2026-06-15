@@ -132,7 +132,7 @@ exports.moveProducts = async (req, res, next) => {
         const { actionType, moveFrom, moveTo, quantity } = req.body;
         const { inventoryId } = req.params;
 
-        const inventory = await InventoryModel.findById({productId});
+        const inventory = await InventoryModel.findById(inventoryId);
         if (!inventory) {
             return res.status(404).json({
                 message: `product does not exist or has been changed`
@@ -140,21 +140,61 @@ exports.moveProducts = async (req, res, next) => {
         }
 
         console.log(inventory)
-        
+
         if (moveFrom.toLowerCase() === 'all stock' && moveTo.toLowerCase() === 'available stock') {
+            if (inventory.totalStock < quantity) {
+                return res.status(400).json({
+                    message: `Not enough products`
+                })
+            }
             inventory.availableStock = quantity;
             inventory.reservedStock = inventory.totalStock - quantity
         } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
+            if (inventory.reservedStock < quantity) {
+                return res.status(400).json({
+                    message: `Not enough products`
+                })
+            }
             inventory.reservedStock -= quantity;
             inventory.availableStock += quantity;
         } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {
+            if (inventory.availableStock < quantity) {
+                return res.status(400).json({
+                    message: `Not enough products`
+                })
+            }
             inventory.availableStock -= quantity;
             inventory.reservedStock += quantity;
         }
         console.log(inventory);
         await inventory.save();
+
+        res.status(200).json({
+            message: `Items moved sucesfully`,
+            data: inventory
+        })
     } catch (error) {
         console.log(error),
+        next(error)
+    }
+}
+
+exports.getAllItems = async (req, res, next) => {
+   try { 
+        const items = await InventoryModel.find();
+
+        if (!items) {
+            return res.status(404).json({
+                message: `Nothing found here. Please upload your products`
+            })
+        }
+
+        res.status(200).json({
+            message: `Product details fetched sucessfully`,
+            data: items
+        })
+    } catch (error) {
+        console.log(error)
         next(error)
     }
 }

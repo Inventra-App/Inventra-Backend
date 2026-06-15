@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const { addProducts } = require('../controllers/inventoryController');
+const { addProducts, moveProducts } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
 
 
@@ -255,5 +255,7 @@ const { authentication } = require('../middlewares/auth');
  */
 
 router.post('/product', authentication , addProducts);
+
+router.put('/p/move/:inventoryId', authentication, moveProducts);
 
 module.exports = router

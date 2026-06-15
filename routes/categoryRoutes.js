@@ -1,13 +1,7 @@
 const router = require('express').Router();
 
-const { createCategory, getCategories, getOneCategory } = require('../controllers/categoryConroller');
+const { createCategory, getCategories, getOneCategory, deleteCategory } = require('../controllers/categoryConroller');
 const {authentication} = require('../middlewares/auth')
-
-
-
-
-
-
 
 
 /**
@@ -83,8 +77,6 @@ const {authentication} = require('../middlewares/auth')
  *         description: Internal server error
  */
 router.post('/category', authentication, createCategory);
-
-
 
 
 /**
@@ -205,5 +197,68 @@ router.get('/allCategories', authentication, getCategories);
  */
 
 router.get('/category/:id', authentication, getOneCategory);
+
+/**
+ * @swagger
+ * /api/v1/d/category/{categoryId}:
+ *   delete:
+ *     summary: Delete a category by ID
+ *     tags: [Category]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: categoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The category ID to delete
+ *         example: 64abc123def456ghi789
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category deleted successfully
+ *       400:
+ *         description: Invalid category ID format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid category ID format.
+ *       404:
+ *         description: Category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category not found!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.delete('/d/category/:categoryId', authentication, deleteCategory);
 
 module.exports = router;

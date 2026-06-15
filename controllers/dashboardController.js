@@ -23,7 +23,7 @@ exports.getTotalStockUnits = async(req, res, next) => {
 
 exports.getTotalProducts = async(req, res, next) => {
     try {
-        const allProducts = await Productodel.countDocuments()
+        const allProducts = await ProductModel.countDocuments()
 
         res.status(200).json({
             message: `Products Fetched Successfully`,

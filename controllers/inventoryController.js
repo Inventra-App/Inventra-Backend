@@ -129,13 +129,32 @@ exports.moveProducts = async (req, res, next) => {
         const supermarketId = await filterRole(id, role);
         console.log(supermarketId)
 
-        const { availableStock, reservedStock } = req.body;
-        const { productId } = req.params;
+        const { actionType, moveFrom, moveTo, quantity } = req.body;
+        const { inventoryId } = req.params;
 
-        const product = await ProductModel.fin
+        const inventory = await InventoryModel.findById({productId});
+        if (!inventory) {
+            return res.status(404).json({
+                message: `product does not exist or has been changed`
+            })
+        }
+
+        console.log(inventory)
+        
+        if (moveFrom.toLowerCase() === 'all stock' && moveTo.toLowerCase() === 'available stock') {
+            inventory.availableStock = quantity;
+            inventory.reservedStock = inventory.totalStock - quantity
+        } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
+            inventory.reservedStock -= quantity;
+            inventory.availableStock += quantity;
+        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {
+            inventory.availableStock -= quantity;
+            inventory.reservedStock += quantity;
+        }
+        console.log(inventory);
+        await inventory.save();
     } catch (error) {
         console.log(error),
         next(error)
     }
 }
-

@@ -91,7 +91,7 @@ exports.deleteCategory = async (req, res, next) => {
             })
         }
 
-        await CategoryModel.findByIdAndDelete({ .})
+        await CategoryModel.findByIdAndDelete({categoryId})
 
         res.status(200).json({
             message: `Category sucessfuly deleted`

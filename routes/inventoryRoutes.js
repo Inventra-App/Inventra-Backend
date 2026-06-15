@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const { addProducts, moveProducts } = require('../controllers/inventoryController');
+const { addProducts, moveProducts, getAllItems } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
 
 
@@ -256,6 +256,205 @@ const { authentication } = require('../middlewares/auth');
 
 router.post('/product', authentication , addProducts);
 
+/**
+ * @swagger
+ * /api/v1/p/move/{inventoryId}:
+ *   put:
+ *     summary: Move stock between inventory states
+ *     tags: [Inventory]
+ *     description: >
+ *       Admin or Manager only. Moves stock between available and reserved stock,
+ *       or allocates stock from total stock into available stock.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: inventoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The inventory record ID
+ *         example: 64abc123def456ghi789
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - actionType
+ *               - moveFrom
+ *               - moveTo
+ *               - quantity
+ *             properties:
+ *               actionType:
+ *                 type: string
+ *                 description: Type of stock movement
+ *                 example: transfer
+ *               moveFrom:
+ *                 type: string
+ *                 description: Source stock location
+ *                 example: available stock
+ *               moveTo:
+ *                 type: string
+ *                 description: Destination stock location
+ *                 example: reserved stock
+ *               quantity:
+ *                 type: number
+ *                 description: Quantity of stock to move
+ *                 example: 50
+ *     responses:
+ *       200:
+ *         description: Stock moved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Stock moved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     totalStock:
+ *                       type: number
+ *                       example: 240
+ *                     availableStock:
+ *                       type: number
+ *                       example: 190
+ *                     reservedStock:
+ *                       type: number
+ *                       example: 50
+ *       400:
+ *         description: Invalid request or insufficient stock
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Insufficient stock to move
+ *       403:
+ *         description: Forbidden - only admin or manager can perform this action
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You are not authorised to perform this action
+ *       404:
+ *         description: Inventory record not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product does not exist or has been changed
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
 router.put('/p/move/:inventoryId', authentication, moveProducts);
+
+/**
+ * @swagger
+ * /api/v1/i/all:
+ *   get:
+ *     summary: Get all inventory records
+ *     tags: [Inventory]
+ *     description: >
+ *       Fetches all inventory records in the supermarket, including stock details
+ *       like total stock, available stock, reserved stock, and product information.
+ *       Accessible to authenticated users.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Inventory fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Inventory fetched successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 64abc123def456ghi789
+ *                       productId:
+ *                         type: string
+ *                         example: 64abc123def456ghi790
+ *                       totalStock:
+ *                         type: number
+ *                         example: 240
+ *                       availableStock:
+ *                         type: number
+ *                         example: 200
+ *                       reservedStock:
+ *                         type: number
+ *                         example: 40
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2026-06-15T10:00:00.000Z
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2026-06-15T12:00:00.000Z
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Please login again.
+ *       404:
+ *         description: No inventory records found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No inventory records found
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.get('/i/all', authentication, getAllItems);
 
 module.exports = router

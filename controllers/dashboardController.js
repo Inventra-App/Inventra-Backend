@@ -1,5 +1,6 @@
 const InventoryModel = require('../models/inventory');
 const ProductModel = require('../models/product')
+const SaleModel = require('../models/sale');
 const { mapPricesAndAdd } = require('../helpers/helpers')
 
 

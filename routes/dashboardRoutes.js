@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
-const { getTotalStockUnits, getTotalProducts } = require('../controllers/dashboardController')
+const { getTotalStockUnits, getTotalProducts, countSales } = require('../controllers/dashboardController');
+const { authentication } = require('../middlewares/auth');
 
 
 
@@ -17,9 +18,11 @@ const { getTotalStockUnits, getTotalProducts } = require('../controllers/dashboa
  * @swagger
  * /api/v1/dashboard/tsu:
  *   get:
- *     tags: [Dashboard]
  *     summary: Get total stock units
- *     description: Retrieves and calculates the total stock units across all inventory items.
+ *     tags: [Dashboard]
+ *     description: Returns the total stock units currently in inventory.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Total stock units fetched successfully
@@ -30,13 +33,12 @@ const { getTotalStockUnits, getTotalProducts } = require('../controllers/dashboa
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Total Units Fetched Successfully
+ *                   example: Total stock units
  *                 data:
  *                   type: number
- *                   description: Total stock units across all inventory
- *                   example: 5000
- *       500:
- *         description: Internal server error
+ *                   example: 1200
+ *       404:
+ *         description: No stock found
  *         content:
  *           application/json:
  *             schema:
@@ -44,20 +46,24 @@ const { getTotalStockUnits, getTotalProducts } = require('../controllers/dashboa
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong
+ *                   example: No stock available
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
  */
-router.get('/dashboard/tsu', getTotalStockUnits)
 
-
-
+router.get('/dashboard/tsu', authentication, getTotalStockUnits);
 
 /**
  * @swagger
  * /api/v1/dasboard/gtp:
  *   get:
+ *     summary: Get total products
  *     tags: [Dashboard]
- *     summary: Get total number of products
- *     description: Returns the total count of all products in the system.
+ *     description: Returns the total number of products in the system.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Total products fetched successfully
@@ -68,13 +74,12 @@ router.get('/dashboard/tsu', getTotalStockUnits)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Products Fetced Successfully
+ *                   example: Total products
  *                 data:
  *                   type: number
- *                   description: Total count of all products
- *                   example: 120
- *       500:
- *         description: Internal server error
+ *                   example: 45
+ *       404:
+ *         description: No products found
  *         content:
  *           application/json:
  *             schema:
@@ -82,8 +87,54 @@ router.get('/dashboard/tsu', getTotalStockUnits)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Something went wrong
+ *                   example: No products found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
  */
-router.get('/dasboard/gtp', getTotalProducts)
+
+router.get('/dasboard/gtp', authentication, getTotalProducts);
+
+/**
+ * @swagger
+ * /api/v1/dashboard/tsa:
+ *   get:
+ *     summary: Get total sales amount
+ *     tags: [Dashboard]
+ *     description: Returns the total number of sales made.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Total sales fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Total sales
+ *                 data:
+ *                   type: number
+ *                   example: 150
+ *       404:
+ *         description: No sales found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Nothing sold yet. Come back when you make a sale!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+
+router.get('/dashboard/tsa', authentication, countSales);
 
 module.exports = router

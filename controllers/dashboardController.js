@@ -35,23 +35,3 @@ exports.getTotalProducts = async(req, res, next) => {
         next(error)
     }
 }
-
-exports.countSales = async (req, res, next) => {
-    try {
-        const totalSales = await saleModel.countDocuments();
-
-        if (!totalSales) {
-            return res.status(404).json({
-                message: `Nothing sold yet. Come back when you make a sale!`
-            })
-        }
-
-        res.status(200).json({
-            message: `Total sales`,
-            data: totalSales
-        })
-    } catch (error) {
-        console.log(error)
-        next(error)
-    }
-}

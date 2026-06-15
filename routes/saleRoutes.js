@@ -125,7 +125,7 @@ router.post('/pos/sale', authentication, checkoutSale);
 
 /**
  * @swagger
- * /api/v1/sales/sales:
+ * /api/v1/sales:
  *   get:
  *     summary: Count total sales
  *     tags: [Sales]

@@ -1,7 +1,7 @@
 const InventoryModel = require('../models/inventory');
 const ProductModel = require('../models/product')
 const SaleModel = require('../models/sale');
-const { mapPricesAndAdd } = require('../helpers/helpers')
+const { mapPricesAndAdd } = require('../helpers/helpers');
 
 
 exports.getTotalStockUnits = async(req, res, next) => {
@@ -38,7 +38,7 @@ exports.getTotalProducts = async(req, res, next) => {
 
 exports.countSales = async (req, res, next) => {
     try {
-        const totalSales = await saleModel.countDocuments();
+        const totalSales = await SaleModel.countDocuments();
 
         if (!totalSales) {
             return res.status(404).json({

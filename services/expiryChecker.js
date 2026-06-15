@@ -2,7 +2,7 @@ const BatchModel = require('../models/batch');
 require('dotenv').config();
 const { brevo } = require('../helpers/brevo');
 
-const checkExpiringProducts = async () => {
+exports.checkExpiringProducts = async () => {
     try {
         const today = new Date();
 
@@ -67,5 +67,3 @@ const checkExpiringProducts = async () => {
         throw error;
     }
 };
-
-module.exports = { checkExpiringProducts };

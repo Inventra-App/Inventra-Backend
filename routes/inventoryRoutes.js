@@ -71,7 +71,7 @@ const { authentication } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /api/v1/inventory/product:
+ * /api/v1/product:
  *   post:
  *     summary: Add a new product to inventory
  *     tags: [Inventory]

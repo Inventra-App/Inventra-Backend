@@ -4,12 +4,6 @@ const { createCategory, getCategories, getOneCategory, deleteCategory } = requir
 const {authentication} = require('../middlewares/auth')
 
 
-
-
-
-
-
-
 /**
  * @swagger
  * tags:
@@ -83,8 +77,6 @@ const {authentication} = require('../middlewares/auth')
  *         description: Internal server error
  */
 router.post('/category', authentication, createCategory);
-
-
 
 
 /**
@@ -206,11 +198,9 @@ router.get('/allCategories', authentication, getCategories);
 
 router.get('/category/:id', authentication, getOneCategory);
 
-
-
 /**
- * @swagger
- * /api/v1/category/{Id}:
+ * @swagger 
+ * /api/v1/d/category/{categoryId}:
  *   delete:
  *     summary: Delete a category by ID
  *     tags: [Category]
@@ -218,11 +208,11 @@ router.get('/category/:id', authentication, getOneCategory);
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: Id
+ *         name: categoryId
  *         required: true
  *         schema:
  *           type: string
- *         description: The category ID
+ *         description: The category ID to delete
  *         example: 64abc123def456ghi789
  *     responses:
  *       200:
@@ -236,7 +226,7 @@ router.get('/category/:id', authentication, getOneCategory);
  *                   type: string
  *                   example: Category deleted successfully
  *       400:
- *         description: Cannot delete category - products are attached to it
+ *         description: Invalid category ID format
  *         content:
  *           application/json:
  *             schema:
@@ -244,7 +234,7 @@ router.get('/category/:id', authentication, getOneCategory);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Cannot delete category. Products are attached to it.
+ *                   example: Invalid category ID format.
  *       404:
  *         description: Category not found
  *         content:
@@ -269,8 +259,6 @@ router.get('/category/:id', authentication, getOneCategory);
  *                   example: Something went wrong
  */
 
-router.delete('/category/:id', authentication, deleteCategory);
-
-
+router.delete('/d/category/:categoryId', authentication, deleteCategory);
 
 module.exports = router;

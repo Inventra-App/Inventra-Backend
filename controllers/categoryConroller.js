@@ -116,6 +116,24 @@ exports.deleteCategory = async (req, res, next) => {
     }
 }
 
+exports.deleteCategory = async (req, res, next) => {
+    try {
+        const { categoryId } = req.params;
 
+        const deletedCategory = await CategoryModel.findByIdAndDelete(categoryId);
 
+        if (!deletedCategory) {
+            return res.status(404).json({
+                message: "Category not found"
+            });
+        }
 
+        res.status(200).json({
+            message: "Category successfully deleted"
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};

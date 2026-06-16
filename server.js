@@ -32,8 +32,6 @@ app.use(express_session({
     resave: false,
     saveUninitialized: false
 }));
-startExpiryJob();
-startLowStockJob();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
@@ -59,7 +57,7 @@ const swaggerDefinition = {
         title: 'Inventra API Documentation',
         version: '2.0.0',
         description: `This is a REST API application made with Express.
-                      The base Url is: http://localhost:7878/api/v1`,
+        The base Url is: http://localhost:7878/api/v1`,
         license: {
             name: 'Official Url',
             url: 'https://google.com',
@@ -100,29 +98,31 @@ const swaggerSpec = swaggerJsdoc(options);
 app.use('/api/v1/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); 
 
 
-    app.use((err, req, res, next) => {
-          if (err.name === 'MulterError') {
-          return res.status(400).json({ 
-          message: 'File upload failed' });
-    }
-    if (err.name === 'JsonWebTokenError') { 
-    return res.status(401).json({
-           message: 'Session expired, please login again' });
-    }
+app.use((err, req, res, next) => {
+    if (err.name === 'MulterError') {
+        return res.status(400).json({ 
+            message: 'File upload failed' });
+        }
+        if (err.name === 'JsonWebTokenError') { 
+            return res.status(401).json({
+                message: 'Session expired, please login again' });
+            }
     res.status(err.statusCode || 500).json({ 
-      message: err.message }); 
-});
-
-mongoose
-    .connect(process.env.MONGO_URI)
+        message: err.message }); 
+    });
+    
+    mongoose
+    .connect(process.env.MONGODB_URI)
     .then(() => {
         console.log('Database connected successfully');
+        startExpiryJob();
+        startLowStockJob();
         app.listen(PORT, () => console.log(`App listening on PORT: ${PORT}`));
     })
     .catch((error) => {
         console.log('Unable to connect: ', error.message);
     });
-
-
-
+    
+    
+    
     

@@ -394,20 +394,20 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *             type: object
  *             required:
  *               - email
- *               - otp
  *               - password
+ *               - confirmPassword
  *             properties:
  *               email:
  *                 type: string
  *                 description: The user's registered email address
  *                 example: onyebenneth20@gmail.com
- *               otp:
- *                 type: string
- *                 description: The 6-digit OTP received via email
- *                 example: "391047"
  *               password:
  *                 type: string
  *                 description: The new password to set
+ *                 example: NewSecret123
+ *               confirmPassword:
+ *                 type: string
+ *                 description: Confirm new password to set
  *                 example: NewSecret123
  *     responses:
  *       200:
@@ -422,7 +422,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   description: A success message
  *                   example: Password reset successfully
  *       400:
- *         description: Invalid or expired OTP, or missing password
+ *         description: Invalid or missing password
  *         content:
  *           application/json:
  *             schema:
@@ -430,7 +430,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Invalid or expired OTP
+ *                   example: Invalid or missing password
  *       404:
  *         description: User not found
  *         content:

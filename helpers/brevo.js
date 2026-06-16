@@ -53,9 +53,6 @@
 
 
 
-
-
-
 const BrevoClient = require("@getbrevo/brevo");
 
 const brevoClient = new BrevoClient.TransactionalEmailsApi();

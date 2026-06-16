@@ -52,7 +52,7 @@ const { authentication } = require('../middlewares/auth');
 
 /**
  * @swagger
- * /api/v1/create-staff/{adminId}:
+ * /api/v1/create-staff:
  *   post:
  *     summary: Create a new staff member
  *     tags: [Staff]

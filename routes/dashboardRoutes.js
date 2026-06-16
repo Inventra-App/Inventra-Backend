@@ -57,7 +57,7 @@ router.get('/dashboard/tsu', authentication, getTotalStockUnits);
 
 /**
  * @swagger
- * /api/v1/dasboard/gtp:
+ * /api/v1/dashboard/gtp:
  *   get:
  *     summary: Get total products
  *     tags: [Dashboard]
@@ -94,7 +94,7 @@ router.get('/dashboard/tsu', authentication, getTotalStockUnits);
  *         description: Internal server error
  */
 
-router.get('/dasboard/gtp', authentication, getTotalProducts);
+router.get('/dashboard/gtp', authentication, getTotalProducts);
 
 /**
  * @swagger

@@ -32,8 +32,6 @@ app.use(express_session({
     resave: false,
     saveUninitialized: false
 }));
-startExpiryJob();
-startLowStockJob();
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
@@ -71,8 +69,8 @@ const swaggerDefinition = {
     },
     servers: [
         {
-          url: 'https://inventra-backend-212y.onrender.com/',
-          description: 'Live server'
+            url: 'https://inventra-backend-212y.onrender.com/',
+            description: 'Live server'
         },
         {
             url: 'http://localhost:7878', 
@@ -103,26 +101,28 @@ app.use('/api/v1/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     app.use((err, req, res, next) => {
           if (err.name === 'MulterError') {
           return res.status(400).json({ 
-          message: 'File upload failed' });
-    }
-    if (err.name === 'JsonWebTokenError') { 
-    return res.status(401).json({
-           message: 'Session expired, please login again' });
-    }
-    res.status(err.statusCode || 500).json({ 
-      message: err.message }); 
+              message: 'File upload failed' });
+            }
+            if (err.name === 'JsonWebTokenError') { 
+                return res.status(401).json({
+                    message: 'Session expired, please login again' });
+                }
+                res.status(err.statusCode || 500).json({ 
+                    message: err.message }); 
 });
 
 mongoose
     .connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Database connected successfully');
+        startExpiryJob();
+        startLowStockJob();
         app.listen(PORT, () => console.log(`App listening on PORT: ${PORT}`));
     })
     .catch((error) => {
         console.log('Unable to connect: ', error.message);
     });
-
+    
 
 
     

@@ -74,7 +74,7 @@ exports.verifyUser = async (req,res,next) =>{
             statusCode:404
         })
        }
-       
+
      if(supermarket.otp !== otp){
             return res.status(400).json({
                 message: "Invalid OTP credentials"
@@ -119,18 +119,21 @@ exports.resendOTP = async (req, res, next) => {
         const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
 
         const expires = new Date(Date.now() + 10 * 60000);
+        
+        await  brevo(supermarket.email, supermarket.firstName, resendOtpTemplate(supermarket.firstName, OTP))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
         supermarket.verificationType = 'onboarding'
 
-        const emailOptions = {
-            email: supermarket.email,
-            subject: 'New otp confirmation',
-            html: resendOtpTemplate(supermarket.firstName, OTP)
-        }
+        // const emailOptions = {
+        //     email: supermarket.email,
+        //     subject: 'New otp confirmation',
+        //     html: resendOtpTemplate(supermarket.firstName, OTP)
+        // }
 
-        await sendMail(emailOptions);
+        // await sendMail(emailOptions);
+
 
         await supermarket.save()
 
@@ -140,6 +143,7 @@ exports.resendOTP = async (req, res, next) => {
             message: 'OTP resent successfully'
         })
     } catch (error) {
+        console.log(error)
        next({
             message: error.message,
             statusCode:500

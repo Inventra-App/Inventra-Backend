@@ -55,17 +55,10 @@ const { authentication } = require('../middlewares/auth');
  * /api/v1/create-staff:
  *   post:
  *     summary: Create a new staff member
+ *     description: Allows an authenticated admin to create a new staff account.
  *     tags: [Staff]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: adminId
- *         required: true
- *         schema:
- *           type: string
- *         description: The ID of the admin creating the staff
- *         example: 64abc123def456ghi789
  *     requestBody:
  *       required: true
  *       content:
@@ -104,15 +97,17 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Staff created successfully
  *                 data:
  *                   $ref: '#/components/schemas/Staff'
- *       404:
- *         description: Admin not found - not authorised to perform this action
+ *
+ *       403:
+ *         description: Forbidden - only admins can create staff
+ *
  *       401:
  *         description: Unauthorized - invalid or missing token
+ *
  *       500:
  *         description: Internal server error
  */
-router.post('/create-staff', authentication, createStaffValidator,  createStaff);
-
+router.post('/create-staff', authentication, createStaffValidator, createStaff);
 
 
 /**

@@ -25,6 +25,11 @@ const batchSchema = new mongoose.Schema({
       trim: true
     },
 
+    supplier: {
+      type: String,
+      trim: true
+    },
+
     quantity: {
       type: Number,
       required: true,

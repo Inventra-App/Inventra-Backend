@@ -9,3 +9,5 @@ const startLowStockJob = () => {
 };
 
 module.exports = startLowStockJob;
+
+// cron.schedule('*/15 * * * * *', checkExpiringProducts);

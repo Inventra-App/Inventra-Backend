@@ -94,5 +94,5 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.get('/low-stock/check',authentication,getLowStock )
+router.get('/low-stock/check',authentication, getLowStock )
 module.exports = router;

@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const { addProducts, moveProducts, getAllItems } = require('../controllers/inventoryController');
+const { addProducts, moveProducts, getAllItems, recordStockEntry } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
 
 
@@ -67,11 +67,9 @@ const { authentication } = require('../middlewares/auth');
  *           example: 120
  */
 
-
-
 /**
  * @swagger
- * /api/v1/inventory/product:
+ * /api/v1/product:
  *   post:
  *     summary: Add a new product to inventory
  *     tags: [Inventory]
@@ -457,4 +455,67 @@ router.put('/p/move/:inventoryId', authentication, moveProducts);
 
 router.get('/i/all', authentication, getAllItems);
 
-module.exports = router
+/**
+ * @swagger
+ * /api/v1/stock/entry:
+ *   post:
+ *     summary: Record incoming stock entry
+ *     description: Creates a new batch and updates inventory stock allocation.
+ *     tags:
+ *       - Inventory
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - productId
+ *               - supplier
+ *               - expiryDate
+ *               - packageType
+ *               - packageQuantity
+ *               - unitPerPackage
+ *               - availableStock
+ *               - reservedStock
+ *             properties:
+ *               productId:
+ *                 type: string
+ *                 example: 685f1234567890abc1234567
+ *               supplier:
+ *                 type: string
+ *                 example: Emzor Pharmaceuticals
+ *               expiryDate:
+ *                 type: string
+ *                 format: date
+ *                 example: 2026-12-31
+ *               packageType:
+ *                 type: string
+ *                 example: Carton
+ *               packageQuantity:
+ *                 type: number
+ *                 example: 10
+ *               unitPerPackage:
+ *                 type: number
+ *                 example: 5
+ *               availableStock:
+ *                 type: number
+ *                 example: 30
+ *               reservedStock:
+ *                 type: number
+ *                 example: 20
+ *     responses:
+ *       201:
+ *         description: Stock recorded successfully
+ *       400:
+ *         description: Invalid stock allocation
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Product not found
+ */
+router.post('/stock/entry', authentication, recordStockEntry)
+
+module.exports = router;

@@ -34,6 +34,7 @@ exports.createStaff = async (req, res, next) => {
             password: hashedPassword,
             role
         });
+        console.log(staff)
 
         await staff.save();
 

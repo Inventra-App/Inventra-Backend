@@ -79,7 +79,7 @@ const { authentication } = require('../middlewares/auth')
  *               email:
  *                 type: string
  *                 description: The user's email address
- *                 example: onyebenneth30@gmail.com
+ *                 example: onyebenneth20@gmail.com
  *               businessName:
  *                 type: string
  *                 description: The user's business name
@@ -91,11 +91,11 @@ const { authentication } = require('../middlewares/auth')
  *               password:
  *                 type: string
  *                 description: The user's password
- *                 example: Smart123
+ *                 example: Smart12@
  *               confirmPassword:
  *                 type: string
  *                 description: Must match password
- *                 example: Smart123
+ *                 example: Smart12@
  *     responses:
  *       201:
  *         description: User registered successfully. OTP sent to email.
@@ -379,13 +379,14 @@ router.post('/resend-otp',resendOtpValidator, resendOTP);
  */
 router.post('/forgot', forgotPasswordValidator, forgotPassword);
 
+
 /**
  * @swagger
  * /api/v1/reset:
  *   post:
  *     tags: [supermarket]
  *     summary: Reset password
- *     description: Resets the user's password after verifying the OTP from the forgot-password step. The OTP is cleared after a successful reset and a confirmation email is sent.
+ *     description: Resets the supermarket password after OTP verification has been completed successfully.
  *     requestBody:
  *       required: true
  *       content:
@@ -399,15 +400,15 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *             properties:
  *               email:
  *                 type: string
- *                 description: The user's registered email address
+ *                 description: Registered supermarket email
  *                 example: onyebenneth20@gmail.com
  *               password:
  *                 type: string
- *                 description: The new password to set
+ *                 description: New password
  *                 example: NewSecret123
  *               confirmPassword:
  *                 type: string
- *                 description: Confirm new password to set
+ *                 description: Confirm new password
  *                 example: NewSecret123
  *     responses:
  *       200:
@@ -419,8 +420,8 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   description: A success message
  *                   example: Password reset successfully
+ *
  *       400:
  *         description: Invalid or missing password
  *         content:
@@ -432,7 +433,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   type: string
  *                   example: Invalid or missing password
  *       404:
- *         description: User not found
+ *         description: Supermarket not found
  *         content:
  *           application/json:
  *             schema:
@@ -440,7 +441,8 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: User not found
+ *                   example: Supermarket not found
+ *
  *       500:
  *         description: Internal server error
  *         content:
@@ -453,6 +455,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   example: Something went wrong
  */
 router.post('/reset', resetPasswordValidator, resetPassword);
+// router.post('/reset', resetPasswordValidator, resetPassword);
 
 /**
  * @swagger

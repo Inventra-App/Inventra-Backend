@@ -15,6 +15,11 @@ const InventorySchema = new mongoose.Schema(
       unique: true
     },
 
+    SKU: {
+       type: String,
+        required: true
+    },
+
     categoryName: {
         type: String,
         required: true
@@ -49,6 +54,12 @@ const InventorySchema = new mongoose.Schema(
     toObject: { virtuals: true }
   }
 );
+
+InventorySchema.virtual('status').get(function () {
+    if (this.totalStock <= 0) return 'out-of-stock';
+    if (this.totalStock <= 10) return 'low-stock';
+    return 'in-stock';
+});
 
 const InventoryModel = mongoose.model('Inventory', InventorySchema);
 

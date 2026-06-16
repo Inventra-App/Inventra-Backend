@@ -78,8 +78,9 @@ exports.addProducts = async (req, res, next) => {
             supermarketId,
             productId: newProduct._id,
             productName: newProduct.productName,
+            SKU: newProduct.SKU,
             categoryName: newProduct.categoryName,
-            totalStock: unitPerPackage * packageQuantity,
+            totalStock: unitPerPackage * packageQuantity, 
             updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
         const newInventoryInput = new InventoryModel(inventoryInput);

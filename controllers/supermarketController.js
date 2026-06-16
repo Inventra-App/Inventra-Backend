@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 
+
 exports.signUp = async (req, res, next) => {
     console.log('here')
     try {
@@ -57,6 +58,9 @@ exports.signUp = async (req, res, next) => {
     } 
 }
 
+
+
+
 exports.verifyUser = async (req,res,next) =>{
     try{
         const { email, otp } = req.body;
@@ -97,6 +101,8 @@ exports.verifyUser = async (req,res,next) =>{
         next(error)
     }
 }
+
+
 
 exports.resendOTP = async (req, res, next) => {
     try {
@@ -247,7 +253,9 @@ exports.forgotPassword = async (req, res, next) => {
         console.log(error);
         next(error)
     }
-};
+}
+
+
 
 exports.verifyPasswordOtp = async (req,res,next) =>{
     try{

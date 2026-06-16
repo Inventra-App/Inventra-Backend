@@ -199,7 +199,7 @@ router.get('/allCategories', authentication, getCategories);
 router.get('/category/:id', authentication, getOneCategory);
 
 /**
- * @swagger
+ * @swagger 
  * /api/v1/d/category/{categoryId}:
  *   delete:
  *     summary: Delete a category by ID

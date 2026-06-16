@@ -79,7 +79,7 @@ const { authentication } = require('../middlewares/auth')
  *               email:
  *                 type: string
  *                 description: The user's email address
- *                 example: onyebenneth30@gmail.com
+ *                 example: onyebenneth20@gmail.com
  *               businessName:
  *                 type: string
  *                 description: The user's business name
@@ -91,11 +91,11 @@ const { authentication } = require('../middlewares/auth')
  *               password:
  *                 type: string
  *                 description: The user's password
- *                 example: Smart123
+ *                 example: Smart12@
  *               confirmPassword:
  *                 type: string
  *                 description: Must match password
- *                 example: Smart123
+ *                 example: Smart12@
  *     responses:
  *       201:
  *         description: User registered successfully. OTP sent to email.
@@ -423,7 +423,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   example: Password reset successfully
  *
  *       400:
- *         description: Invalid reset request or OTP not verified
+ *         description: Invalid or missing password
  *         content:
  *           application/json:
  *             schema:
@@ -431,8 +431,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Please request for a new OTP
- *
+ *                   example: Invalid or missing password
  *       404:
  *         description: Supermarket not found
  *         content:
@@ -456,7 +455,7 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   example: Something went wrong
  */
 router.post('/reset', resetPasswordValidator, resetPassword);
-router.post('/reset', resetPasswordValidator, resetPassword);
+// router.post('/reset', resetPasswordValidator, resetPassword);
 
 /**
  * @swagger

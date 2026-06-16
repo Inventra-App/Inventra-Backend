@@ -2,7 +2,7 @@ const cron = require('node-cron');
 const {checkExpiringProducts} = require('../services/expiryChecker');
 
 const startExpiryJob = () => {
-    cron.schedule('*/60 * * * * *', async () => {
+    cron.schedule('*/60 * * * *', async () => {
         console.log('Running product expiry check...');
 
         try {

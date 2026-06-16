@@ -174,7 +174,7 @@ exports.checkExpiringProducts = async () => {
 
             const daysLeft = Math.ceil(
                 (expiryDate - today) / (1000 * 60 * 60 * 24)
-            );
+            ); 
 
           let urgencyLevel = 'SAFE';
 

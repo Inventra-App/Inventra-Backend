@@ -12,7 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@getbrevo/brevo": "^3.0.1",
+    "@getbrevo/brevo": "^5.0.4",
     "axios": "^1.17.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -27,7 +27,7 @@
     "mongodb": "^7.2.0",
     "mongoose": "^8.24.0",
     "node-cron": "^4.2.1",
-    "nodemailer": "^8.0.10",
+    "nodemailer": "^8.0.11",
     "otp-generator": "^4.0.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

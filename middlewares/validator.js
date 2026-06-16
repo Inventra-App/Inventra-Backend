@@ -184,13 +184,13 @@ exports.createStaffValidator = (req, res, next) => {
                 'string.max': 'Last name must not exceed 50 characters',
                 'any.required': 'Last name is required'
             }),
-        password: joi.string().min(6).max(20).pattern(/^(?=.*[A-Z])(?=.*\d)/).required().messages({
-                'string.empty': 'Password is required',
-                'string.min': 'Password must be at least 6 characters',
-                'string.max': 'Password must not exceed 20 characters',
-                'string.pattern.base': 'Password must contain at least one uppercase letter and one number',
-                'any.required': 'Password is required'
+
+            email: joi.string().email().required().messages({
+            'any required':'Email is required',
+            'string.empty':'Email cannot be Empty',
+            'string.email':'Email must be a valid email',
             }),
+            
         role: joi.string().valid('sales', 'manager').required().messages({
                 'string.empty': 'Role is required',
                 'any.only': 'Role must be either sales or manager',

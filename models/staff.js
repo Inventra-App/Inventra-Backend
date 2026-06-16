@@ -24,8 +24,20 @@ const staffSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: false,
         trim: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: false
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     },
     role: {
         type: String,

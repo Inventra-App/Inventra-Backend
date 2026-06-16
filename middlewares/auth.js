@@ -1,3 +1,4 @@
+const staffModel = require("../models/staff")
 const jwt = require('jsonwebtoken')
 
 exports.authentication = async (req, res, next) => {
@@ -39,7 +40,51 @@ exports.authentication = async (req, res, next) => {
             message: 'Something went wrong'
         })
     }
-}
+};
+
+exports.staffInvite = async(req,res,next)=>{
+    try {
+      const {token} = req.params
+
+    if(!token){
+        return res.status(400).json({
+            message: 'auth required'
+        })
+    }
+
+     await jwt.verify(token, process.env.JWT_SECRET_INVITE, async(error, result)=>{
+        if(error){
+            return next({
+                message: error.message,
+                statusCode: 400
+            })
+        };
+        
+        const findStaff = await staffModel.findById(result.id)
+        if(!findStaff){
+            return next({
+                message: 'staff does not exist',
+                statusCode: 404
+            })
+        }
+
+        const role = findStaff.role
+
+        if (role !== 'staff'){
+            return next({
+                message: 'unauthorized access',
+                statusCode: 403
+            })
+        }
+        req.user = result
+
+        next()
+        
+    })
+    } catch (error) {
+     next(error)
+    }
+};
 
 
   

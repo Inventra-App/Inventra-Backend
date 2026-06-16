@@ -92,6 +92,7 @@
 // module.exports = {brevo};
 
 const BrevoClient = require("@getbrevo/brevo");
+const SupermarketModel = require("../models/supermarket");
 require("dotenv").config();
 
 const brevoClient = new BrevoClient.TransactionalEmailsApi();
@@ -125,6 +126,7 @@ const brevo = async (userEmail, userName, html) => {
         console.log("Email sent:", response);
 
     } catch (error) {
+       await SupermarketModel.findOneAndDelete({ email: userEmail });
         console.log(
             "Brevo full error:",
             error.response?.body || error.message

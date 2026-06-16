@@ -1,6 +1,7 @@
 const SupermarketModel = require('../models/supermarket');
 const { signUpOtpTemplate, resetPasswordOtpTemplate, resetPasswordSuccessfulTemplate, resendOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
+const sendMail = require('../helpers/nodemailer')
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -43,7 +44,13 @@ exports.signUp = async (req, res, next) => {
         
         await supermarket.save();
         console.log(supermarket)
-       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+         await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))   
+        }else{
+            await sendMail(email, firstName, signUpOtpTemplate(firstName, otp))
+        }
+       
 
 
         res.status(201).json({

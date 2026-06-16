@@ -68,20 +68,14 @@ exports.loginStaff = async (req, res, next) => {
 
 
     
-       const token = jwt.sign(
-        { 
-        id: staff._id,      
-        role: staff.role, 
-        name: staff.firstName },
-        process.env.SECRET_KEY,
-       { expiresIn: '1day' }
-)
-
-        // const token = await jwt.sign(
-        //     {staffId: staff._id, role: staff.role, name: staff.firstName},
-        //     process.env.SECRET_KEY,
-        //     { expiresIn: '1day'}
-        // )
+       const token = jwt.sign( 
+            { 
+            id: staff._id,      
+            role: staff.role, 
+            name: staff.firstName },
+            process.env.SECRET_KEY,
+            { expiresIn: '1day' }
+        )
 
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,

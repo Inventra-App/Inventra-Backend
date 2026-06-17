@@ -6,15 +6,17 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otp = require('otp-generator')
 
+
 exports.createStaff = async (req, res, next) => {
     try {
         const adminId = req.user.id;
+
         const admin = await userModel.findById(adminId);
-        const genPass = await otp.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: true, digits: true })
-        if (!admin) {
-            return res.status(404).json({
-                message: `You are not authourised to perform this action. Please contact your administrator`
-            })
+
+        if (!admin || admin.role !== 'admin') {
+            return res.status(403).json({
+                message: `You are not authorised to perform this action`
+            });
         }
 
         const {
@@ -24,10 +26,29 @@ exports.createStaff = async (req, res, next) => {
             role
         } = req.body;
 
+        // This is to check if the staff was already existing before
+        const existingStaff = await staffModel.findOne({
+            email: email.toLowerCase()
+        });
+
+        if (existingStaff) {
+            return res.status(400).json({
+                message: `Staff with this email already exists`
+            });
+        }
+
+        
+        const genPass = await otp.generate(10, {
+            lowerCaseAlphabets: true,
+            upperCaseAlphabets: true,
+            specialChars: true,
+            digits: true
+        });
+
         const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
 
-        const salt = await bcrypt.genSalt(10)
-        const hashedPassword = await bcrypt.hash(genPass, salt)
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(genPass, salt);
 
         const staff = new staffModel({
             adminId,
@@ -35,30 +56,88 @@ exports.createStaff = async (req, res, next) => {
             lastName,
             username,
             password: hashedPassword,
-            email,
+            email: email.toLowerCase(),
             role
         });
-        // console.log(staff)
 
-            //    await  brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, link))
+        await staff.save();
 
-            const emailOptions = {
-                email: staff.email,
-                subject: `welcome to ${admin.businessName}`,
-                html: staffInviteTemplate(staff.username, genPass)
-            };
+        const emailOptions = {
+            email: staff.email,
+            subject: `Welcome to ${admin.businessName}`,
+            html: staffInviteTemplate(staff.username, genPass)
+        };
 
-            await sendBrevoEmail(emailOptions)
+        await sendBrevoEmail(emailOptions);
 
         res.status(201).json({
             message: "Staff created successfully",
-            data: staff  
-        })
+            data: staff
+        });
 
     } catch (error) {
-        next(error)
+        next(error);
     }
 };
+
+
+
+
+
+// previous code 
+// exports.createStaff = async (req, res, next) => {
+//     try {
+//         const adminId = req.user.id;
+//         const admin = await userModel.findById(adminId);
+//         const genPass = await otp.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: true, digits: true })
+//         if (!admin) {
+//             return res.status(404).json({
+//                 message: `You are not authourised to perform this action. Please contact your administrator`
+//             })
+//         }
+
+//         const {
+//             firstName,
+//             lastName,
+//             email,
+//             role
+//         } = req.body;
+
+//         const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
+
+//         const salt = await bcrypt.genSalt(10)
+//         const hashedPassword = await bcrypt.hash(genPass, salt)
+
+//         const staff = new staffModel({
+//             adminId,
+//             firstName,
+//             lastName,
+//             username,
+//             password: hashedPassword,
+//             email,
+//             role
+//         });
+//         // console.log(staff)
+
+//             //    await  brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, link))
+
+//             const emailOptions = {
+//                 email: staff.email,
+//                 subject: `welcome to ${admin.businessName}`,
+//                 html: staffInviteTemplate(staff.username, genPass)
+//             };
+
+//             await sendBrevoEmail(emailOptions)
+
+//         res.status(201).json({
+//             message: "Staff created successfully",
+//             data: staff  
+//         })
+
+//     } catch (error) {
+//         next(error)
+//     }
+// };
 
 exports.loginStaff = async (req, res, next) => {
     try {

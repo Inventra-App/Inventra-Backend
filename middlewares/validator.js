@@ -14,7 +14,7 @@ exports.signUpValidator = (req, res, next) => {
             'string.pattern.base': 'Last Name cannot contain numbers and must be atleast 4 characters'
         }),
         email: joi.string().email().required().messages({
-            'any required':'Email is required',
+            'any.required':'Email is required',
             'string.empty':'Email cannot be Empty',
             'string.email':'Email must be a valid email',
         }),
@@ -63,11 +63,11 @@ exports.verifyUserValidator = (req, res, next) => {
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
         }),
-        otp: joi.string().trim().length(6).required().messages({
-            'string.empty': 'OTP is required',
-            'string.length': 'OTP must be 6 characters long',
-            'any.required': 'OTP is required'
-        })
+        otp: joi.string().pattern(/^[0-9]{6}$/).required().messages({
+        'string.empty': 'OTP is required',
+        'string.pattern.base': 'OTP must be exactly 6 digits',
+        'any.required': 'OTP is required'
+})
     })
 
     const { error } = schema.validate(req.body)
@@ -139,17 +139,16 @@ exports.forgotPasswordValidator = (req, res, next) => {
 
 exports.resetPasswordValidator = (req, res, next) => {
     const schema = joi.object({
-        email: joi.string().trim().email().required().messages({
+        email: joi.string().trim().lowercase().email().required().messages({
             'string.email': 'Please enter a valid email',
             'string.empty': 'Email is required',
             'any.required': 'Email is required'
         }),
 
-        password: joi.string().pattern(passwordPattern).required().messages({
+        password: joi.string().pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/).required().messages({
             'any.required': 'Password is required',
             'string.empty': 'Password cannot be empty',
-            'string.pattern.base':
-                'Password must be at least 8 characters and include upper and lower case'
+            'string.pattern.base':'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'
         }),
 
         confirmPassword: joi.string().valid(joi.ref('password')).required().messages({
@@ -157,53 +156,54 @@ exports.resetPasswordValidator = (req, res, next) => {
             'string.empty': 'Confirm password is required',
             'any.required': 'Confirm password is required'
         })
-    })
+    });
 
-    const { error } = schema.validate(req.body)
+    const { error } = schema.validate(req.body);
 
     if (error) {
         return res.status(400).json({
             message: error.details[0].message
-        })
+        });
     }
 
-    next()
-}
+    next();
+};
 
 exports.createStaffValidator = (req, res, next) => {
     const schema = joi.object({
-        firstName: joi.string().trim().min(2).max(50).required().messages({
+        firstName: joi.string().trim().pattern(/^[A-Za-z\s]{2,50}$/).required().messages({
                 'string.empty': 'First name is required',
-                'string.min': 'First name must be at least 2 characters',
-                'string.max': 'First name must not exceed 50 characters',
+                'string.pattern.base': 'First name must contain only letters and be between 2 and 50 characters',
                 'any.required': 'First name is required'
             }),
-        lastName: joi.string().trim().min(2).max(50).required().messages({
+
+        lastName: joi.string().trim().pattern(/^[A-Za-z\s]{2,50}$/).required().messages({
                 'string.empty': 'Last name is required',
-                'string.min': 'Last name must be at least 2 characters',
-                'string.max': 'Last name must not exceed 50 characters',
+                'string.pattern.base': 'Last name must contain only letters and be between 2 and 50 characters',
                 'any.required': 'Last name is required'
             }),
 
-            email: joi.string().email().required().messages({
-            'any required':'Email is required',
-            'string.empty':'Email cannot be Empty',
-            'string.email':'Email must be a valid email',
+        email: joi.string().trim().lowercase().email().required().messages({
+                'any.required': 'Email is required',
+                'string.empty': 'Email cannot be empty',
+                'string.email': 'Email must be a valid email',
             }),
-            
-        role: joi.string().valid('sales', 'manager').required().messages({
+
+        role: joi.string().trim().lowercase().valid('sales', 'manager').required().messages({
                 'string.empty': 'Role is required',
-                'any.only': 'Role must be either sales or manager',
+                'any.only': 'Role must be either sales or manager,',
                 'any.required': 'Role is required'
             }),
     });
 
     const { error } = schema.validate(req.body, { abortEarly: false });
+
     if (error) {
         return res.status(400).json({
             message: error.details.map(err => err.message)
         });
     }
+
     next();
 };
 

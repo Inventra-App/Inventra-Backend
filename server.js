@@ -57,7 +57,7 @@ const swaggerDefinition = {
         title: 'Inventra API Documentation',
         version: '2.0.0',
         description: `This is a REST API application made with Express.
-                      The base Url is: http://localhost:7878/api/v1`,
+        The base Url is: http://localhost:7878/api/v1`,
         license: {
             name: 'Official Url',
             url: 'https://google.com',

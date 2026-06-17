@@ -67,7 +67,7 @@ const checkLowStock = async () => {
         const LOW_STOCK_LIMIT = 10;
 
         const lowStockItems = await InventoryModel.find({
-            availableStock: { $lte: LOW_STOCK_LIMIT }
+            totalStock: { $lte: LOW_STOCK_LIMIT }
         }).populate('productId');
 
         if (!lowStockItems.length) {

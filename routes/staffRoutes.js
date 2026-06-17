@@ -1,9 +1,8 @@
 const router = require('express').Router();
 
-const { createStaff,loginStaff } = require('../controllers/staffController');
+const { createStaff,loginStaff, createPassword } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
-const { authentication } = require('../middlewares/auth');
-
+const { authentication, staffInvite } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -21,7 +20,7 @@ const { authentication } = require('../middlewares/auth');
  *       properties:
  *         adminId:
  *           type: string
- *           description: The ID of the admin who created the staff (auto-pulled from authenticated user)
+ *           description: The ID of the admin who created the staff
  *           example: 64abc123def456ghi789
  *         firstName:
  *           type: string
@@ -31,15 +30,33 @@ const { authentication } = require('../middlewares/auth');
  *           type: string
  *           description: The staff member's last name
  *           example: Doe
- *         userName:
+ *         username:
  *           type: string
  *           description: Auto-generated from firstName + random number
  *           example: john4523
+ *         email:
+ *           type: string
+ *           description: The staff member's email address
+ *           example: john@example.com
  *         role:
  *           type: string
  *           description: The staff member's role
  *           enum: [sales, manager]
  *           example: sales
+ *         isActive:
+ *           type: boolean
+ *           description: Whether the staff account is activated
+ *           default: false
+ *           example: false
+ *         isVerified:
+ *           type: boolean
+ *           description: Whether the staff account is verified
+ *           default: false
+ *           example: false
+ *         token:
+ *           type: string
+ *           description: Invite token sent to staff email
+ *           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -54,9 +71,13 @@ const { authentication } = require('../middlewares/auth');
  * @swagger
  * /api/v1/create-staff:
  *   post:
- *     summary: Create a new staff member
- *     description: Allows an authenticated admin to create a new staff account.
  *     tags: [Staff]
+ *     summary: Create and invite a new staff member
+ *     description: >
+ *       Creates a new staff member and sends an invite email with a
+ *       password setup link to the staff email. The link expires in 1 day.
+ *       The username is auto-generated from firstName + random number.
+ *       The staff account remains inactive until the password is created.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -68,7 +89,7 @@ const { authentication } = require('../middlewares/auth');
  *             required:
  *               - firstName
  *               - lastName
- *               - password
+ *               - email
  *               - role
  *             properties:
  *               firstName:
@@ -77,16 +98,16 @@ const { authentication } = require('../middlewares/auth');
  *               lastName:
  *                 type: string
  *                 example: Doe
- *               password:
+ *               email:
  *                 type: string
- *                 example: Secret123
+ *                 example: john@example.com
  *               role:
  *                 type: string
  *                 enum: [sales, manager]
  *                 example: sales
  *     responses:
  *       201:
- *         description: Staff created successfully
+ *         description: Staff created and invite email sent successfully
  *         content:
  *           application/json:
  *             schema:
@@ -97,15 +118,28 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Staff created successfully
  *                 data:
  *                   $ref: '#/components/schemas/Staff'
- *
- *       403:
- *         description: Forbidden - only admins can create staff
- *
+ *       404:
+ *         description: Admin not found - not authorised to perform this action
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You are not authourised to perform this action. Please contact your administrator
  *       401:
  *         description: Unauthorized - invalid or missing token
- *
  *       500:
  *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
  */
 router.post('/create-staff', authentication, createStaffValidator, createStaff);
 
@@ -186,6 +220,5 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  */
 
 router.post('/staff/login', loginStaffValidator, loginStaff);
-
-
-module.exports = router;
+    
+module.exports = router

@@ -53,7 +53,7 @@ exports.createStaff = async (req, res, next) => {
 
         const info = process.env.NODE_ENV
         if (info === "production") {
-             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.username, genPass, link))   
+             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.username, genPass, link))   
         } else{
              await sendMail({
                 email: staff.email, 

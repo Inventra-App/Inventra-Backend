@@ -143,28 +143,45 @@ exports.moveProducts = async (req, res, next) => {
 
         console.log(inventory)
 
+        if (quantity <= 0) {
+            return res.status(400).json({
+                message: "Quantity must be greater than 0"
+            });
+        }
+
+        inventory.availableStock = inventory.availableStock || 0;
+        inventory.reservedStock = inventory.reservedStock || 0;
+
         if (moveFrom.toLowerCase() === 'all stock' && moveTo.toLowerCase() === 'available stock') {
-            if (inventory.totalStock < quantity) {
+
+            if (inventory.availableStock + quantity > inventory.totalStock) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
+                });
             }
+
             inventory.availableStock += quantity;
-            inventory.reservedStock += inventory.totalStock - quantity
+            inventory.reservedStock = inventory.totalStock - inventory.availableStock;
+
         } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
+
             if (inventory.reservedStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
-            } 
+                });
+            }
+
             inventory.reservedStock -= quantity;
             inventory.availableStock += quantity;
+
         } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {
+
             if (inventory.availableStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
+                });
             }
+
             inventory.availableStock -= quantity;
             inventory.reservedStock += quantity;
         }

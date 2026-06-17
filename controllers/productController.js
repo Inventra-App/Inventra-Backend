@@ -4,9 +4,9 @@ const ProductModel = require ('../models/product');
 exports.getAllProducts = async (req, res, next) => {
     try {
         const products = await ProductModel.find()
-            .populate('categoryId', 'categoryName description')
-            .populate('supermarketId', 'businessName email')
-            .populate('createdBy', 'firstName lastName');
+            // .populate('categoryId', 'categoryName description')
+            // .populate('supermarketId', 'businessName email')
+            // .populate('createdBy', 'firstName lastName');
 
         console.log(products);
 
@@ -32,9 +32,9 @@ exports.getOneProduct = async (req, res, next) => {
         }
 
         const product = await ProductModel.findById(id)
-            .populate('categoryId', 'categoryName description')
-            .populate('supermarketId', 'businessName email')
-            .populate('createdBy', 'firstName lastName');
+            // .populate('categoryId', 'categoryName description')
+            // .populate('supermarketId', 'businessName email')
+            // .populate('createdBy', 'firstName lastName');
 
         if (!product) {
             return res.status(404).json({

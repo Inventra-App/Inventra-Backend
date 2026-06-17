@@ -77,7 +77,7 @@ exports.checkoutSale = async (req, res, next) => {
         const { items, paymentMethod } = req.body;
         const { id, role } = req.user;
 
-        if (role === 'admin' && role === 'sales') {
+        if (role !== 'admin' && role !== 'sales') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })
@@ -91,7 +91,7 @@ exports.checkoutSale = async (req, res, next) => {
         let count = 0;
 
         for (const item of items) {
-            const { productId, quantity } = item;
+            const { productId, quantity } = item; 
 
             const product = await ProductModel.findById(productId);
             // console.log(product)

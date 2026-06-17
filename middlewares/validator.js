@@ -185,7 +185,7 @@ exports.createStaffValidator = (req, res, next) => {
                 'any.required': 'Last name is required'
             }),
 
-            email: joi.string().email().required().messages({
+        email: joi.string().email().required().messages({
             'any required':'Email is required',
             'string.empty':'Email cannot be Empty',
             'string.email':'Email must be a valid email',

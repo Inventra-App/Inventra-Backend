@@ -112,7 +112,7 @@ app.use('/api/v1/documentation', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 });
 
 mongoose
-    .connect(process.env.MONGODB_URI)
+    .connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Database connected successfully');
         startExpiryJob();

@@ -1,6 +1,7 @@
 const SupermarketModel = require('../models/supermarket');
 const { signUpOtpTemplate, resetPasswordOtpTemplate, resetPasswordSuccessfulTemplate, resendOtpTemplate } = require('../helpers/emailTemplates');
 const {brevo} = require('../helpers/brevo');
+const sendMail = require('../helpers/nodemailer')
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -44,7 +45,13 @@ exports.signUp = async (req, res, next) => {
         
         await supermarket.save();
         console.log(supermarket)
-       await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+         await  brevo(email, firstName, signUpOtpTemplate(firstName, otp))   
+        }else{
+            await sendMail(email, firstName, signUpOtpTemplate(firstName, otp))
+        }
+       
 
 
         res.status(201).json({
@@ -57,9 +64,6 @@ exports.signUp = async (req, res, next) => {
         next(error)
     } 
 }
-
-
-
 
 exports.verifyUser = async (req,res,next) =>{
     try{
@@ -119,20 +123,20 @@ exports.resendOTP = async (req, res, next) => {
         const OTP = otpGenerator.generate(6, { upperCaseAlphabets: false, lowerCaseAlphabets: false, specialChars: false })
 
         const expires = new Date(Date.now() + 10 * 60000);
+
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+                await  brevo(supermarket.email, supermarket.firstName, resendOtpTemplate(supermarket.firstName, OTP))
+  
+        }else{
+            await  sendMail(supermarket.email, supermarket.firstName, resendOtpTemplate(supermarket.firstName, OTP))
+
+        }
         
-        await  brevo(supermarket.email, supermarket.firstName, resendOtpTemplate(supermarket.firstName, OTP))
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
         supermarket.verificationType = 'onboarding'
-
-        // const emailOptions = {
-        //     email: supermarket.email,
-        //     subject: 'New otp confirmation',
-        //     html: resendOtpTemplate(supermarket.firstName, OTP)
-        // }
-
-        // await sendMail(emailOptions);
 
 
         await supermarket.save()
@@ -236,7 +240,13 @@ exports.forgotPassword = async (req, res, next) => {
             otp: OTP
         };
 
-        await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+            await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
+
+        }else{
+            await sendMail(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
+        }
 
         supermarket.otp = OTP;
         supermarket.otpExpires = expires;
@@ -323,7 +333,13 @@ exports.resetPassword = async (req, res, next) => {
 
         await supermarket.save();
 
-        await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+            await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+   
+        }else{
+            await sendMail(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+        }
 
         res.status(200).json({
             message: "Password reset successfully"

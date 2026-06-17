@@ -149,14 +149,14 @@ exports.moveProducts = async (req, res, next) => {
                     message: `Not enough products`
                 })
             }
-            inventory.availableStock = quantity;
-            inventory.reservedStock = inventory.totalStock - quantity
+            inventory.availableStock += quantity;
+            inventory.reservedStock += inventory.totalStock - quantity
         } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
             if (inventory.reservedStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
                 })
-            }
+            } 
             inventory.reservedStock -= quantity;
             inventory.availableStock += quantity;
         } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {

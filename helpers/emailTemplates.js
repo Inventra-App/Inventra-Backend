@@ -103,7 +103,7 @@ exports.signUpOtpTemplate = (userName, otp) => {
 `
 }
 
-const {resetPasswordOtpTemplate} = (userName, otp) => {
+exports.resetPasswordOtpTemplate = (userName, otp) => {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -416,13 +416,13 @@ exports.resendOtpTemplate = (userName, otp) => {
 `
 }
 
-exports.staffInviteTemplate = (username, pass) => {
+exports.staffInviteTemplate = (firstName, username, password, loginLink) => {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Inventra OTP Verification</title>
+	<title>Inventra Staff Invitation</title>
 </head>
 
 <body style="margin:0; padding:0; background-color:#f4f7fb; font-family:Arial, Helvetica, sans-serif;">
@@ -436,8 +436,7 @@ exports.staffInviteTemplate = (username, pass) => {
 
 					<!-- Header -->
 					<tr>
-						<td align="center"
-							style="background:#111827; padding:32px 24px;">
+						<td align="center" style="background:#111827; padding:32px 24px;">
 							<h1 style="margin:0; color:#ffffff; font-size:32px; font-weight:bold;">
 								Inventra
 							</h1>
@@ -453,42 +452,42 @@ exports.staffInviteTemplate = (username, pass) => {
 						<td style="padding:40px 32px;">
 
 							<h2 style="margin:0 0 16px; color:#111827; font-size:24px;">
-								Verify Your Email
+								Welcome to Inventra
 							</h2>
 
 							<p style="margin:0 0 24px; color:#4b5563; font-size:16px; line-height:1.7;">
-								Hello, ${username}! Welcome to Inventra. <br> Use the password below to login.
+								Hello, <strong>${firstName}</strong>! <br>
+								Your staff account has been created successfully. Below are your login credentials:
 							</p>
 
-							<!-- OTP Box -->
-							<table width="100%" cellpadding="0" cellspacing="0" border="0">
-								<tr>
-									<td align="center">
+							<!-- Credentials -->
+							<p style="margin:10px 0; color:#374151; font-size:15px;">
+								<strong>Username:</strong> ${username}
+							</p>
 
-										<div style="
-											display:inline-block;
-											background:#f3f4f6;
-											padding:18px 40px;
-											border-radius:10px;
-											border:1px solid #e5e7eb;
-											font-size:36px;
-											font-weight:bold;
-											letter-spacing:8px;
-											color:#111827;
-										">
-											${pass}
-										</div>
+							<p style="margin:10px 0; color:#374151; font-size:15px;">
+								<strong>Password:</strong> ${password}
+							</p>
 
-									</td>
-								</tr>
-							</table>    
+							<!-- Login Button -->
+							<div style="margin:30px 0; text-align:center;">
+								<a href="${loginLink}" 
+								   style="
+										display:inline-block;
+										padding:14px 28px;
+										background:#f59e0b;
+										color:#ffffff;
+										text-decoration:none;
+										font-size:16px;
+										font-weight:bold;
+										border-radius:8px;
+								   ">
+									Access Dashboard
+								</a>
+							</div>
 
 							<p style="margin:28px 0 0; color:#6b7280; font-size:14px; line-height:1.7;">
-								This code will expire in <strong>10 minutes</strong>.
-							</p>
-
-							<p style="margin:12px 0 0; color:#6b7280; font-size:14px; line-height:1.7;">
-								If you did not request this verification, you can safely ignore this email.
+								For security reasons, we strongly recommend changing your password after your first login.
 							</p>
 
 						</td>
@@ -502,11 +501,9 @@ exports.staffInviteTemplate = (username, pass) => {
 							border-top:1px solid #e5e7eb;
 							text-align:center;
 						">
-
 							<p style="margin:0; color:#9ca3af; font-size:13px;">
 								© 2026 Inventra. All rights reserved.
 							</p>
-
 						</td>
 					</tr>
 
@@ -517,8 +514,7 @@ exports.staffInviteTemplate = (username, pass) => {
 	</table>
 
 </body>
-</html>
-`
-}
+</html>`;
+};
 
 

@@ -3,7 +3,7 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddCart } = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale } = require('../helpers/helpers');
 
 // exports.createSale = async (req, res, next) => {
 //     try {
@@ -181,6 +181,22 @@ exports.countSales = async (req, res, next) => {
             message: `Total sales`,
             data: totalSales
         })
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+exports.countSalesAmount = async (req, res, next) => {
+    try {
+        const salesAmount = await saleModel.find();
+        const totalSalesAmount = mapPricesAndAddSale(salesAmount)
+        console.log(totalSalesAmount)
+
+        res.status(200).json({
+            message: `Here's how much you've sold!`,
+            data: totalSalesAmount
+        })
+
     } catch (error) {
         console.log(error)
         next(error)

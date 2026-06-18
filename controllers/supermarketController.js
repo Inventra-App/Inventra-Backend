@@ -106,8 +106,6 @@ exports.verifyUser = async (req,res,next) =>{
     }
 }
 
-
-
 exports.resendOTP = async (req, res, next) => {
     try {
         const { email } = req.body;
@@ -236,16 +234,16 @@ exports.forgotPassword = async (req, res, next) => {
 
 
         const emailData = {
-            name: supermarket.fullName,
+            name: supermarket.firstName,
             otp: OTP
         };
 
         const info = process.env.NODE_ENV
         if (info === "production") {
-            await brevo(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
+            await brevo(supermarket.email, supermarket.firstName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
 
         }else{
-            await sendMail(supermarket.email, supermarket.fullName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
+            await sendMail(supermarket.email, supermarket.firstName, resetPasswordOtpTemplate(emailData.name, emailData.otp))
         }
 
         supermarket.otp = OTP;
@@ -264,8 +262,6 @@ exports.forgotPassword = async (req, res, next) => {
         next(error)
     }
 }
-
-
 
 exports.verifyPasswordOtp = async (req,res,next) =>{
     try{
@@ -335,10 +331,10 @@ exports.resetPassword = async (req, res, next) => {
 
         const info = process.env.NODE_ENV
         if (info === "production") {
-            await brevo(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+            await brevo(supermarket.email, supermarket.firstName, resetPasswordSuccessfulTemplate(supermarket.firstName ))
    
         }else{
-            await sendMail(supermarket.email, supermarket.fullName, resetPasswordSuccessfulTemplate(supermarket.fullName))
+            await sendMail(supermarket.email, supermarket.firstName, resetPasswordSuccessfulTemplate(supermarket.firstName))
         }
 
         res.status(200).json({

@@ -379,7 +379,6 @@ router.post('/resend-otp',resendOtpValidator, resendOTP);
  */
 router.post('/forgot', forgotPasswordValidator, forgotPassword);
 
-
 /**
  * @swagger
  * /api/v1/reset:
@@ -455,7 +454,6 @@ router.post('/forgot', forgotPasswordValidator, forgotPassword);
  *                   example: Something went wrong
  */
 router.post('/reset', resetPasswordValidator, resetPassword);
-// router.post('/reset', resetPasswordValidator, resetPassword);
 
 /**
  * @swagger
@@ -613,18 +611,37 @@ router.post('/logout', authentication, logout);
  */
 router.post('/p/verify', verifyUserValidator, verifyPasswordOtp);
 
-router.get('/auth/google', profile)
-router.get('/auth/google/callback', loginProfile, loginWithGoogle)
+/**
+ * @swagger
+ * /api/v1/auth/google:
+ *   get:
+ *     summary: Authenticate user with Google
+ *     description: Redirects the user to Google for authentication.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       302:
+ *         description: Redirects to Google login page
+ */
+router.get('/auth/google', profile);
+
+/**
+ * @swagger
+ * /api/v1/auth/google/callback:
+ *   get:
+ *     summary: Google authentication callback
+ *     description: Handles Google's callback after successful authentication.
+ *     tags:
+ *       - Authentication
+ *     responses:
+ *       200:
+ *         description: User authenticated successfully
+ *       401:
+ *         description: Authentication failed
+ */
+router.get('/auth/google/callback', loginProfile, loginWithGoogle);
 
 module.exports = router;
-
-
-
-
-
-
-
-
 
 
 

@@ -41,7 +41,7 @@ const staffSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ['sales', 'manager'],
+        enum: ['cashier', 'manager'],
         required: true
     },
 }, { timestamps: true});

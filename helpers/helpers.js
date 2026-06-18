@@ -78,7 +78,7 @@ exports.generateUserSlug = (name, tableLength) => {
         throw new Error('Name must contain at least two words');
     }
 
-    return `${parts[0].slice(0, 3)}-${parts[1].slice(0, 3)}-${exports.padStart(tableLength)}`;
+    return `${parts[0].slice(0, 3)}-${parts[1]?.slice(0, 3)}-${exports.padStart(tableLength)}`;
 };
 
 exports.mapPricesAndAdd = (serviceArray) => {

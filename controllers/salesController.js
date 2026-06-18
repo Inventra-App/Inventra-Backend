@@ -77,7 +77,7 @@ exports.checkoutSale = async (req, res, next) => {
         const { items, paymentMethod } = req.body;
         const { id, role } = req.user;
 
-        if (role !== 'admin' && role !== 'sales') {
+        if (role !== 'admin' && role !== 'cashier') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })

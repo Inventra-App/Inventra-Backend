@@ -2,7 +2,8 @@ const router = require('express').Router();
 
 const {
     checkoutSale,
-    countSales
+    countSales,
+    countSalesAmount
 } = require('../controllers/salesController');
 const { authentication } = require('../middlewares/auth');
 
@@ -163,5 +164,36 @@ router.post('/pos/sale', authentication, checkoutSale);
  */
 
 router.get('/sales', authentication, countSales)
+
+/**
+ * @swagger
+ * /api/v1/sale/amount:
+ *   get:
+ *     summary: Get total sales amount
+ *     description: Returns the total amount of all sales made in the supermarket.
+ *     tags:
+ *       - Sales
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Total sales amount retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Here's how much you've sold!
+ *                 data:
+ *                   type: number
+ *                   example: 250000
+ *       401:
+ *         description: Unauthorized - Token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/sale/amount', authentication, countSalesAmount);
 
 module.exports = router;

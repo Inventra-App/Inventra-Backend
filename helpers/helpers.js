@@ -85,8 +85,8 @@ exports.mapPricesAndAdd = (serviceArray) => {
     const servicePrices = serviceArray.map(service => service.totalStock)
     return servicePrices.reduce((acc, curr) => acc + curr, 0)
 }
-exports.mapPricesAndAddCart = (serviceArray) => {
-    const servicePrices = serviceArray.map(service => service.subtotal)
+exports.mapPricesAndAddSale = (serviceArray) => {
+    const servicePrices = serviceArray.map(service => service.totalAmount)
     return servicePrices.reduce((acc, curr) => acc + curr, 0)
 }
 

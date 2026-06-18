@@ -25,9 +25,10 @@ exports.createStaff = async (req, res, next) => {
             role
         } = req.body;
 
-        const checkExistingEmail = await staffModel.findOne({email})
+        const checkExistingEmail = await staffModel.findOne({email: email})
+        // console.log(checkExistingEmail)
         console.log(email)
-        if (email) {
+        if (checkExistingEmail) {
             return res.status(500).json({
                 message: `Staff already exist. Please proceed to login`
             })

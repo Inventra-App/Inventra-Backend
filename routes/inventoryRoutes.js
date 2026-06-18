@@ -1,7 +1,7 @@
 const router = require('express').Router()
-
 const { addProducts, moveProducts, getAllItems, recordStockEntry } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
+const { addProductValidator, moveProductsValidator, recordStockEntryValidator } = require('../middlewares/validator');
 
 
 
@@ -252,7 +252,7 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.post('/product', authentication , addProducts);
+router.post('/product', authentication ,addProductValidator, addProducts);
 
 /**
  * @swagger
@@ -368,7 +368,7 @@ router.post('/product', authentication , addProducts);
  *                   example: Something went wrong
  */
 
-router.put('/p/move/:inventoryId', authentication, moveProducts);
+router.put('/p/move/:inventoryId', authentication,moveProductsValidator ,moveProducts);
 
 /**
  * @swagger
@@ -516,6 +516,6 @@ router.get('/i/all', authentication, getAllItems);
  *       404:
  *         description: Product not found
  */
-router.post('/stock/entry', authentication, recordStockEntry)
+router.post('/stock/entry', authentication,recordStockEntryValidator, recordStockEntry)
 
 module.exports = router;

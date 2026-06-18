@@ -1,4 +1,5 @@
-const { Error } = require('mongoose');
+// const { Error } = require('mongoose');
+const mongoose = require('mongoose');
 const CategoryModel = require('../models/category');
 const ProductModel = require('../models/product');
 const UserModel = require('../models/supermarket');
@@ -62,7 +63,7 @@ exports.getOneCategory = async(req,res,next) =>{
                     });
                 }
         
-                const category = await ProductModel.findById(id);
+                const category = await CategoryModel.findById(id);
         
                 if (!category) {
                     return res.status(404).json({
@@ -72,7 +73,7 @@ exports.getOneCategory = async(req,res,next) =>{
         
                 res.status(200).json({
                     message: `category found  successfully`,
-                    data: product
+                    data: category
                 })
     } catch (error) {
         console.log(error)

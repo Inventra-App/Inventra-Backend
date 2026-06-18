@@ -185,7 +185,7 @@ exports.getAllItems = async (req, res, next) => {
    try { 
         const items = await InventoryModel.find();
 
-        if (!items) {
+        if (!items.length === 0) {
             return res.status(404).json({
                 message: `Nothing found here. Please upload your products`
             })

@@ -1,10 +1,8 @@
 const router = require('express').Router();
 
-const {
-    checkoutSale,
-    countSales
-} = require('../controllers/salesController');
+const {checkoutSale,countSales} = require('../controllers/salesController');
 const { authentication } = require('../middlewares/auth');
+const { checkoutSaleValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
@@ -120,7 +118,7 @@ const { authentication } = require('../middlewares/auth');
  *         description: Internal server error
  */
 
-router.post('/pos/sale', authentication, checkoutSale);
+router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
 
 
 /**

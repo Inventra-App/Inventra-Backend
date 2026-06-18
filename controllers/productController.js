@@ -15,6 +15,7 @@ exports.getAllProducts = async (req, res, next) => {
             data: products
         });
 
+        next(error);
     } catch (error) {
         console.log(error);
         next(error);

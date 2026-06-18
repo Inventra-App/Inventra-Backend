@@ -3,9 +3,11 @@ const router = require('express').Router();
 const {
     checkoutSale,
     countSales,
-    countSalesAmount
+    countSalesAmount,
+    getAllSales
 } = require('../controllers/salesController');
 const { authentication } = require('../middlewares/auth');
+const { checkoutSaleValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
@@ -121,12 +123,12 @@ const { authentication } = require('../middlewares/auth');
  *         description: Internal server error
  */
 
-router.post('/pos/sale', authentication, checkoutSale);
+router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
 
 
 /**
  * @swagger
- * /api/v1/sales:
+ * /api/v1/sales/count:
  *   get:
  *     summary: Count total sales
  *     tags: [Sales]
@@ -163,7 +165,101 @@ router.post('/pos/sale', authentication, checkoutSale);
  *         description: Internal server error
  */
 
-router.get('/sales', authentication, countSales)
+router.get('/sales/count', authentication, countSales)
+
+/**
+ * @swagger
+ * /api/v1/sales:
+ *   get:
+ *     summary: Get all sales
+ *     description: Returns a paginated list of all sales made in the supermarket.
+ *     tags:
+ *       - Sales
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *         description: Current page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         schema:
+ *           type: integer
+ *           example: 5
+ *         description: Number of sales per page
+ *     responses:
+ *       200:
+ *         description: Sales fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Sales fetched successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 685f1234567890abc1234567
+ *                       cashierId:
+ *                         type: string
+ *                         example: 685f1234567890abc1234568
+ *                       paymentMethod:
+ *                         type: string
+ *                         example: cash
+ *                       totalAmount:
+ *                         type: number
+ *                         example: 15000
+ *                       totalItems:
+ *                         type: number
+ *                         example: 5
+ *                       saleNumber:
+ *                         type: string
+ *                         example: 0001
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2026-06-18T14:00:00.000Z
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     currentPage:
+ *                       type: number
+ *                       example: 1
+ *                     perPage:
+ *                       type: number
+ *                       example: 5
+ *                     totalSales:
+ *                       type: number
+ *                       example: 57
+ *                     totalPages:
+ *                       type: number
+ *                       example: 12
+ *                     hasNextPage:
+ *                       type: boolean
+ *                       example: true
+ *                     hasPreviousPage:
+ *                       type: boolean
+ *                       example: false
+ *       404:
+ *         description: No sales found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/sales', authentication, getAllSales);
+
 
 /**
  * @swagger

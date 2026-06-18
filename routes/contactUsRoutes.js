@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const { receiveContactRequest } = require('../controllers/contactUs');
+const { contactUsValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
@@ -53,6 +54,6 @@ const { receiveContactRequest } = require('../controllers/contactUs');
  *       400:
  *         description: Validation error
  */
-router.post('/contact-us', receiveContactRequest);
+router.post('/contact-us',contactUsValidator, receiveContactRequest);
 
 module.exports = router;

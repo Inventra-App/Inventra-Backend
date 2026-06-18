@@ -18,7 +18,7 @@ exports.getTotalStockUnits = async(req, res, next) => {
 
     } catch (error) {
         console.log(error)
-        nect(error)
+        next(error)
     }
 }
 

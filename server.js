@@ -42,7 +42,7 @@ app.use('/api/v1', staffRoutes);
 app.use('/api/v1/product', productRoutes);
 app.use('/api/v1', inventoryRoutes);
 app.use('/api/v1', dashboardRoutes);
-app.use('/api/v1/batch', batchRoutes);
+app.use('/api/v1/', batchRoutes);
 app.use('/api/v1', contactUsRoutes);
 app.use('/api/v1', salesRoutes);
 

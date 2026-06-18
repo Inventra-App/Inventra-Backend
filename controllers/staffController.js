@@ -75,10 +75,6 @@ exports.createStaff = async (req, res, next) => {
     }
 };
 
-
-
-
-
 // previous code 
 // exports.createStaff = async (req, res, next) => {
 //     try {
@@ -136,9 +132,9 @@ exports.createStaff = async (req, res, next) => {
 
 exports.loginStaff = async (req, res, next) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
         
-        const staff = await staffModel.findOne({ username: username.toLowerCase() });
+        const staff = await staffModel.findOne({ email: email.toLowerCase() });
         if (!staff) {
             return res.status(404).json({
                 message: `Invalid credentials. Please contact your administrator.`

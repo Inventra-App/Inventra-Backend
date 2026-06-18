@@ -314,24 +314,25 @@ exports.batchIdValidator = (req, res, next) => {
 
 exports.loginStaffValidator = (req, res, next) => {
     const schema = joi.object({
-        username: joi.string().trim().required().messages({
-                'string.empty': 'Username is required',
-                'any.required': 'Username is required'
-            }),
-        password: joi.string()
-            .required()
-            .messages({
-                'string.empty': 'Password is required',
-                'any.required': 'Password is required'
-            }),
+        email: joi.string().trim().lowercase().email().required().messages({
+            'string.empty': 'Email is required',
+            'string.email': 'Enter a valid email',
+            'any.required': 'Email is required'
+        }),
+        password: joi.string().required().messages({
+            'string.empty': 'Password is required',
+            'any.required': 'Password is required'
+        })
     });
 
-    const { error } = schema.validate(req.body, { abortEarly: false });
+    const { error } = schema.validate(req.body);
+
     if (error) {
         return res.status(400).json({
-            message: error.details.map(err => err.message)
+            message: error.details[0].message
         });
     }
+
     next();
 };
 

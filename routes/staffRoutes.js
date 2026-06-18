@@ -150,7 +150,7 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  *   post:
  *     tags: [Staff]
  *     summary: Login as a staff member
- *     description: Authenticates a staff member with username and password. Returns a JWT token valid for 1 day.
+ *     description: Authenticates a staff member with email and password. Returns a JWT token valid for 1 day.
  *     requestBody:
  *       required: true
  *       content:
@@ -158,13 +158,14 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  *           schema:
  *             type: object
  *             required:
- *               - username
+ *               - email
  *               - password
  *             properties:
- *               username:
+ *               email:
  *                 type: string
- *                 description: The staff member's auto-generated username
- *                 example: john4523
+ *                 format: email
+ *                 description: The staff member's registered email
+ *                 example: john@example.com
  *               password:
  *                 type: string
  *                 description: The staff member's password
@@ -179,7 +180,7 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Login sucesssful. You may pass!
+ *                   example: Login successful. You may pass!
  *                 data:
  *                   $ref: '#/components/schemas/Staff'
  *                 token:
@@ -208,17 +209,7 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  *                   example: Invalid credentials. Please contact your administrator.
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Something went wrong
- *             example: Something went wrong
  */
-
 router.post('/staff/login', loginStaffValidator, loginStaff);
     
 module.exports = router

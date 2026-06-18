@@ -66,7 +66,7 @@ const {authentication} = require('../middlewares/auth')
 
 /**
  * @swagger
- * /api/v1/batch/getAll:
+ * /api/v1/getAll:
  *   get:
  *     summary: Get all batches
  *     tags: [Batch]

@@ -1,7 +1,11 @@
-const { Error } = require('mongoose');
+// const { Error } = require('mongoose');
+const mongoose = require('mongoose');
 const CategoryModel = require('../models/category');
 const ProductModel = require('../models/product');
 const UserModel = require('../models/supermarket');
+const { getPagination } = require('../helpers/pagination');
+
+
 
 exports.createCategory = async (req, res, next) => {
     try {
@@ -62,7 +66,7 @@ exports.getOneCategory = async(req,res,next) =>{
                     });
                 }
         
-                const category = await ProductModel.findById(id);
+                const category = await CategoryModel.findById(id);
         
                 if (!category) {
                     return res.status(404).json({
@@ -72,7 +76,7 @@ exports.getOneCategory = async(req,res,next) =>{
         
                 res.status(200).json({
                     message: `category found  successfully`,
-                    data: product
+                    data: category
                 })
     } catch (error) {
         console.log(error)
@@ -116,24 +120,28 @@ exports.deleteCategory = async (req, res, next) => {
     }
 }
 
-exports.deleteCategory = async (req, res, next) => {
-    try {
-        const { categoryId } = req.params;
 
-        const deletedCategory = await CategoryModel.findByIdAndDelete(categoryId);
 
-        if (!deletedCategory) {
-            return res.status(404).json({
-                message: "Category not found"
-            });
-        }
 
-        res.status(200).json({
-            message: "Category successfully deleted"
-        });
 
-    } catch (error) {
-        console.log(error);
-        next(error);
-    }
-};
+// exports.deleteCategory = async (req, res, next) => {
+//     try {
+//         const { categoryId } = req.params;
+
+//         const deletedCategory = await CategoryModel.findByIdAndDelete(categoryId);
+
+//         if (!deletedCategory) {
+//             return res.status(404).json({
+//                 message: "Category not found"
+//             });
+//         }
+
+//         res.status(200).json({
+//             message: "Category successfully deleted"
+//         });
+
+//     } catch (error) {
+//         console.log(error);
+//         next(error);
+//     }
+// };

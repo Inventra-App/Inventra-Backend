@@ -1,5 +1,5 @@
 const router = require('express').Router();
-
+const { createCategoryValidator } = require('../middlewares/validator');
 const { createCategory, getCategories, getOneCategory, deleteCategory } = require('../controllers/categoryConroller');
 const {authentication} = require('../middlewares/auth')
 
@@ -76,7 +76,7 @@ const {authentication} = require('../middlewares/auth')
  *       500:
  *         description: Internal server error
  */
-router.post('/category', authentication, createCategory);
+router.post('/category', authentication,createCategoryValidator, createCategory);
 
 
 /**

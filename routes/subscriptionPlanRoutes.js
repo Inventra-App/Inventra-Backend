@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 const { createSubscriptionPlan } = require('../controllers/subscriptionPlanController');
 const authenticate = require('../middlewares/auth');
+const { createSubscriptionPlanValidator } = require('../middlewares/validator');
 
 
 
@@ -124,7 +125,7 @@ const authenticate = require('../middlewares/auth');
  *         description: Internal server error
  */
 
-router.post('/sub-plan', createSubscriptionPlan);
+router.post('/sub-plan',createSubscriptionPlanValidator, createSubscriptionPlan);
 
 module.exports = router;
 

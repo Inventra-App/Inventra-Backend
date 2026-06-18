@@ -160,7 +160,7 @@ exports.addProductValidator = (req, res, next) => {
     const schema = Joi.object({
         productName: Joi.string().trim().min(2).max(100).required(),
 
-        categoryId: Joi.string()
+        categoryId: Joi.string() 
             .custom((value, helpers) => {
                 if (!mongoose.isValidObjectId(value)) {
                     return helpers.error('any.invalid');
@@ -335,7 +335,6 @@ exports.loginStaffValidator = (req, res, next) => {
 
     next();
 };
-
 
 exports.createSubscriptionPlanValidator = (req, res, next) => {
     const schema = Joi.object({

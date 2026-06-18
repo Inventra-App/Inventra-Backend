@@ -128,7 +128,7 @@ router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
 
 /**
  * @swagger
- * /api/v1/sales:
+ * /api/v1/sales/count:
  *   get:
  *     summary: Count total sales
  *     tags: [Sales]
@@ -165,7 +165,7 @@ router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
  *         description: Internal server error
  */
 
-router.get('/sales', authentication, countSales)
+router.get('/sales/count', authentication, countSales)
 
 /**
  * @swagger

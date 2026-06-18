@@ -4,6 +4,7 @@ const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
 const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale } = require('../helpers/helpers');
+const { getPagination } = require('../helpers/pagination');
 
 // exports.createSale = async (req, res, next) => {
 //     try {

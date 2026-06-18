@@ -1,6 +1,11 @@
 const router = require('express').Router();
 
-const {checkoutSale,countSales, getAllSales} = require('../controllers/salesController');
+const {
+    checkoutSale,
+    countSales,
+    countSalesAmount,
+    getAllSales
+} = require('../controllers/salesController');
 const { authentication } = require('../middlewares/auth');
 const { checkoutSaleValidator } = require('../middlewares/validator');
 
@@ -162,16 +167,12 @@ router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
 
 router.get('/sales', authentication, countSales)
 
-
-
-
-
 /**
  * @swagger
  * /api/v1/sales:
  *   get:
- *     summary: Get all sales history
- *     description: Fetches all sales records with pagination support.
+ *     summary: Get all sales
+ *     description: Returns a paginated list of all sales made in the supermarket.
  *     tags:
  *       - Sales
  *     security:
@@ -252,6 +253,27 @@ router.get('/sales', authentication, countSales)
  *                       example: false
  *       404:
  *         description: No sales found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/sales', authentication, getAllSales);
+
+
+/**
+ * @swagger
+ * /api/v1/sale/amount:
+ *   get:
+ *     summary: Get total sales amount
+ *     description: Returns the total amount of all sales made in the supermarket.
+ *     tags:
+ *       - Sales
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Total sales amount retrieved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -259,13 +281,15 @@ router.get('/sales', authentication, countSales)
  *               properties:
  *                 message:
  *                   type: string
- *                   example: No sales found
+ *                   example: Here's how much you've sold!
+ *                 data:
+ *                   type: number
+ *                   example: 250000
  *       401:
- *         description: Unauthorized - invalid or missing token
+ *         description: Unauthorized - Token missing or invalid
  *       500:
  *         description: Internal server error
  */
-
-router.get('/sales', authentication, getAllSales);
+router.get('/sale/amount', authentication, countSalesAmount);
 
 module.exports = router;

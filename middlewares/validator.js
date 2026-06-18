@@ -138,9 +138,9 @@ exports.createStaffValidator = (req, res, next) => {
             'string.email':'Email must be a valid email',
             }),
             
-        role: joi.string().valid('sales', 'manager').required().messages({
+        role: joi.string().valid('cashier', 'manager').required().messages({
                 'string.empty': 'Role is required',
-                'any.only': 'Role must be either sales or manager',
+                'any.only': 'Role must be either cashier or manager',
                 'any.required': 'Role is required'
             }),
     });

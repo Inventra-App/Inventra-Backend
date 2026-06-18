@@ -3,7 +3,7 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddCart } = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale } = require('../helpers/helpers');
 
 // exports.createSale = async (req, res, next) => {
 //     try {
@@ -77,7 +77,7 @@ exports.checkoutSale = async (req, res, next) => {
         const { items, paymentMethod } = req.body;
         const { id, role } = req.user;
 
-        if (role !== 'admin' && role !== 'sales') {
+        if (role !== 'admin' && role !== 'cashier') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })
@@ -225,3 +225,19 @@ exports.getAllSales = async (req, res, next) => {
         next(error);
     }
 };
+exports.countSalesAmount = async (req, res, next) => {
+    try {
+        const salesAmount = await saleModel.find();
+        const totalSalesAmount = mapPricesAndAddSale(salesAmount)
+        console.log(totalSalesAmount)
+
+        res.status(200).json({
+            message: `Here's how much you've sold!`,
+            data: totalSalesAmount
+        })
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}

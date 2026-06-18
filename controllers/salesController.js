@@ -77,7 +77,7 @@ exports.checkoutSale = async (req, res, next) => {
         const { items, paymentMethod } = req.body;
         const { id, role } = req.user;
 
-        if (role === 'admin' && role === 'sales') {
+        if (role !== 'admin' && role !== 'sales') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })
@@ -91,7 +91,7 @@ exports.checkoutSale = async (req, res, next) => {
         let count = 0;
 
         for (const item of items) {
-            const { productId, quantity } = item;
+            const { productId, quantity } = item; 
 
             const product = await ProductModel.findById(productId);
             // console.log(product)
@@ -186,3 +186,42 @@ exports.countSales = async (req, res, next) => {
         next(error)
     }
 }
+
+
+exports.getAllSales = async (req, res, next) => {
+    try {
+        const { page, limit, skip } = getPagination(req);
+
+        const totalSales = await saleModel.countDocuments();
+
+        const sales = await saleModel.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        if (sales.length === 0) {
+            return res.status(404).json({
+                message: `No sales found`
+            });
+        }
+
+        const totalPages = Math.ceil(totalSales / limit);
+
+        res.status(200).json({
+            message: `Sales fetched successfully`,
+            data: sales,
+            pagination: {
+                currentPage: page,
+                perPage: limit,
+                totalSales,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};

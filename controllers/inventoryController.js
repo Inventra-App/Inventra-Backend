@@ -5,6 +5,7 @@ const { generateBatchCode, padStart, generateUserSlug, filterRole } = require('.
 const staffModel = require('../models/staff');
 const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
+const { getPagination } = require('../helpers/pagination');
 
 
 
@@ -143,28 +144,45 @@ exports.moveProducts = async (req, res, next) => {
 
         console.log(inventory)
 
+        if (quantity <= 0) {
+            return res.status(400).json({
+                message: "Quantity must be greater than 0"
+            });
+        }
+
+        inventory.availableStock = inventory.availableStock || 0;
+        inventory.reservedStock = inventory.reservedStock || 0;
+
         if (moveFrom.toLowerCase() === 'all stock' && moveTo.toLowerCase() === 'available stock') {
-            if (inventory.totalStock < quantity) {
+
+            if (inventory.availableStock + quantity > inventory.totalStock) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
+                });
             }
-            inventory.availableStock = quantity;
-            inventory.reservedStock = inventory.totalStock - quantity
+
+            inventory.availableStock += quantity;
+            inventory.reservedStock = inventory.totalStock - inventory.availableStock;
+
         } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
+
             if (inventory.reservedStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
+                });
             }
+
             inventory.reservedStock -= quantity;
             inventory.availableStock += quantity;
+
         } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {
+
             if (inventory.availableStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
-                })
+                });
             }
+
             inventory.availableStock -= quantity;
             inventory.reservedStock += quantity;
         }
@@ -181,25 +199,86 @@ exports.moveProducts = async (req, res, next) => {
     }
 }
 
-exports.getAllItems = async (req, res, next) => {
-   try { 
-        const items = await InventoryModel.find();
 
-        if (!items.length === 0) {
+exports.getAllItems = async (req, res, next) => {
+    try {
+        const { page, limit, skip } = getPagination(req);
+
+        const totalProducts = await InventoryModel.countDocuments();
+
+        const items = await InventoryModel.find()
+            .skip(skip)
+            .limit(limit);
+
+        if (items.length === 0) {
             return res.status(404).json({
-                message: `Nothing found here. Please upload your products`
-            })
+                message: 'No products found'
+            });
         }
 
+        const totalPages = Math.ceil(totalProducts / limit);
+
         res.status(200).json({
-            message: `Product details fetched sucessfully`,
-            data: items
-        })
+            message: 'Products fetched successfully',
+            data: items,
+            pagination: {
+                currentPage: page,
+                perPage: limit,
+                totalProducts,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
+
     } catch (error) {
-        console.log(error)
-        next(error)
+        console.log(error);
+        next(error);
     }
-}
+};
+
+
+
+
+
+
+
+
+// exports.getAllItems = async (req, res, next) => {
+//    try { 
+//         const items = await InventoryModel.find();
+
+//          const page = parseInt(req.query.page) || 1;
+//         const limit = parseInt(req.query.limit) || 5;
+//         const skip = (page - 1) * limit;
+
+
+//         const [items, total] = await Promise.all([
+//             InventoryModel.find(filter)
+//                 .sort({ createdAt: -1 }) // Show newest items first
+//                 .skip(skip)
+//                 .limit(limit)
+//                 .lean(), // Converts Mongoose docs to plain JSON (faster)
+//             InventoryModel.countDocuments(filter)
+//         ]);
+
+
+
+//         if (!items.length === 0) {
+//             return res.status(404).json({
+//                 message: `Nothing found here. Please upload your products`
+//             })
+//         }
+
+//         res.status(200).json({
+//             message: `Product details fetched sucessfully`,
+//             data: items
+//         })
+//     } catch (error) {
+//         console.log(error)
+//         next(error)
+//     }
+// }
 
 exports.recordStockEntry = async (req, res, next) => {
     try {

@@ -1,27 +1,26 @@
 const staffModel = require('../models/staff');
-const userModel = require('../models/supermarket');
+const SupermarketModel = require('../models/supermarket');
 const { staffInviteTemplate } = require('../helpers/emailTemplates');
-const { sendBrevoEmail} = require('../helpers/brevo');
+const { brevo } = require('../helpers/brevo');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const otp = require('otp-generator')
+const otp = require('otp-generator');
+const sendMail = require('../helpers/nodemailer');
 
-
-exports.createStaff = async (req, res, next) => {
+exports.createStaff = async (req, res, next) => {  
     try {
         const adminId = req.user.id;
-
-        const admin = await userModel.findById(adminId);
-
-        if (!admin || admin.role !== 'admin') {
-            return res.status(403).json({
-                message: `You are not authorised to perform this action`
-            });
+        const admin = await SupermarketModel.findById(adminId);
+        const genPass = await otp.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: true, digits: true })
+        if (!admin) {
+            return res.status(404).json({
+                message: `You are not authourised to perform this action. Please contact your administrator`
+            })
         }
 
         const {
             firstName,
-            lastName,
+            lastName,  
             email,
             role
         } = req.body;
@@ -37,14 +36,6 @@ exports.createStaff = async (req, res, next) => {
             });
         }
 
-        
-        const genPass = await otp.generate(10, {
-            lowerCaseAlphabets: true,
-            upperCaseAlphabets: true,
-            specialChars: true,
-            digits: true
-        });
-
         const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
 
         const salt = await bcrypt.genSalt(10);
@@ -58,25 +49,31 @@ exports.createStaff = async (req, res, next) => {
             password: hashedPassword,
             email: email.toLowerCase(),
             role
-        });
+        }); 
+        console.log(staff)
+        const link = 'http://localhost:7878/api/v1/documentation/#/Staff/post_api_v1_staff_login'
 
-        await staff.save();
+        const info = process.env.NODE_ENV
+        if (info === "production") {
+             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.username, genPass, link))   
+        } else{
+             await sendMail({
+                email: staff.email, 
+                subject: 'Welcome', 
+                html: staffInviteTemplate(staff.firstName, staff.username, genPass, link)
+            })
+        }
 
-        const emailOptions = {
-            email: staff.email,
-            subject: `Welcome to ${admin.businessName}`,
-            html: staffInviteTemplate(staff.username, genPass)
-        };
-
-        await sendBrevoEmail(emailOptions);
+        await staff.save()
 
         res.status(201).json({
-            message: "Staff created successfully",
-            data: staff
-        });
+            message: "Staff created successfully",  
+            data: staff  
+        })
 
     } catch (error) {
-        next(error);
+        console.log(error)
+        next(error)
     }
 };
 
@@ -157,22 +154,20 @@ exports.loginStaff = async (req, res, next) => {
             })
         }
 
+        staff.isActive = true;
+        staff.isVerified = true;
 
-    
-       const token = jwt.sign(
-        { 
-        id: staff._id,      
-        role: staff.role, 
-        name: staff.firstName },
-        process.env.SECRET_KEY,
-       { expiresIn: '1day' }
-)
+        await staff.save()
 
-        // const token = await jwt.sign(
-        //     {staffId: staff._id, role: staff.role, name: staff.firstName},
-        //     process.env.SECRET_KEY,
-        //     { expiresIn: '1day'}
-        // )
+
+       const token = jwt.sign( 
+            { 
+            id: staff._id,      
+            role: staff.role, 
+            name: staff.firstName },
+            process.env.SECRET_KEY,
+            { expiresIn: '1day' }
+        )
 
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,

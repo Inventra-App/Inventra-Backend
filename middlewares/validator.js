@@ -118,11 +118,31 @@ exports.resetPasswordValidator = (req, res, next) => {
 };
 
 exports.createStaffValidator = (req, res, next) => {
-    const schema = Joi.object({
-        firstName: Joi.string().trim().pattern(/^[A-Za-z\s]{2,50}$/).required(),
-        lastName: Joi.string().trim().pattern(/^[A-Za-z\s]{2,50}$/).required(),
-        email: Joi.string().email().required(),
-        role: Joi.string().valid('sales', 'manager').required()
+    const schema = joi.object({
+        firstName: joi.string().trim().min(2).max(50).required().messages({
+                'string.empty': 'First name is required',
+                'string.min': 'First name must be at least 2 characters',
+                'string.max': 'First name must not exceed 50 characters',
+                'any.required': 'First name is required'
+            }),
+        lastName: joi.string().trim().min(2).max(50).required().messages({
+                'string.empty': 'Last name is required',
+                'string.min': 'Last name must be at least 2 characters',
+                'string.max': 'Last name must not exceed 50 characters',
+                'any.required': 'Last name is required'
+            }),
+
+        email: joi.string().email().required().messages({
+            'any required':'Email is required',
+            'string.empty':'Email cannot be Empty',
+            'string.email':'Email must be a valid email',
+            }),
+            
+        role: joi.string().valid('sales', 'manager').required().messages({
+                'string.empty': 'Role is required',
+                'any.only': 'Role must be either sales or manager',
+                'any.required': 'Role is required'
+            }),
     });
 
     const { error } = schema.validate(req.body, { abortEarly: false });
@@ -291,7 +311,6 @@ exports.batchIdValidator = (req, res, next) => {
 
     next();
 };
-
 
 exports.loginStaffValidator = (req, res, next) => {
     const schema = joi.object({

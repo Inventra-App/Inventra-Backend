@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { getExpiringProducts } = require('../controllers/expiryController');
+const { fetchExpiringProducts } = require('../controllers/expiryController');
 const { authentication } = require('../middlewares/auth');
 
 
@@ -84,7 +84,7 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.get('/expiry/check',authentication, getExpiringProducts);
+router.get('/expiry/check',authentication, fetchExpiringProducts);
 
 // router.get('/expiry/check', (req, res) => {
 //     res.json({

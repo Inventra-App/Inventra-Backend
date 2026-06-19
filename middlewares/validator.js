@@ -126,7 +126,7 @@ exports.createCategoryValidator = validate(
 
 exports.moveProductsValidator = validate(
     Joi.object({
-        actionType: Joi.string().valid('move').required(),
+        actionType: Joi.string().required(),
         moveFrom: Joi.string()
             .valid('all stock', 'available stock', 'reserved stock')
             .required(),

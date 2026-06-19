@@ -1,4 +1,5 @@
 const { checkExpiringProducts } = require('../services/expiryChecker');
+const { filterRole } = require('../helpers/helpers');
 
 exports.fetchExpiringProducts = async (req, res, next) => {
     try {

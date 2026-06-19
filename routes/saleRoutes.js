@@ -123,7 +123,7 @@ const { checkoutSaleValidator } = require('../middlewares/validator');
  *         description: Internal server error
  */
 
-router.post('/pos/sale', authentication,checkoutSaleValidator, checkoutSale);
+router.post('/pos/sale', authentication, checkoutSale);
 
 
 /**

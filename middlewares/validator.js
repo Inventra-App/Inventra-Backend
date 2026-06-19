@@ -104,74 +104,74 @@ exports.createStaffValidator = validate(
     })
 );
 
-exports.addProductValidator = validate(
-    Joi.object({
-        productName: Joi.string().trim().min(2).max(100).required(),
-        categoryId: objectIdValidator.required(),
-        packageType: Joi.string().required(),
-        packageQuantity: Joi.number().min(1).required(),
-        unitPerPackage: Joi.number().min(1).required(),
-        unitPrice: Joi.number().min(0).required(),
-        expiryDate: Joi.date().greater('now').required(),
-        supplier: Joi.string().trim().min(2).optional()
-    })
-);
+// exports.addProductValidator = validate(
+//     Joi.object({
+//         productName: Joi.string().trim().min(2).max(100).required(),
+//         categoryId: objectIdValidator.required(),
+//         packageType: Joi.string().required(),
+//         packageQuantity: Joi.number().min(1).required(),
+//         unitPerPackage: Joi.number().min(1).required(),
+//         unitPrice: Joi.number().min(0).required(),
+//         expiryDate: Joi.date().greater('now').required(),
+//         supplier: Joi.string().trim().min(2).optional()
+//     })
+// );
 
-exports.createCategoryValidator = validate(
-    Joi.object({
-        categoryName: Joi.string().trim().min(3).max(50).required(),
-        description: Joi.string().trim().min(5).max(200).required()
-    })
-);
+// exports.createCategoryValidator = validate(
+//     Joi.object({
+//         categoryName: Joi.string().trim().min(3).max(50).required(),
+//         description: Joi.string().trim().min(5).max(200).required()
+//     })
+// );
 
-exports.moveProductsValidator = validate(
-    Joi.object({
-        actionType: Joi.string().required(),
-        moveFrom: Joi.string()
-            .valid('all stock', 'available stock', 'reserved stock')
-            .required(),
-        moveTo: Joi.string()
-            .valid('available stock', 'reserved stock')
-            .required(),
-        quantity: Joi.number().integer().positive().required()
-    })
-);
+// exports.moveProductsValidator = validate(
+//     Joi.object({
+//         actionType: Joi.string().required(),
+//         moveFrom: Joi.string()
+//             .valid('all stock', 'available stock', 'reserved stock')
+//             .required(),
+//         moveTo: Joi.string()
+//             .valid('available stock', 'reserved stock')
+//             .required(),
+//         quantity: Joi.number().integer().positive().required()
+//     })
+// );
 
-exports.recordStockEntryValidator = validate(
-    Joi.object({
-        productId: objectIdValidator.required(),
-        supplier: Joi.string().trim().min(2).required(),
-        expiryDate: Joi.date().greater('now').required(),
-        packageType: Joi.string().required(),
-        packageQuantity: Joi.number().integer().positive().required(),
-        unitPerPackage: Joi.number().integer().positive().required()
-    })
-);
+// exports.recordStockEntryValidator = validate(
+//     Joi.object({
+//         productId: objectIdValidator.required(),
+//         supplier: Joi.string().trim().min(2).required(),
+//         expiryDate: Joi.date().greater('now').required(),
+//         packageType: Joi.string().required(),
+//         packageQuantity: Joi.number().integer().positive().required(),
+//         unitPerPackage: Joi.number().integer().positive().required()
+//     })
+// );
 
-exports.checkoutSaleValidator = validate(
-    Joi.object({
-        paymentMethod: Joi.string()
-            .valid('cash', 'card', 'transfer')
-            .required(),
+// exports.checkoutSaleValidator = validate(
+//     Joi.object({
+//         paymentMethod: Joi.string()
+//             .valid('cash', 'card', 'transfer')
+//             .required(),
 
-        items: Joi.array()
-            .items(
-                Joi.object({
-                    productId: objectIdValidator.required(),
-                    quantity: Joi.number().integer().positive().required()
-                })
-            )
-            .min(1)
-            .required()
-    })
-);
+//         items: Joi.array()
+//             .items(
+//                 Joi.object({
+//                     productId: objectIdValidator.required(),
+//                     quantity: Joi.number().integer().positive().required()
+//                 })
+//             )
+//             .min(1)
+//             .required()
+//     })
+// );
 
-exports.batchIdValidator = validate(
-    Joi.object({
-        id: objectIdValidator.required()
-    }),
-    'params'
-);
+// exports.batchIdValidator = validate(
+//     Joi.object({
+//         id: objectIdValidator.required()
+//     }),
+//     'params'
+// );
 
 exports.loginStaffValidator = validate(
     Joi.object({

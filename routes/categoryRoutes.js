@@ -76,7 +76,7 @@ const {authentication} = require('../middlewares/auth')
  *       500:
  *         description: Internal server error
  */
-router.post('/category', authentication,createCategoryValidator, createCategory);
+router.post('/category', authentication, createCategory);
 
 
 /**

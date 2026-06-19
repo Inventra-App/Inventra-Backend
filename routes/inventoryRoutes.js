@@ -252,7 +252,7 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  *                   example: Something went wrong
  */
 
-router.post('/product', authentication ,addProductValidator, addProducts);
+router.post('/product', authentication, addProducts);
 
 /**
  * @swagger
@@ -368,7 +368,7 @@ router.post('/product', authentication ,addProductValidator, addProducts);
  *                   example: Something went wrong
  */
 
-router.put('/p/move/:inventoryId', authentication,moveProductsValidator ,moveProducts);
+router.put('/p/move/:inventoryId', authentication, moveProducts);
 
 /**
  * @swagger
@@ -516,6 +516,6 @@ router.get('/i/all', authentication, getAllItems);
  *       404:
  *         description: Product not found
  */
-router.post('/stock/entry', authentication,recordStockEntryValidator, recordStockEntry)
+router.post('/stock/entry', authentication, recordStockEntry)
 
 module.exports = router;

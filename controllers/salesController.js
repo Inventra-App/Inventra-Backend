@@ -132,7 +132,7 @@ exports.checkoutSale = async (req, res, next) => {
         // console.log(totalItems)
         const saleCount = await saleModel.countDocuments({ supermarketId })
         const supermarket = await SupermarketModel.findById(supermarketId)
-        const saleNumber = `${generateUserSlug(supermarket, saleCount)}-${padStart(saleCount)}`
+        const saleNumber = `${generateUserSlug(supermarket.firstName, saleCount)}-${padStart(saleCount)}`
 
         // console.log(saleItems)
         // console.log(count)
@@ -201,7 +201,6 @@ exports.countSales = async (req, res, next) => {
         next(error)
     }
 }
-
 
 exports.getAllSales = async (req, res, next) => {
     try {

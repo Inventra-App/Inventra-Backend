@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const { createCategoryValidator } = require('../middlewares/validator');
-const { createCategory, getCategories, getOneCategory, deleteCategory } = require('../controllers/categoryConroller');
+const { createCategory, getCategories, getOneCategory, updateCategory, deleteCategory } = require('../controllers/categoryConroller');
 const {authentication} = require('../middlewares/auth')
 
 
@@ -260,5 +260,70 @@ router.get('/category/:id', authentication, getOneCategory);
  */
 
 router.delete('/d/category/:categoryId', authentication, deleteCategory);
+
+/**
+ * @swagger
+ * /api/v1/category/{id}:
+ *   patch:
+ *     summary: Update a category
+ *     description: Update a category's name or description for the authenticated supermarket.
+ *     tags:
+ *       - Category
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Category ID
+ *         example: 685f1234567890abc1234567
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               categoryName:
+ *                 type: string
+ *                 example: Soft Drinks
+ *               description:
+ *                 type: string
+ *                 example: All carbonated and non-carbonated drinks
+ *     responses:
+ *       200:
+ *         description: Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Category updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 685f1234567890abc1234567
+ *                     categoryName:
+ *                       type: string
+ *                       example: Soft Drinks
+ *                     description:
+ *                       type: string
+ *                       example: All carbonated and non-carbonated drinks
+ *       400:
+ *         description: Category name already exists
+ *       404:
+ *         description: Category not found
+ *       401:
+ *         description: Unauthorized - Token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/category/:id', authentication, updateCategory);
 
 module.exports = router;

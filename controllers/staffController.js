@@ -50,16 +50,16 @@ exports.createStaff = async (req, res, next) => {
             role
         }); 
         console.log(staff)
-        const link = 'http://localhost:7878/api/v1/documentation/#/Staff/post_api_v1_staff_login'
+        const link = 'https://inventra-backend-212y.onrender.com/api/v1/documentation/#/supermarket/post_api_v1_login'
 
         const info = process.env.NODE_ENV
         if (info === "production") {
-             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.username, genPass, link))   
+             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.email, genPass, link))   
         } else{
              await sendMail({
                 email: staff.email, 
                 subject: 'Welcome', 
-                html: staffInviteTemplate(staff.firstName, staff.username, genPass, link)
+                html: staffInviteTemplate(staff.firstName, staff.email, genPass, link)
             })
         }
 

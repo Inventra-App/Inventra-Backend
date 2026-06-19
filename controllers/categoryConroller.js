@@ -10,34 +10,48 @@ const { filterRole } = require('../helpers/helpers');
 
 exports.createCategory = async (req, res, next) => {
     try {
-        console.log(req.user)
         const { id, role } = req.user;
         const supermarketId = await filterRole(id, role);
-        console.log( id )
 
         const { categoryName, description } = req.body;
 
-        const category = {
+        // Check if category already exists
+        const existingCategory = await CategoryModel.findOne({
             supermarketId,
-            categoryName,
-            description,
+            categoryName: categoryName.trim()
+        });
+
+        if (existingCategory) {
+            return res.status(400).json({
+                message: 'Category already exists'
+            });
         }
 
-        const newCategory = new CategoryModel(category)
-        console.log(newCategory)
+        const newCategory = await CategoryModel.create({
+            supermarketId,
+            categoryName,
+            description
+        });
 
-        await newCategory.save();
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Created category',
+            module: 'CATEGORY',
+            description: `Created category ${newCategory.categoryName}`,
+            entityId: newCategory._id
+        });
 
         res.status(201).json({
-            message: `Category added sucessfuly`,
+            message: 'Category added successfully',
             data: newCategory
-        })
+        });
 
     } catch (error) {
-        console.log(error)
-        next(error)
+        console.log(error);
+        next(error);
     }
-}
+};
 
 exports.getCategories = async (req, res, next) => {
     try {
@@ -89,35 +103,107 @@ exports.getOneCategory = async(req,res,next) =>{
         next(error)
         
     }
-}
+};
+
+exports.updateCategory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { id: userId, role } = req.user;
+
+        const supermarketId = await filterRole(userId, role);
+        const { categoryName, description } = req.body;
+
+        const category = await CategoryModel.findOne({
+            _id: id,
+            supermarketId
+        });
+
+        if (!category) {
+            return res.status(404).json({
+                message: 'Category not found'
+            });
+        }
+
+        // Prevent duplicate category names
+        if (categoryName) {
+            const existingCategory = await CategoryModel.findOne({
+                supermarketId,
+                categoryName: categoryName.trim(),
+                _id: { $ne: id }
+            });
+
+            if (existingCategory) {
+                return res.status(400).json({
+                    message: 'Category name already exists'
+                });
+            }
+        }
+
+        category.categoryName = categoryName || category.categoryName;
+        category.description = description || category.description;
+
+        await category.save();
+
+        await logActivity({
+            supermarket: supermarketId,
+            user: userId,
+            title: 'Updated category',
+            module: 'CATEGORY',
+            description: `Updated category ${category.categoryName}`,
+            entityId: category._id
+        });
+
+        res.status(200).json({
+            message: 'Category updated successfully',
+            data: category
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};
 
 
 exports.deleteCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
-
         const { id: userId, role } = req.user;
+
         const supermarketId = await filterRole(userId, role);
-        const category = await CategoryModel.findOne({ _id: id, supermarketId });
+
+        const category = await CategoryModel.findOne({
+            _id: id,
+            supermarketId
+        });
 
         if (!category) {
             return res.status(404).json({
-                message: 'Category not found!'
+                message: 'Category not found'
             });
         }
 
-        const products = await ProductModel.find({
+        const productCount = await ProductModel.countDocuments({
             categoryId: id,
             supermarketId
         });
 
-        if (products.length > 0) {
+        if (productCount > 0) {
             return res.status(400).json({
                 message: 'Cannot delete category. Products are attached to it.'
             });
         }
 
-        await CategoryModel.findOneAndDelete({ _id: id, supermarketId });
+        await CategoryModel.findByIdAndDelete(id);
+
+        await logActivity({
+            supermarket: supermarketId,
+            user: userId,
+            title: 'Deleted category',
+            module: 'CATEGORY',
+            description: `Deleted category ${category.categoryName}`,
+            entityId: category._id
+        });
 
         res.status(200).json({
             message: 'Category deleted successfully'
@@ -127,7 +213,7 @@ exports.deleteCategory = async (req, res, next) => {
         console.log(error);
         next(error);
     }
-}
+};
 
 
 

@@ -57,3 +57,33 @@ exports.getOneProduct = async (req, res, next) => {
         next(error);
     }
 }
+
+exports.getProductsByCategory = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+        const { categoryId } = req.params;
+
+        const supermarketId = await filterRole(id, role);
+
+        const products = await ProductModel.find({
+            supermarketId,
+            categoryId
+        });
+
+        if (!products.length) {
+            return res.status(404).json({
+                message: 'No products found for this category'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Products fetched successfully',
+            total: products.length,
+            data: products
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};

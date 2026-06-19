@@ -3,8 +3,9 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity } = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug} = require('../helpers/helpers');
 const { getPagination } = require('../helpers/pagination');
+const SupermarketModel = require('../models/supermarket');
 
 // exports.createSale = async (req, res, next) => {
 //     try {
@@ -130,7 +131,8 @@ exports.checkoutSale = async (req, res, next) => {
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
         // console.log(totalItems)
         const saleCount = await saleModel.countDocuments({ supermarketId })
-        const saleNumber = padStart(saleCount)
+        const supermarket = await SupermarketModel.findById(supermarketId)
+        const saleNumber = `${generateUserSlug(supermarket, saleCount)}-${padStart(saleCount)}`
 
         // console.log(saleItems)
         // console.log(count)

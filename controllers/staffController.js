@@ -2,6 +2,7 @@ const staffModel = require('../models/staff');
 const SupermarketModel = require('../models/supermarket');
 const { staffInviteTemplate } = require('../helpers/emailTemplates');
 const { brevo } = require('../helpers/brevo');
+const { logActivity } = require('../helpers/helpers');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otp = require('otp-generator');
@@ -162,6 +163,15 @@ exports.loginStaff = async (req, res, next) => {
             process.env.SECRET_KEY,
             { expiresIn: '1day' }
         )
+
+        await logActivity({
+            supermarket: staff.supermarketId || null,
+            user: staff._id,
+            title: 'Login successful',
+            module: 'AUTH',
+            description: `Staff login successful for ${staff.firstName}`,
+            entityId: staff._id
+        });
 
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,

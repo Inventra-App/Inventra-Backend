@@ -1,7 +1,7 @@
 const InventoryModel = require('../models/inventory');
 const SupermarketModel = require('../models/supermarket');
 const CategoryModel = require('../models/category');
-const { generateBatchCode, padStart, generateUserSlug, filterRole } = require('../helpers/helpers');
+const { generateBatchCode, padStart, generateUserSlug, filterRole, logActivity } = require('../helpers/helpers');
 const staffModel = require('../models/staff');
 const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
@@ -31,7 +31,7 @@ exports.addProducts = async (req, res, next) => {
         } = req.body;
 
         
-        const ifCategory = await CategoryModel.findById(categoryId)
+        const ifCategory = await CategoryModel.findOne({ _id: categoryId, supermarketId })
         console.log(ifCategory)
         if (!ifCategory) {
             return res.status(404).json({
@@ -39,7 +39,7 @@ exports.addProducts = async (req, res, next) => {
             })
         }
 
-        const ifProduct = await ProductModel.findOne({productName: productName})
+        const ifProduct = await ProductModel.findOne({ productName: productName, supermarketId })
         console.log(ifProduct)
         if (ifProduct) {
             return res.status(400).json({
@@ -80,7 +80,9 @@ exports.addProducts = async (req, res, next) => {
             productName: newProduct.productName,
             SKU: newProduct.SKU,
             categoryName: newProduct.categoryName,
-            totalStock: unitPerPackage * packageQuantity, 
+            totalStock: unitPerPackage * packageQuantity,
+            availableStock: unitPerPackage * packageQuantity,
+            reservedStock: 0,
             updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
         const newInventoryInput = new InventoryModel(inventoryInput);
@@ -103,6 +105,14 @@ exports.addProducts = async (req, res, next) => {
         await newBatch.save()
         console.log(`BATCH: `, batch)
 
+        await logActivity({
+            supermarket: supermarketId,
+            user: req.user.id,
+            title: 'Created product',
+            module: 'INVENTORY',
+            description: `Added ${newProduct.productName} with ${newBatch.quantity} units`,
+            entityId: newProduct._id
+        });
 
         res.status(201).json({
             message: `Product added sucessfully`,
@@ -113,6 +123,7 @@ exports.addProducts = async (req, res, next) => {
             }
         })
 
+
     } catch (error) {
         console.log(error)
         next(error)
@@ -122,7 +133,7 @@ exports.addProducts = async (req, res, next) => {
 exports.moveProducts = async (req, res, next) => {
     try {
         const { id, role } = req.user;
-           if (role === 'admin' && role === 'sales') {
+        if (role !== 'admin' && role !== 'manager') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })
@@ -134,12 +145,21 @@ exports.moveProducts = async (req, res, next) => {
         const { actionType, moveFrom, moveTo, quantity } = req.body;
         const { inventoryId } = req.params;
 
-        const inventory = await InventoryModel.findById(inventoryId);
+        const inventory = await InventoryModel.findOne({ _id: inventoryId, supermarketId });
         if (!inventory) {
             return res.status(404).json({
                 message: `product does not exist or has been changed`
             })
         }
+
+        const product = await ProductModel.findOne({ _id: inventory.productId, supermarketId });
+        if (!product) {
+            return res.status(404).json({
+                message: `Product not found`
+            })
+        }
+
+        const oldQuantity = inventory.availableStock || 0;
 
         console.log(inventory)
 
@@ -188,6 +208,16 @@ exports.moveProducts = async (req, res, next) => {
         console.log(inventory);
         await inventory.save();
 
+        const newQuantity = inventory.availableStock || 0;
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Updated stock',
+            module: 'INVENTORY',
+            description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
+            entityId: product._id
+        });
+
         res.status(200).json({
             message: `Items moved sucesfully`,
             data: inventory
@@ -200,7 +230,9 @@ exports.moveProducts = async (req, res, next) => {
 
 exports.getAllItems = async (req, res, next) => {
    try { 
-        const items = await InventoryModel.find();
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const items = await InventoryModel.find({ supermarketId });
 
         if (!items) {
             return res.status(404).json({
@@ -260,15 +292,15 @@ exports.recordStockEntry = async (req, res, next) => {
 
 
 
-        const inventoryItem = await InventoryModel.findOne({productId: productId})
-        const previousStock = inventoryItem.totalStock;
+        const inventoryItem = await InventoryModel.findOne({ productId: productId, supermarketId })
+        const previousStock = inventoryItem?.totalStock;
         console.log(inventoryItem)
         if (!inventoryItem) {
             return res.status(404).json({
                 message: `Product not found`
             })
         }
-        const checkProduct = await ProductModel.findById(inventoryItem.productId)
+        const checkProduct = await ProductModel.findOne({ _id: inventoryItem.productId, supermarketId })
         const productCount = await BatchModel.countDocuments()
         console.log(productCount)
 
@@ -297,7 +329,14 @@ exports.recordStockEntry = async (req, res, next) => {
 
         await inventoryItem.save()
         
-
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Recorded delivery',
+            module: 'INVENTORY',
+            description: `Received ${totalIncomingStock} units of ${checkProduct.productName} from ${supplier}`,
+            entityId: newBatch._id
+        });
 
         res.status(201).json({
             message: `Done`,

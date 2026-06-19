@@ -1,12 +1,14 @@
 const InventoryModel = require('../models/inventory');
 const ProductModel = require('../models/product')
 const SaleModel = require('../models/sale');
-const { mapPricesAndAdd } = require('../helpers/helpers');
+const { mapPricesAndAdd, filterRole } = require('../helpers/helpers');
 
 
 exports.getTotalStockUnits = async(req, res, next) => {
     try {
-        const allStockUnits = await InventoryModel.find()
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const allStockUnits = await InventoryModel.find({ supermarketId })
         
         const totalStockUnits = mapPricesAndAdd(allStockUnits)
         console.log(totalStockUnits)
@@ -24,7 +26,9 @@ exports.getTotalStockUnits = async(req, res, next) => {
 
 exports.getTotalProducts = async(req, res, next) => {
     try {
-        const allProducts = await ProductModel.countDocuments()
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const allProducts = await ProductModel.countDocuments({ supermarketId })
 
         res.status(200).json({
             message: `Products Fetched Successfully`,
@@ -38,7 +42,9 @@ exports.getTotalProducts = async(req, res, next) => {
 
 exports.countSales = async (req, res, next) => {
     try {
-        const totalSales = await SaleModel.countDocuments();
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const totalSales = await SaleModel.countDocuments({ supermarketId });
 
         if (!totalSales) {
             return res.status(404).json({

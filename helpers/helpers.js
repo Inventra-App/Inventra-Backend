@@ -92,17 +92,76 @@ exports.mapPricesAndAddSale = (serviceArray) => {
 
 const staffModel = require('../models/staff')
 
-let SId;
 exports.filterRole = async (id, role) => {
     console.log(id)
     if (role === 'admin') {
-        return id
-    } else {
-        const staff = await staffModel.findById(id);
-        Sid = staff.adminId
-        const extId = Sid.toString()
-        // console.log(Sid.toString())
-        return extId;
+        return id;
     }
-    return " ";
+
+    const staff = await staffModel.findById(id);
+    if (!staff || !staff.adminId) {
+        throw new Error('Staff or associated supermarket not found');
+    }
+
+    return staff.adminId.toString();
 }
+
+
+
+exports.findStaff = async (id) => {
+    const staff =  await staffModel.findById(id)
+    return staff.firstName
+}
+
+// const logActivity = async () => {
+
+// }
+
+
+// let description = '';
+
+// switch (action) {
+//     case 'PRODUCT_CREATED':
+//         description = `${role} created product ${details.name}`;
+//         break;
+
+//     case 'SALE_COMPLETED':
+//         description = `${role} completed sale worth ₦${details.totalAmount}`;
+//         break;
+
+//     case 'STAFF_CREATED':
+//         description = `${role} invited new staff ${details.staffName}`;
+//         break;
+
+//     case 'CATEGORY_CREATED':
+//         description = `${role} created category ${details.categoryName}`;
+//         break;
+
+//     default:
+//         description = `${role} performed ${action}`;
+// }
+
+const ActivityLog = require('../models/activityLog');
+
+exports.logActivity = async ({
+    supermarket,
+    user,
+    title,
+    module,
+    description,
+    amount = null,
+    entityId = null,
+    action = null,
+    entity = null
+}) => {
+    await ActivityLog.create({
+        supermarket,
+        user,
+        action: action || title,
+        module,
+        entity: entity || module,
+        description,
+        amount,
+        entityId
+    });
+};

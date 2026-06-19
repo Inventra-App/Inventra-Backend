@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
+const { filterRole } = require('../helpers/helpers');
 const ProductModel = require ('../models/product');
 
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const products = await ProductModel.find()
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const products = await ProductModel.find({ supermarketId })
             // .populate('categoryId', 'categoryName description')
             // .populate('supermarketId', 'businessName email')
             // .populate('createdBy', 'firstName lastName');
@@ -31,7 +34,9 @@ exports.getOneProduct = async (req, res, next) => {
             });
         }
 
-        const product = await ProductModel.findById(id)
+        const { id: userId, role } = req.user;
+        const supermarketId = await filterRole(userId, role);
+        const product = await ProductModel.findOne({ _id: id, supermarketId })
             // .populate('categoryId', 'categoryName description')
             // .populate('supermarketId', 'businessName email')
             // .populate('createdBy', 'firstName lastName');

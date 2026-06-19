@@ -1,4 +1,5 @@
 const { checkLowStock } = require('../services/lowStockChecker');
+const { filterRole } = require('../helpers/helpers');
 
 exports.getLowStock = async (req, res, next) => {
     try {

@@ -81,7 +81,7 @@ exports.addProducts = async (req, res, next) => {
             SKU: newProduct.SKU,
             categoryName: newProduct.categoryName,
             totalStock: unitPerPackage * packageQuantity,
-            availableStock: unitPerPackage * packageQuantity,
+            // availableStock: unitPerPackage * packageQuantity,
             reservedStock: 0,
             updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }

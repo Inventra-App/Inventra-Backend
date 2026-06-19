@@ -7,34 +7,57 @@ const activityLogSchema = new mongoose.Schema({
         required: true
     },
 
-    staff: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'staff'
+        ref: 'Staff'
     },
-     
+
+    role: {
+        type: String,
+        enum: ['admin', 'sales', 'manager']
+    },
+
     action: {
         type: String,
         required: true
     },
 
+    module: {
+        type: String,
+        required: true,
+        enum: [
+            'AUTH',
+            'PRODUCT',
+            'CATEGORY',
+            'INVENTORY',
+            'SALE',
+        ]
+    },
+
     entity: {
-        type: String // product, sale, category, batch
+        type: String,
+        required: true
     },
 
     entityId: {
         type: mongoose.Schema.Types.ObjectId
     },
 
-    details: {
-        type: Object
+    description: {
+        type: String,
+        required: true
     },
 
-    ipAddress: String,
+    details: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null
+    },
 
-    createdAt: {
-        type: Date,
-        default: Date.now
+    triggeredAt: {
+        type: Date
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model('ActivityLog', activityLogSchema);

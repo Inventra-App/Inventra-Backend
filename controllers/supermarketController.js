@@ -1,7 +1,8 @@
 const SupermarketModel = require('../models/supermarket');
 const { signUpOtpTemplate, resetPasswordOtpTemplate, resetPasswordSuccessfulTemplate, resendOtpTemplate } = require('../helpers/emailTemplates');
-const {brevo} = require('../helpers/brevo');
+const { brevo } = require('../helpers/brevo');
 const sendMail = require('../helpers/nodemailer')
+const { logActivity } = require('../helpers/helpers');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -203,6 +204,15 @@ exports.login = async( req, res, next) => {
             process.env.SECRET_KEY, 
             { expiresIn: '1day' }
         );
+
+        await logActivity({
+            supermarket: supermarket._id,
+            user: supermarket._id,
+            title: 'Login successful',
+            module: 'AUTH',
+            description: `Supermarket login successful for ${supermarket.businessName}`,
+            entityId: supermarket._id
+        });
 
         res.status(200).json({
             message: 'Login Successful',
@@ -438,4 +448,4 @@ exports.logout = async (req, res, next) => {
     } catch (error) {
         next(error);
     }
-};
+}; 

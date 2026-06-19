@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { createStaff,loginStaff, createPassword } = require('../controllers/staffController');
+const { createStaff,loginStaff, createPassword, getAllStaff } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
 const { authentication, staffInvite } = require('../middlewares/auth');
 
@@ -211,5 +211,71 @@ router.post('/create-staff', authentication, createStaffValidator, createStaff);
  *         description: Internal server error
  */
 router.post('/staff/login', loginStaffValidator, loginStaff);
+
+/**
+ * @swagger
+ * /api/v1/staff:
+ *   get:
+ *     summary: Get all staff
+ *     description: Fetch all staff members (cashiers and managers) belonging to the authenticated supermarket.
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Staff fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff fetched successfully
+ *                 count:
+ *                   type: number
+ *                   example: 4
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: 685f1234567890abc1234567
+ *                       firstName:
+ *                         type: string
+ *                         example: John
+ *                       lastName:
+ *                         type: string
+ *                         example: Doe
+ *                       email:
+ *                         type: string
+ *                         example: johndoe@example.com
+ *                       role:
+ *                         type: string
+ *                         example: cashier
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                         example: 2026-06-19T10:30:00.000Z
+ *       404:
+ *         description: No staff found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No staff found
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/staff', authentication, getAllStaff);
+
     
 module.exports = router

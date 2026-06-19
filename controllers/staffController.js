@@ -194,3 +194,32 @@ exports.requestPasswordChange = async (req, res, next) => {
         next(error)
     }
 }
+
+exports.getAllStaff = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+
+        const supermarketId = await filterRole(id, role);
+
+        const staff = await UserModel.find({
+            supermarketId,
+            role: { $in: ['manager', 'cashier'] }
+        }).select('-password');
+
+        if (!staff.length) {
+            return res.status(404).json({
+                message: 'No staff found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Staff fetched successfully',
+            count: staff.length,
+            data: staff
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};  

@@ -72,13 +72,17 @@ exports.padStart = (tableLength) => {
 };
 
 exports.generateUserSlug = (name, tableLength) => {
-    const parts = name.trim().toUpperCase().split(' ');
-
-    if (parts.length < 2) {
-        throw new Error('Name must contain at least two words');
+    if (typeof name !== 'string') {
+        throw new Error('Name must be a string');
     }
 
-    return `${parts[0].slice(0, 3)}-${parts[1]?.slice(0, 3)}-${exports.padStart(tableLength)}`;
+    const parts = name.trim().toUpperCase().split(/\s+/);
+
+    if (parts.length < 2) {
+        return `${parts[0].slice(0, 3)}-INV-${exports.padStart(tableLength)}`;
+    }
+
+    return `${parts[0].slice(0, 3)}-${parts[1].slice(0, 3)}-${exports.padStart(tableLength)}`;
 };
 
 exports.mapPricesAndAdd = (serviceArray) => {

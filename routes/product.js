@@ -1,7 +1,8 @@
 const router = require('express').Router()
 const { Router } = require('express')
-const {getAllItems, getOneProduct} = require('../controllers/productController')
+const {getAllItems, getOneProduct, updateProduct} = require('../controllers/productController')
 const {authentication} = require('../middlewares/auth')
+const { authenticate } = require('passport')
 
 
 
@@ -185,6 +186,148 @@ router.get('/getAll', authentication ,getAllItems)
 
 
 router.get('/getOne/:id', authentication ,getOneProduct)
+
+/**
+ * @swagger
+ * /api/v1/product/{productId}:
+ *   put:
+ *     summary: Update a product
+ *     tags: [Inventory]
+ *     description: >
+ *       Admin or Manager only. Updates a product's details. Only fields
+ *       sent in the request body will be updated. SKU, supermarketId and
+ *       createdBy cannot be changed.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The product ID
+ *         example: 64abc123def456ghi789
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productName:
+ *                 type: string
+ *                 description: Name of the product
+ *                 example: Pepsi
+ *               categoryId:
+ *                 type: string
+ *                 description: ID of the category this product belongs to
+ *                 example: 64abc123def456ghi789
+ *               packageType:
+ *                 type: string
+ *                 description: Type of packaging
+ *                 example: Carton
+ *               packageQuantity:
+ *                 type: number
+ *                 description: Number of packages
+ *                 example: 10
+ *               unitPerPackage:
+ *                 type: number
+ *                 description: Number of units in each package
+ *                 example: 24
+ *               unitPrice:
+ *                 type: number
+ *                 description: Price per unit
+ *                 example: 350
+ *               reorderLevel:
+ *                 type: number
+ *                 description: Minimum stock level before reorder alert
+ *                 example: 20
+ *               status:
+ *                 type: string
+ *                 description: Product status
+ *                 enum: [active, inactive]
+ *                 example: active
+ *     responses:
+ *       200:
+ *         description: Product updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     productName:
+ *                       type: string
+ *                       example: Pepsi
+ *                     categoryName:
+ *                       type: string
+ *                       example: Beverages
+ *                     packageType:
+ *                       type: string
+ *                       example: Carton
+ *                     packageQuantity:
+ *                       type: number
+ *                       example: 10
+ *                     unitPerPackage:
+ *                       type: number
+ *                       example: 24
+ *                     unitPrice:
+ *                       type: number
+ *                       example: 350
+ *                     reorderLevel:
+ *                       type: number
+ *                       example: 20
+ *                     status:
+ *                       type: string
+ *                       example: active
+ *       403:
+ *         description: Forbidden - only admin or manager can perform this action
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You are not authorised to perform this action!
+ *       404:
+ *         description: Product or category not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Product not found!
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Please login again.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Something went wrong
+ */
+
+router.put('/product/:productId', authentication, updateProduct);
 
 
 module.exports = router

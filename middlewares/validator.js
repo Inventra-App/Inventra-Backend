@@ -138,9 +138,9 @@ exports.createStaffValidator = (req, res, next) => {
             'string.email':'Email must be a valid email',
             }),
             
-        role: joi.string().valid('cashier', 'manager').required().messages({
+        role: joi.string().valid('sales', 'manager').required().messages({
                 'string.empty': 'Role is required',
-                'any.only': 'Role must be either cashier or manager',
+                'any.only': 'Role must be either sales or manager',
                 'any.required': 'Role is required'
             }),
     });
@@ -158,7 +158,18 @@ exports.createStaffValidator = (req, res, next) => {
 
 exports.addProductValidator = (req, res, next) => {
     const schema = Joi.object({
-        productName: Joi.string().trim().min(2).max(100).required(),
+productName: joi.string()
+    .trim()
+    .min(2)
+    .max(100)
+    .pattern(/^[A-Za-z0-9\s\-_()]+$/)
+    .required()
+    .messages({
+        'string.empty': 'Product name is required',
+        'string.min': 'Product name must be at least 2 characters',
+        'string.max': 'Product name must not exceed 100 characters',
+        'string.pattern.base': 'Product name contains invalid characters'
+    }),
 
         categoryId: Joi.string()
             .custom((value, helpers) => {

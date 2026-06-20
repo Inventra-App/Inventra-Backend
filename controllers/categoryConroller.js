@@ -169,6 +169,7 @@ exports.deleteCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
         const { id: userId, role } = req.user;
+        console.log(`here: `, id)
 
         const supermarketId = await filterRole(userId, role);
 

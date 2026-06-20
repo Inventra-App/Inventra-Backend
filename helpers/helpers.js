@@ -65,8 +65,6 @@ exports.generateBatchCode = () => {
 //     return " "
 // }
 
-
-
 exports.padStart = (tableLength) => {
     return (tableLength + 1).toString().padStart(3, '0');
 };
@@ -107,7 +105,7 @@ exports.filterRole = async (id, role) => {
         throw new Error('Staff or associated supermarket not found');
     }
 
-    return staff.adminId.toString();
+    return staff.adminId;
 }
 
 

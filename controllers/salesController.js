@@ -116,6 +116,7 @@ exports.checkoutSale = async (req, res, next) => {
             totalAmount += subtotal;
 
             inventory.availableStock -= quantity;
+            inventory.totalStock -= quantity;
             await inventory.save();
 
             saleItems.push({
@@ -132,7 +133,7 @@ exports.checkoutSale = async (req, res, next) => {
         // console.log(totalItems)
         const saleCount = await saleModel.countDocuments({ supermarketId })
         const supermarket = await SupermarketModel.findById(supermarketId)
-        const saleNumber = `${generateUserSlug(supermarket.firstName, saleCount)}-${padStart(saleCount)}`
+        const saleNumber = `${generateUserSlug(supermarket.firstName, saleCount)}`
 
         // console.log(saleItems)
         // console.log(count)

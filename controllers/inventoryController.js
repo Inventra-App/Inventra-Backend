@@ -371,8 +371,7 @@ exports.recordStockEntry = async (req, res, next) => {
             });
         }
 
-        const supermarketId = await filterRole(id, role);
-
+        const supermarketId = await filterRole(id, role); 
         const {
             productId,
             supplier,
@@ -451,9 +450,8 @@ exports.recordStockEntry = async (req, res, next) => {
         inventoryItem.availableStock += availableStock;
         inventoryItem.reservedStock += reservedStock;
 
-        // Always derive total stock
-        inventoryItem.totalStock =
-            inventoryItem.availableStock + inventoryItem.reservedStock;
+        // Add only the new stock received
+        inventoryItem.totalStock += totalIncomingStock;
 
         await inventoryItem.save();
 

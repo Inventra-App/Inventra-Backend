@@ -5,6 +5,7 @@ const ProductModel = require('../models/product');
 const UserModel = require('../models/supermarket');
 const { getPagination } = require('../helpers/pagination');
 const { filterRole } = require('../helpers/helpers');
+const { logActivity } = require('../helpers/helpers');
 
 
 
@@ -40,7 +41,7 @@ exports.createCategory = async (req, res, next) => {
             module: 'CATEGORY',
             description: `Created category ${newCategory.categoryName}`,
             entityId: newCategory._id
-        });
+        }).then(console.log("didthis?"));
 
         res.status(201).json({
             message: 'Category added successfully',
@@ -144,7 +145,7 @@ exports.updateCategory = async (req, res, next) => {
 
         await category.save();
 
-        await logActivity({
+        const info = await logActivity({
             supermarket: supermarketId,
             user: userId,
             title: 'Updated category',
@@ -157,6 +158,7 @@ exports.updateCategory = async (req, res, next) => {
             message: 'Category updated successfully',
             data: category
         });
+        console.log(info)
 
     } catch (error) {
         console.log(error);
@@ -167,14 +169,14 @@ exports.updateCategory = async (req, res, next) => {
 
 exports.deleteCategory = async (req, res, next) => {
     try {
-        const { id } = req.params;
+        const { categoryId } = req.params;
         const { id: userId, role } = req.user;
-        console.log(`here: `, id)
+        console.log(`here: `, categoryId)
 
         const supermarketId = await filterRole(userId, role);
 
         const category = await CategoryModel.findOne({
-            _id: id,
+            _id: categoryId,
             supermarketId
         });
 
@@ -185,7 +187,7 @@ exports.deleteCategory = async (req, res, next) => {
         }
 
         const productCount = await ProductModel.countDocuments({
-            categoryId: id,
+            categoryId,
             supermarketId
         });
 
@@ -195,7 +197,10 @@ exports.deleteCategory = async (req, res, next) => {
             });
         }
 
-        await CategoryModel.findByIdAndDelete(id);
+        await CategoryModel.findByIdAndDelete({
+            _id: categoryId,
+            supermarketId
+        });
 
         await logActivity({
             supermarket: supermarketId,

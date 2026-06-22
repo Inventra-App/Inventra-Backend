@@ -154,7 +154,7 @@ exports.logActivity = async ({
     amount = null,
     entityId = null,
     action = null,
-    entity = null
+    entity = null 
 }) => {
     await ActivityLog.create({
         supermarket,

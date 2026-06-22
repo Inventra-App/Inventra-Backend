@@ -10,9 +10,7 @@ exports.getLowStock = async (req, res, next) => {
         const data = await checkLowStock(supermarketId);
 
         if (!data.length) {
-            return res.status(404).json({
-                message: 'No low stock products found'
-            });
+            return [];
         }
 
         res.status(200).json({

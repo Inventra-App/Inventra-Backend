@@ -165,7 +165,7 @@ exports.loginStaff = async (req, res, next) => {
         )
 
         await logActivity({
-            supermarket: staff.supermarketId || null,
+            supermarket: staff.adminId || null,
             user: staff._id,
             title: 'Login successful',
             module: 'AUTH',

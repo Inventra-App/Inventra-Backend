@@ -50,7 +50,14 @@ exports.createStaff = async (req, res, next) => {
             role
         }); 
         console.log(staff)
-        const link = 'https://inventra-backend-212y.onrender.com/api/v1/documentation/#/supermarket/post_api_v1_login'
+        await staff.save()
+        
+        const roleLinks = {
+            manager: 'https://inventra-frontend-lmm6.vercel.app/staff-login',
+            cashier: 'https://inventra-frontend-lmm6.vercel.app/cashier-login'
+        };
+
+        const link = roleLinks[staff.role];
 
         const info = process.env.NODE_ENV
         if (info === "production") {
@@ -63,7 +70,6 @@ exports.createStaff = async (req, res, next) => {
             })
         }
 
-        await staff.save()
 
         res.status(201).json({
             message: "Staff created successfully",  

@@ -1,4 +1,5 @@
 const InventoryModel = require('../models/inventory');
+const ProductModel = require('../models/product');
 
 let lowStockCache = {};
 
@@ -16,6 +17,10 @@ const checkLowStock = async (supermarketId) => {
             return [];
         }
 
+        const product = await ProductModel.find({
+            supermarketId
+        })
+
         const products = lowStockItems.map(item => {
             let stockLevel = 'LOW';
 
@@ -25,7 +30,7 @@ const checkLowStock = async (supermarketId) => {
 
             return {
                 productId: item.productId?._id,
-                productName: item.productId?.productName || 'Unknown Product',
+                productName: product.productName || 'Unknown Product',
                 totalStock: item.totalStock,
                 availableStock: item.availableStock,
                 reservedStock: item.reservedStock,

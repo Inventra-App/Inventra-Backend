@@ -24,10 +24,18 @@ exports.addProducts = async (req, res, next) => {
             productName,
             categoryId,
             packageType,
-            packageQuantity,
-            unitPerPackage,
             unitPrice,
+            availableStock,
+            reservedStock,
             expiryDate
+
+            // productName,
+            // categoryId,
+            // packageType,
+            // packageQuantity,
+            // unitPerPackage,
+            // unitPrice,
+            // expiryDate
         } = req.body;
 
         
@@ -89,16 +97,29 @@ exports.addProducts = async (req, res, next) => {
         await newInventoryInput.save()
         console.log(`INVENTORY: `, inventoryInput)
 
-        const batch = {
+         
+          
+           const batch = {
+
             supermarketId,
             inventoryId: newInventoryInput._id,
             productId: newProduct._id,
             batchCode: code,
-            quantity: unitPerPackage * packageQuantity,
-            quantityRemaining: unitPerPackage * packageQuantity,
+            quantity: totalStock,
+            quantityRemaining: totalStock,
             unitCost: newProduct.unitPrice,
             expiryDate,
             createdBy: id
+
+            // supermarketId,
+            // inventoryId: newInventoryInput._id,
+            // productId: newProduct._id,
+            // batchCode: code,
+            // quantity: unitPerPackage * packageQuantity,
+            // quantityRemaining: unitPerPackage * packageQuantity,
+            // unitCost: newProduct.unitPrice,
+            // expiryDate,
+            // createdBy: id
         }
 
         const newBatch = new BatchModel(batch);
@@ -379,28 +400,28 @@ exports.recordStockEntry = async (req, res, next) => {
             packageType,
             packageQuantity,
             unitPerPackage,
-            availableStock,
-            reservedStock
+            // availableStock,
+            // reservedStock
         } = req.body;
 
         const totalIncomingStock = packageQuantity * unitPerPackage;
-        const allocatedStock = availableStock + reservedStock;
+        // const allocatedStock = availableStock + reservedStock;
 
-        // Prevent over-allocation
-        if (allocatedStock > totalIncomingStock) {
-            return res.status(400).json({
-                message: 'Allocated stock exceeds total incoming stock'
-            });
-        }
+        // // Prevent over-allocation
+        // if (allocatedStock > totalIncomingStock) {
+        //     return res.status(400).json({
+        //         message: 'Allocated stock exceeds total incoming stock'
+        //     });
+        // }
 
-        // Prevent under-allocation
-        if (allocatedStock < totalIncomingStock) {
-            return res.status(400).json({
-                message: `Stock allocation is incomplete. Remaining ${
-                    totalIncomingStock - allocatedStock
-                } units unallocated`
-            });
-        }
+        // // Prevent under-allocation
+        // if (allocatedStock < totalIncomingStock) {
+        //     return res.status(400).json({
+        //         message: `Stock allocation is incomplete. Remaining ${
+        //             totalIncomingStock - allocatedStock
+        //         } units unallocated`
+        //     });
+        // }
 
         const inventoryItem = await InventoryModel.findOne({
             productId,

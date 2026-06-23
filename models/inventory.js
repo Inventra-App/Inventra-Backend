@@ -59,6 +59,8 @@ const InventorySchema = new mongoose.Schema(
   }
 );
 
+
+
 InventorySchema.virtual('status').get(function () {
     if (this.totalStock <= 0) return 'out-of-stock';
     if (this.totalStock <= 10) return 'low-stock';

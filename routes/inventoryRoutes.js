@@ -34,15 +34,15 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  *           example: Beverages
  *         totalStock:
  *           type: number
- *           description: Total stock calculated from unitPerPackage x packageQuantity
+ *           description: Virtual total stock calculated as availableStock + backroomStock
  *           example: 240
  *         availableStock:
  *           type: number
  *           description: Stock currently available
  *           example: 240
- *         reservedStock:
+ *         backroomStock:
  *           type: number
- *           description: Stock currently reserved
+ *           description: Stock allocated to backroom storage
  *           example: 0
  *         updatedBy:
  *           type: string
@@ -71,12 +71,12 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  * @swagger
  * /api/v1/product:
  *   post:
- *     summary: Add a new product to inventory
+ *     summary: Add a new product with inventory and batch
  *     tags: [Inventory]
  *     description: >
- *       Admin or Manager only. Creates a new product, inventory record, and batch
- *       all in one request. Auto-generates SKU and batch code.
- *       Total stock is calculated as unitPerPackage x packageQuantity.
+ *       Admin or Manager only. Creates a product, inventory record, and initial batch.
+ *       SKU and batch code are auto-generated.
+ *       totalStock is a virtual field computed as availableStock + backroomStock.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -93,39 +93,49 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  *               - unitPerPackage
  *               - unitPrice
  *               - expiryDate
+ *               - availableStock
+ *               - backroomStock
  *             properties:
  *               productName:
  *                 type: string
- *                 description: Name of the product
  *                 example: Coca Cola
+ *
  *               categoryId:
  *                 type: string
- *                 description: ID of the category this product belongs to
  *                 example: 64abc123def456ghi789
+ *
  *               packageType:
  *                 type: string
- *                 description: Type of packaging
  *                 example: Carton
+ *
  *               packageQuantity:
  *                 type: number
- *                 description: Number of packages being added
  *                 example: 10
+ *
  *               unitPerPackage:
  *                 type: number
- *                 description: Number of units in each package
  *                 example: 24
+ *
  *               unitPrice:
  *                 type: number
- *                 description: Price per unit
  *                 example: 300
+ *
  *               expiryDate:
  *                 type: string
  *                 format: date
- *                 description: Expiry date of this batch
  *                 example: 2027-01-01
+ *
+ *               availableStock:
+ *                 type: number
+ *                 example: 240
+ *
+ *               backroomStock:
+ *                 type: number
+ *                 example: 0
+ *
  *     responses:
  *       201:
- *         description: Product added successfully with inventory and batch records created
+ *         description: Product, inventory and batch created successfully
  *         content:
  *           application/json:
  *             schema:
@@ -133,123 +143,67 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Product added sucessfully
+ *                   example: Product added successfully
+ *
  *                 data:
  *                   type: object
  *                   properties:
  *                     productDetails:
  *                       type: object
- *                       description: The newly created product
  *                       properties:
  *                         productName:
  *                           type: string
- *                           example: Coca Cola
  *                         SKU:
  *                           type: string
- *                           example: SKU-CC-001
  *                         categoryName:
  *                           type: string
- *                           example: Beverages
+ *                         batchCode:
+ *                           type: string
  *                         packageType:
  *                           type: string
- *                           example: Carton
  *                         packageQuantity:
  *                           type: number
- *                           example: 10
  *                         unitPerPackage:
  *                           type: number
- *                           example: 24
  *                         unitPrice:
  *                           type: number
- *                           example: 300
- *                         status:
- *                           type: string
- *                           example: active
+ *
  *                     inventory:
  *                       type: object
- *                       description: The newly created inventory record
  *                       properties:
- *                         totalStock:
- *                           type: number
- *                           example: 240
  *                         availableStock:
  *                           type: number
- *                           example: 240
- *                         reservedStock:
+ *                         backroomStock:
  *                           type: number
- *                           example: 0
+ *                         totalStock:
+ *                           type: number
+ *                           description: Virtual field (availableStock + backroomStock)
+ *
  *                     batch:
  *                       type: object
- *                       description: The newly created batch record
  *                       properties:
  *                         batchCode:
  *                           type: string
- *                           example: BATCH-2026-001
  *                         quantity:
  *                           type: number
- *                           example: 240
  *                         quantityRemaining:
  *                           type: number
- *                           example: 240
  *                         unitCost:
  *                           type: number
- *                           example: 300
  *                         expiryDate:
  *                           type: string
- *                           example: 2027-01-01
- *                         status:
- *                           type: string
- *                           example: active
+ *
  *       400:
  *         description: Product already exists
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Product details already exist. Please move to ... to update the product
+ *
  *       403:
- *         description: Forbidden - only admin or manager can perform this action
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: You are not authorised to perform this action!
+ *         description: Unauthorized role (admin or manager only)
+ *
  *       404:
  *         description: Category not found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Category not found!
- *       401:
- *         description: Unauthorized - invalid or missing token
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Access denied. Please login again.
+ *
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Something went wrong
  */
 
 router.post('/product', authentication, addProducts);
@@ -258,21 +212,24 @@ router.post('/product', authentication, addProducts);
  * @swagger
  * /api/v1/p/move/{inventoryId}:
  *   put:
- *     summary: Move stock between inventory states
+ *     summary: Move stock between available and backroom inventory
  *     tags: [Inventory]
  *     description: >
- *       Admin or Manager only. Moves stock between available and reserved stock,
- *       or allocates stock from total stock into available stock.
+ *       Admin or Manager only. Moves stock between availableStock and backroomStock.
+ *       Ensures stock integrity and prevents overdrawing from either location.
+ *       totalStock is virtual and not modified (availableStock + backroomStock).
  *     security:
  *       - bearerAuth: []
+ *
  *     parameters:
  *       - in: path
  *         name: inventoryId
  *         required: true
  *         schema:
  *           type: string
- *         description: The inventory record ID
+ *         description: Inventory record ID
  *         example: 64abc123def456ghi789
+ *
  *     requestBody:
  *       required: true
  *       content:
@@ -280,27 +237,27 @@ router.post('/product', authentication, addProducts);
  *           schema:
  *             type: object
  *             required:
- *               - actionType
  *               - moveFrom
  *               - moveTo
  *               - quantity
  *             properties:
- *               actionType:
- *                 type: string
- *                 description: Type of stock movement
- *                 example: transfer
  *               moveFrom:
  *                 type: string
  *                 description: Source stock location
+ *                 enum: [available stock, backroom stock]
  *                 example: available stock
+ *
  *               moveTo:
  *                 type: string
  *                 description: Destination stock location
- *                 example: reserved stock
+ *                 enum: [available stock, backroom stock]
+ *                 example: backroom stock
+ *
  *               quantity:
  *                 type: number
  *                 description: Quantity of stock to move
  *                 example: 50
+ *
  *     responses:
  *       200:
  *         description: Stock moved successfully
@@ -311,19 +268,23 @@ router.post('/product', authentication, addProducts);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Stock moved successfully
+ *                   example: Items moved successfully
  *                 data:
  *                   type: object
  *                   properties:
- *                     totalStock:
- *                       type: number
- *                       example: 240
  *                     availableStock:
  *                       type: number
  *                       example: 190
- *                     reservedStock:
+ *
+ *                     backroomStock:
  *                       type: number
  *                       example: 50
+ *
+ *                     totalStock:
+ *                       type: number
+ *                       description: Virtual field (availableStock + backroomStock)
+ *                       example: 240
+ *
  *       400:
  *         description: Invalid request or insufficient stock
  *         content:
@@ -333,9 +294,10 @@ router.post('/product', authentication, addProducts);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Insufficient stock to move
+ *                   example: Not enough products
+ *
  *       403:
- *         description: Forbidden - only admin or manager can perform this action
+ *         description: Forbidden - only admin or manager allowed
  *         content:
  *           application/json:
  *             schema:
@@ -344,8 +306,9 @@ router.post('/product', authentication, addProducts);
  *                 message:
  *                   type: string
  *                   example: You are not authorised to perform this action
+ *
  *       404:
- *         description: Inventory record not found
+ *         description: Inventory not found
  *         content:
  *           application/json:
  *             schema:
@@ -354,18 +317,12 @@ router.post('/product', authentication, addProducts);
  *                 message:
  *                   type: string
  *                   example: Product does not exist or has been changed
+ *
  *       401:
  *         description: Unauthorized - invalid or missing token
+ *
  *       500:
  *         description: Internal server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Something went wrong
  */
 
 router.put('/p/move/:inventoryId', authentication, moveProducts);
@@ -378,7 +335,7 @@ router.put('/p/move/:inventoryId', authentication, moveProducts);
  *     tags: [Inventory]
  *     description: >
  *       Fetches all inventory records in the supermarket, including stock details
- *       like total stock, available stock, reserved stock, and product information.
+ *       like total stock, available stock, backroom stock, and product information.
  *       Accessible to authenticated users.
  *     security:
  *       - bearerAuth: []
@@ -410,7 +367,7 @@ router.put('/p/move/:inventoryId', authentication, moveProducts);
  *                       availableStock:
  *                         type: number
  *                         example: 200
- *                       reservedStock:
+ *                       backroomStock:
  *                         type: number
  *                         example: 40
  *                       createdAt:
@@ -459,12 +416,15 @@ router.get('/i/all', authentication, getAllItems);
  * @swagger
  * /api/v1/stock/entry:
  *   post:
- *     summary: Record incoming stock entry
- *     description: Creates a new batch and updates inventory stock allocation.
- *     tags:
- *       - Inventory
+ *     summary: Record incoming stock delivery (restock inventory)
+ *     tags: [Inventory]
+ *     description: >
+ *       Admin or Manager only. Records a new stock delivery, creates a batch,
+ *       and updates backroom stock. totalStock is a virtual field
+ *       (availableStock + backroomStock).
  *     security:
  *       - bearerAuth: []
+ *
  *     requestBody:
  *       required: true
  *       content:
@@ -472,49 +432,105 @@ router.get('/i/all', authentication, getAllItems);
  *           schema:
  *             type: object
  *             required:
- *               - productId
+ *               - inventoryId
  *               - supplier
  *               - expiryDate
  *               - packageType
  *               - packageQuantity
  *               - unitPerPackage
- *               - availableStock
- *               - reservedStock
  *             properties:
- *               productId:
+ *               inventoryId:
  *                 type: string
- *                 example: 685f1234567890abc1234567
+ *                 example: 64abc123def456ghi789
+ *
  *               supplier:
  *                 type: string
  *                 example: Emzor Pharmaceuticals
+ *
  *               expiryDate:
  *                 type: string
  *                 format: date
  *                 example: 2026-12-31
+ *
  *               packageType:
  *                 type: string
  *                 example: Carton
+ *
  *               packageQuantity:
  *                 type: number
  *                 example: 10
+ *
  *               unitPerPackage:
  *                 type: number
  *                 example: 5
- *               availableStock:
- *                 type: number
- *                 example: 30
- *               reservedStock:
- *                 type: number
- *                 example: 20
+ *
  *     responses:
  *       201:
- *         description: Stock recorded successfully
+ *         description: Stock entry recorded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Stock entry recorded successfully
+ *
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     batch:
+ *                       type: object
+ *
+ *                     inventory:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         availableStock:
+ *                           type: number
+ *                         backroomStock:
+ *                           type: number
+ *                         totalStock:
+ *                           type: number
+ *                           description: Virtual field (availableStock + backroomStock)
+ *
+ *                     summary:
+ *                       type: object
+ *                       properties:
+ *                         message:
+ *                           type: string
+ *                           example: "Stock Entry: 50 units received from Emzor Pharmaceuticals"
+ *
+ *                         product:
+ *                           type: string
+ *
+ *                         previousStock:
+ *                           type: number
+ *
+ *                         updatedStock:
+ *                           type: number
+ *
+ *                         availableStock:
+ *                           type: number
+ *
+ *                         backroomStock:
+ *                           type: number
+ *
  *       400:
- *         description: Invalid stock allocation
+ *         description: Invalid stock entry
+ *
  *       403:
- *         description: Unauthorized
+ *         description: Forbidden - only admin or manager allowed
+ *
  *       404:
- *         description: Product not found
+ *         description: Inventory or product not found
+ *
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *
+ *       500:
+ *         description: Internal server error
  */
 router.post('/stock/entry', authentication, restockItem)
 

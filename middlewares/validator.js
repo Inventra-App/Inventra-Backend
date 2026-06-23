@@ -187,6 +187,109 @@ exports.createStaffValidator = (req, res, next) => {
     next();
 };
 
+exports.addProductValidator = (req, res, next) => {
+    const schema = Joi.object({
+        productName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'Product name is required',
+            'string.min': 'Product name must be at least 2 characters'
+        }),
+        categoryId: objectIdValidator.required().messages({
+            'any.invalid': 'Category ID must be a valid ObjectId',
+            'any.required': 'Category ID is required'
+        }),
+        packageType: Joi.string().trim().required().messages({
+            'string.empty': 'Package type is required'
+        }),
+        packageQuantity: Joi.number().integer().min(1).required().messages({
+            'number.base': 'Package quantity must be a number',
+            'number.min': 'Package quantity must be at least 1',
+            'any.required': 'Package quantity is required'
+        }),
+        unitPerPackage: Joi.number().integer().min(1).required().messages({
+            'number.base': 'Units per package must be a number',
+            'number.min': 'Units per package must be at least 1',
+            'any.required': 'Units per package is required'
+        }),
+        unitPrice: Joi.number().min(0).required().messages({
+            'number.base': 'Unit price must be a number',
+            'number.min': 'Unit price cannot be negative',
+            'any.required': 'Unit price is required'
+        }),
+        expiryDate: Joi.date().iso().required().messages({
+            'date.base': 'Expiry date must be a valid date',
+            'date.format': 'Expiry date must be in ISO format (YYYY-MM-DD)',
+            'any.required': 'Expiry date is required'
+        }),
+        availableStock: Joi.number().integer().min(0).optional().messages({
+            'number.base': 'Available stock must be a number',
+            'number.min': 'Available stock cannot be negative'
+        }),
+        backroomStock: Joi.number().integer().min(0).optional().messages({
+            'number.base': 'Backroom stock must be a number',
+            'number.min': 'Backroom stock cannot be negative'
+        })
+    }).custom((value, helpers) => {
+        const totalIncomingStock = value.packageQuantity * value.unitPerPackage;
+        const availableStock = value.availableStock ?? 0;
+        const backroomStock = value.backroomStock ?? 0;
+
+        if (value.availableStock !== undefined || value.backroomStock !== undefined) {
+            if (availableStock + backroomStock !== totalIncomingStock) {
+                return helpers.message(
+                    `Initial stock allocation must equal total incoming stock of ${totalIncomingStock} units`
+                );
+            }
+        }
+
+        return value;
+    }, 'Stock allocation validation');
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.moveProductsValidator = (req, res, next) => {
+    const schema = Joi.object({
+        actionType: Joi.string().trim().required().messages({
+            'string.empty': 'Action type is required'
+        }),
+        moveFrom: Joi.string().trim().required().messages({
+            'string.empty': 'Move from field is required'
+        }),
+        moveTo: Joi.string().trim().required().messages({
+            'string.empty': 'Move to field is required'
+        }),
+        quantity: Joi.number().integer().min(1).required().messages({
+            'number.base': 'Quantity must be a number',
+            'number.min': 'Quantity must be at least 1',
+            'any.required': 'Quantity is required'
+        })
+    }).custom((value, helpers) => {
+        if (value.moveFrom.toLowerCase() === value.moveTo.toLowerCase()) {
+            return helpers.message('moveFrom and moveTo cannot be the same');
+        }
+
+        return value;
+    }, 'Move validation');
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
 exports.loginStaffValidator = (req, res, next) => {
     const schema = Joi.object({
         email: Joi.string().trim().lowercase().email().required(),

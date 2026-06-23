@@ -26,6 +26,8 @@ exports.addProducts = async (req, res, next) => {
             packageType,
             packageQuantity,
             unitPerPackage,
+            availableStock,
+            backroomStock,
             unitPrice,
             expiryDate
         } = req.body;
@@ -43,15 +45,16 @@ exports.addProducts = async (req, res, next) => {
         console.log(ifProduct)
         if (ifProduct) {
             return res.status(400).json({
-                message: `Product details already exist. Please move to ... to update the product`
+                message: `Product details already exist. Please go to "Manage stock" to update the product`
             })
         }
 
-        const productCount = await BatchModel.countDocuments()
-        console.log(productCount)
+        const batchCount = await BatchModel.countDocuments({supermarketId})
+        const productCount = await BatchModel.countDocuments({supermarketId})
         const productId = generateUserSlug(productName, productCount)
+        console.log(productCount)
         console.log(productId)
-        const code = `${generateBatchCode()}${padStart(productCount)}`;
+        const code = `${generateBatchCode()}${padStart(batchCount)}`;
         console.log(code)
 
         // const checkProduct = await InventoryModel.
@@ -80,9 +83,8 @@ exports.addProducts = async (req, res, next) => {
             productName: newProduct.productName,
             SKU: newProduct.SKU,
             categoryName: newProduct.categoryName,
-            totalStock: unitPerPackage * packageQuantity,
-            // availableStock: unitPerPackage * packageQuantity,
-            reservedStock: 0,
+            availableStock,
+            backroomStock,
             updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
         const newInventoryInput = new InventoryModel(inventoryInput);
@@ -170,31 +172,20 @@ exports.moveProducts = async (req, res, next) => {
         }
 
         inventory.availableStock = inventory.availableStock || 0;
-        inventory.reservedStock = inventory.reservedStock || 0;
+        inventory.backroomStock = inventory.backroomStock || 0;
 
-        if (moveFrom.toLowerCase() === 'all stock' && moveTo.toLowerCase() === 'available stock') {
+        if (moveFrom.toLowerCase() === 'backroom stock' && moveTo.toLowerCase() === 'available stock') {
 
-            if (inventory.availableStock + quantity > inventory.totalStock) {
+            if (inventory.backroomStock < quantity) {
                 return res.status(400).json({
                     message: `Not enough products`
                 });
             }
 
-            inventory.availableStock += quantity;
-            inventory.reservedStock = inventory.totalStock - inventory.availableStock;
-
-        } else if (moveFrom.toLowerCase() === 'reserved stock' && moveTo.toLowerCase() === 'available stock') {
-
-            if (inventory.reservedStock < quantity) {
-                return res.status(400).json({
-                    message: `Not enough products`
-                });
-            }
-
-            inventory.reservedStock -= quantity;
+            inventory.backroomStock -= quantity;
             inventory.availableStock += quantity;
 
-        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'reserved stock') {
+        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'backroom stock') {
 
             if (inventory.availableStock < quantity) {
                 return res.status(400).json({
@@ -203,7 +194,7 @@ exports.moveProducts = async (req, res, next) => {
             }
 
             inventory.availableStock -= quantity;
-            inventory.reservedStock += quantity;
+            inventory.backroomStock += quantity;
         }
         console.log(inventory);
         await inventory.save();
@@ -241,7 +232,7 @@ exports.getAllItems = async (req, res, next) => {
         }
 
         res.status(200).json({
-            message: `Product details fetched sucessfully`,
+            message: `Inventory item details fetched sucessfully`,
             data: items
         })
     } catch (error) {
@@ -269,23 +260,23 @@ exports.getAllItems = async (req, res, next) => {
 //             packageQuantity,
 //             unitPerPackage,
 //             availableStock,
-//             reservedStock,
+//             backroomStock,
 //         } = req.body;
 
 //         const totalIncomingStock = unitPerPackage * packageQuantity;
 
 //         // Block invalid stock allocation
-//         if ((availableStock + reservedStock) > totalIncomingStock) {
+//         if ((availableStock + backroomStock) > totalIncomingStock) {
 //             return res.status(400).json({
 //                 message: `Allocated stock exceeds total incoming stock`
 //             });
 //         }
 
 //         // Block incomplete allocation
-//         if ((availableStock + reservedStock) < totalIncomingStock) {
+//         if ((availableStock + backroomStock) < totalIncomingStock) {
 //             return res.status(400).json({
 //                 message: `Stock allocation is incomplete. Remaining ${
-//                     totalIncomingStock - (availableStock + reservedStock)
+//                     totalIncomingStock - (availableStock + backroomStock)
 //                 } units unallocated`
 //             });
 //         }
@@ -325,7 +316,7 @@ exports.getAllItems = async (req, res, next) => {
         
 //         inventoryItem.totalStock += newBatch.quantity;
 //         inventoryItem.availableStock += availableStock;
-//         inventoryItem.reservedStock += reservedStock;
+//         inventoryItem.backroomStock += backroomStock;
 
 //         await inventoryItem.save()
         
@@ -349,7 +340,7 @@ exports.getAllItems = async (req, res, next) => {
 //                     previousStock,
 //                     updatedStock: inventoryItem.totalStock,
 //                     availableStock: inventoryItem.availableStock,
-//                     reservedStock: inventoryItem.reservedStock
+//                     backroomStock: inventoryItem.backroomStock
 //                 }
 //              }
 //         })
@@ -361,7 +352,7 @@ exports.getAllItems = async (req, res, next) => {
 //     }
 // }
 
-exports.recordStockEntry = async (req, res, next) => {
+exports.restockItem = async (req, res, next) => {
     try {
         const { id, role } = req.user;
 
@@ -373,37 +364,18 @@ exports.recordStockEntry = async (req, res, next) => {
 
         const supermarketId = await filterRole(id, role); 
         const {
-            productId,
+            inventoryId,
             supplier,
             expiryDate,
             packageType,
             packageQuantity,
-            unitPerPackage,
-            availableStock,
-            reservedStock
+            unitPerPackage
         } = req.body;
 
         const totalIncomingStock = packageQuantity * unitPerPackage;
-        const allocatedStock = availableStock + reservedStock;
-
-        // Prevent over-allocation
-        if (allocatedStock > totalIncomingStock) {
-            return res.status(400).json({
-                message: 'Allocated stock exceeds total incoming stock'
-            });
-        }
-
-        // Prevent under-allocation
-        if (allocatedStock < totalIncomingStock) {
-            return res.status(400).json({
-                message: `Stock allocation is incomplete. Remaining ${
-                    totalIncomingStock - allocatedStock
-                } units unallocated`
-            });
-        }
 
         const inventoryItem = await InventoryModel.findOne({
-            productId,
+            _id: inventoryId,
             supermarketId
         });
 
@@ -413,6 +385,7 @@ exports.recordStockEntry = async (req, res, next) => {
             });
         }
 
+        const productId = inventoryItem.productId;
         const product = await ProductModel.findOne({
             _id: productId,
             supermarketId
@@ -422,8 +395,8 @@ exports.recordStockEntry = async (req, res, next) => {
             return res.status(404).json({
                 message: 'Product not found'
             });
-        }
-
+        }         
+        
         const previousStock = inventoryItem.totalStock;
 
         const batchCount = await BatchModel.countDocuments({
@@ -446,13 +419,7 @@ exports.recordStockEntry = async (req, res, next) => {
             createdBy: id
         });
 
-        // Update stock safely
-        inventoryItem.availableStock += availableStock;
-        inventoryItem.reservedStock += reservedStock;
-
-        // Add only the new stock received
-        inventoryItem.totalStock += totalIncomingStock;
-
+        inventoryItem.backroomStock += totalIncomingStock;
         await inventoryItem.save();
 
         await logActivity({
@@ -475,7 +442,7 @@ exports.recordStockEntry = async (req, res, next) => {
                     previousStock,
                     updatedStock: inventoryItem.totalStock,
                     availableStock: inventoryItem.availableStock,
-                    reservedStock: inventoryItem.reservedStock
+                    backroomStock: inventoryItem.backroomStock
                 }
             }
         });

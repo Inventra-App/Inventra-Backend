@@ -51,7 +51,7 @@ const ProductModel = require('../models/product');
 //                 inventory: {
 //                     totalStock: batch.inventoryId?.totalStock || 0,
 //                     availableStock: batch.inventoryId?.availableStock || 0,
-//                     reservedStock: batch.inventoryId?.reservedStock || 0
+//                     backroomStock: batch.inventoryId?.backroomStock || 0
 //                 }
 //             })
 
@@ -66,7 +66,7 @@ const ProductModel = require('../models/product');
 //                 inventory: {
 //                     totalStock: batch.inventoryId?.totalStock || 0,
 //                     availableStock: batch.inventoryId?.availableStock || 0,
-//                     reservedStock: batch.inventoryId?.reservedStock || 0
+//                     backroomStock: batch.inventoryId?.backroomStock || 0
 //                 }
 //             };
 //         });
@@ -128,7 +128,7 @@ exports.checkExpiringProducts = async (supermarketId) => {
                 inventory: {
                     totalStock: batch.inventoryId?.totalStock || 0,
                     availableStock: batch.inventoryId?.availableStock || 0,
-                    reservedStock: batch.inventoryId?.reservedStock || 0
+                    backroomStock: batch.inventoryId?.backroomStock || 0
                 }
             };
         });

@@ -42,29 +42,6 @@ exports.generateBatchCode = () => {
    return `BTH-${year}${month}${day}-`
 }
 
-// let count = 0;
-
-// exports.padStart = (tableLength) => {
-//     if (tableLength === 0) {
-//         count++
-//         return `00${count}`
-//     } else {
-//         tableLength += 4;
-//         return `00${tableLength}`
-//     }
-//     return ""
-// }
-
-// exports.generateUserSlug = (name, tableLength) => {
-//     if (name) {
-//         let splitedName = name.toUpperCase().split(" ")
-//         return `${splitedName[0].slice(0, 3)}-${splitedName[1].slice(0, 3)}-${exports.padStart(tableLength)}`
-//     } else {
-//         console.log(`Requires a string and a number as parameters!`)
-//     }
-//     return " "
-// }
-
 exports.padStart = (tableLength) => {
     return (tableLength + 1).toString().padStart(3, '0');
 };

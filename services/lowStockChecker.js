@@ -36,7 +36,7 @@
 //                 productName: product.productName,
 //                 totalStock: item.totalStock,
 //                 availableStock: item.availableStock,
-//                 reservedStock: item.reservedStock,
+//                 backroomStock: item.backroomStock,
 //                 stockLevel
 //             });
 //             return {
@@ -44,7 +44,7 @@
 //                 productName: product.productName,
 //                 totalStock: item.totalStock,
 //                 availableStock: item.availableStock,
-//                 reservedStock: item.reservedStock,
+//                 backroomStock: item.backroomStock,
 //                 stockLevel
 //             };
 
@@ -107,7 +107,7 @@ const checkLowStock = async (supermarketId) => {
                     productName: product?.productName,
                     totalStock: item.totalStock,
                     availableStock: item.availableStock,
-                    reservedStock: item.reservedStock,
+                    backroomStock: item.backroomStock,
                     stockLevel
                 });
 
@@ -116,7 +116,7 @@ const checkLowStock = async (supermarketId) => {
                     productName: product?.productName,
                     totalStock: item.totalStock,
                     availableStock: item.availableStock,
-                    reservedStock: item.reservedStock,
+                    backroomStock: item.backroomStock,
                     stockLevel
                 };
             })

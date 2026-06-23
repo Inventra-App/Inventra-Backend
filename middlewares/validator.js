@@ -2,7 +2,7 @@ const Joi = require('joi');
 const mongoose = require('mongoose');
 
 const passwordPattern =
-/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
 
 const objectIdValidator = Joi.string().custom((value, helpers) => {
     if (!mongoose.isValidObjectId(value)) {
@@ -11,8 +11,56 @@ const objectIdValidator = Joi.string().custom((value, helpers) => {
     return value;
 });
 
-const validate = (schema, source = 'body') => (req, res, next) => {
-    const { error } = schema.validate(req[source], { abortEarly: false });
+exports.signUpValidator = (req, res, next) => {
+    const schema = Joi.object({
+        firstName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'First name is required',
+            'string.min': 'First name must be at least 2 characters'
+        }),
+
+        lastName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'Last name is required',
+            'string.min': 'Last name must be at least 2 characters'
+        }),
+
+        email: Joi.string().email().required().messages({
+            'string.empty': 'Email is required',
+            'string.email': 'Please provide a valid email address'
+        }),
+
+        businessName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'Business name is required',
+            'string.min': 'Business name must be at least 2 characters'
+        }),
+
+        phoneNumber: Joi.string()
+            .pattern(/^\d{10,15}$/)
+            .required()
+            .messages({
+                'string.empty': 'Phone number is required',
+                'string.pattern.base':
+                    'Phone number must be between 10 and 15 digits'
+            }),
+
+        password: Joi.string()
+            .pattern(passwordPattern)
+            .required()
+            .messages({
+                'string.empty': 'Password is required',
+                'string.pattern.base':
+                    'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character'
+            }),
+
+        confirmPassword: Joi.string()
+            .valid(Joi.ref('password'))
+            .required()
+            .messages({
+                'string.empty': 'Confirm password is required',
+                'any.only': 'Passwords do not match'
+            })
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
         return res.status(400).json({
@@ -23,59 +71,74 @@ const validate = (schema, source = 'body') => (req, res, next) => {
     next();
 };
 
-exports.signUpValidator = validate(
-    Joi.object({
-        firstName: Joi.string().trim().min(2).required(),
-        lastName: Joi.string().trim().min(2).required(),
-        email: Joi.string().email().required(),
-        businessName: Joi.string().trim().min(2).required(),
-        phoneNumber: Joi.string().pattern(/^\d{10,15}$/).required(),
-
-        password: Joi.string()
-            .pattern(passwordPattern)
-            .required()
-            .messages({
-                'string.pattern.base':
-                    'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character'
-            }),
-
-        confirmPassword: Joi.string()
-            .valid(Joi.ref('password'))
-            .required()
-            .messages({
-                'any.only': 'Passwords do not match'
-            })
-    })
-);
-
-exports.verifyUserValidator = validate(
-    Joi.object({
+exports.verifyUserValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().email().required(),
         otp: Joi.string().pattern(/^\d{6}$/).required()
-    })
-);
+    });
 
-exports.resendOtpValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.resendOtpValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().email().required()
-    })
-);
+    });
 
-exports.loginValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.loginValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().email().required(),
         password: Joi.string().required()
-    })
-);
+    });
 
-exports.forgotPasswordValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.forgotPasswordValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().email().required()
-    })
-);
+    });
 
-exports.resetPasswordValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.resetPasswordValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().email().required(),
 
         password: Joi.string()
@@ -92,108 +155,89 @@ exports.resetPasswordValidator = validate(
             .messages({
                 'any.only': 'Passwords do not match'
             })
-    })
-);
+    });
 
-exports.createStaffValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.createStaffValidator = (req, res, next) => {
+    const schema = Joi.object({
         firstName: Joi.string().trim().min(2).max(50).required(),
         lastName: Joi.string().trim().min(2).max(50).required(),
         email: Joi.string().email().required(),
         role: Joi.string().valid('cashier', 'manager').required()
-    })
-);
+    });
 
-// exports.addProductValidator = validate(
-//     Joi.object({
-//         productName: Joi.string().trim().min(2).max(100).required(),
-//         categoryId: objectIdValidator.required(),
-//         packageType: Joi.string().required(),
-//         packageQuantity: Joi.number().min(1).required(),
-//         unitPerPackage: Joi.number().min(1).required(),
-//         unitPrice: Joi.number().min(0).required(),
-//         expiryDate: Joi.date().greater('now').required(),
-//         supplier: Joi.string().trim().min(2).optional()
-//     })
-// );
+    const { error } = schema.validate(req.body, { abortEarly: false });
 
-// exports.createCategoryValidator = validate(
-//     Joi.object({
-//         categoryName: Joi.string().trim().min(3).max(50).required(),
-//         description: Joi.string().trim().min(5).max(200).required()
-//     })
-// );
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
 
-// exports.moveProductsValidator = validate(
-//     Joi.object({
-//         actionType: Joi.string().required(),
-//         moveFrom: Joi.string()
-//             .valid('all stock', 'available stock', 'reserved stock')
-//             .required(),
-//         moveTo: Joi.string()
-//             .valid('available stock', 'reserved stock')
-//             .required(),
-//         quantity: Joi.number().integer().positive().required()
-//     })
-// );
+    next();
+};
 
-// exports.recordStockEntryValidator = validate(
-//     Joi.object({
-//         productId: objectIdValidator.required(),
-//         supplier: Joi.string().trim().min(2).required(),
-//         expiryDate: Joi.date().greater('now').required(),
-//         packageType: Joi.string().required(),
-//         packageQuantity: Joi.number().integer().positive().required(),
-//         unitPerPackage: Joi.number().integer().positive().required()
-//     })
-// );
-
-// exports.checkoutSaleValidator = validate(
-//     Joi.object({
-//         paymentMethod: Joi.string()
-//             .valid('cash', 'card', 'transfer')
-//             .required(),
-
-//         items: Joi.array()
-//             .items(
-//                 Joi.object({
-//                     productId: objectIdValidator.required(),
-//                     quantity: Joi.number().integer().positive().required()
-//                 })
-//             )
-//             .min(1)
-//             .required()
-//     })
-// );
-
-// exports.batchIdValidator = validate(
-//     Joi.object({
-//         id: objectIdValidator.required()
-//     }),
-//     'params'
-// );
-
-exports.loginStaffValidator = validate(
-    Joi.object({
+exports.loginStaffValidator = (req, res, next) => {
+    const schema = Joi.object({
         email: Joi.string().trim().lowercase().email().required(),
         password: Joi.string().required()
-    })
-);
+    });
 
-exports.createSubscriptionPlanValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.createSubscriptionPlanValidator = (req, res, next) => {
+    const schema = Joi.object({
         subscriptionName: Joi.string().trim().required(),
         price: Joi.number().min(0).required(),
         billingCycle: Joi.string().valid('monthly', 'yearly').required(),
         maxStaff: Joi.number().min(1).required()
-    })
-);
+    });
 
-exports.contactUsValidator = validate(
-    Joi.object({
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.contactUsValidator = (req, res, next) => {
+    const schema = Joi.object({
         firstName: Joi.string().trim().required(),
         email: Joi.string().trim().lowercase().email().required(),
         phoneNumber: Joi.string().pattern(/^\d{10,15}$/).required(),
         message: Joi.string().trim().min(10).required()
-    })
-);
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};

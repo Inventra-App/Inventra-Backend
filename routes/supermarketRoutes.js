@@ -1,10 +1,20 @@
+
 const router = require('express').Router();
-// const rateLimiter = require('../middleware/rateLimiter');
-const { signUp, verifyUser, resendOTP, login, forgotPassword, resetPassword, loginWithGoogle, addBusinessName, logout, verifyPasswordOtp } = require('../controllers/supermarketController');
+const {
+  signUp,
+  verifyUser,
+  resendOTP,
+  login,
+  forgotPassword,
+  resetPassword,
+  loginWithGoogle,
+  addBusinessName,
+  logout,
+  verifyPasswordOtp
+} = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 const { profile, loginProfile } = require('../middlewares/passport')
 const { authentication } = require('../middlewares/auth')
-
 
 /**
  * @swagger
@@ -521,7 +531,7 @@ router.post('/reset', resetPasswordValidator, resetPassword);
  */
 router.patch('/business-name', authentication, addBusinessName)
 
-/**
+/** 
  * @swagger
  * /api/v1/logout:
  *   post:

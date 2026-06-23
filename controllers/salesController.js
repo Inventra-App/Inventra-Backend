@@ -116,7 +116,6 @@ exports.checkoutSale = async (req, res, next) => {
             totalAmount += subtotal;
 
             inventory.availableStock -= quantity;
-            inventory.totalStock -= quantity;
             await inventory.save();
 
             saleItems.push({

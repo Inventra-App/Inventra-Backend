@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { addProducts, moveProducts, getAllItems, recordStockEntry } = require('../controllers/inventoryController');
+const { addProducts, moveProducts, getAllItems, restockItem } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
 const { addProductValidator, moveProductsValidator, recordStockEntryValidator } = require('../middlewares/validator');
 
@@ -516,6 +516,6 @@ router.get('/i/all', authentication, getAllItems);
  *       404:
  *         description: Product not found
  */
-router.post('/stock/entry', authentication, recordStockEntry)
+router.post('/stock/entry', authentication, restockItem)
 
 module.exports = router;

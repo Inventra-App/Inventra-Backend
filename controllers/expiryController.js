@@ -1,8 +1,13 @@
-const { getExpiringProducts } = require('../services/expiryChecker');
+const { checkExpiringProducts } = require('../services/expiryChecker');
+const { filterRole } = require('../helpers/helpers');
 
 exports.fetchExpiringProducts = async (req, res, next) => {
     try {
-        const products = getExpiringProducts();
+        const { id, role } = req.user;
+
+        const supermarketId = await filterRole(id, role);
+
+        const products = await checkExpiringProducts(supermarketId);
 
         res.status(200).json({
             message: 'Expiring products fetched successfully',
@@ -11,6 +16,7 @@ exports.fetchExpiringProducts = async (req, res, next) => {
         });
 
     } catch (error) {
+        console.log(error);
         next(error);
     }
 };

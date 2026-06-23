@@ -416,7 +416,7 @@ exports.resendOtpTemplate = (userName, otp) => {
 `
 }
 
-exports.staffInviteTemplate = (firstName, username, password, loginLink) => {
+exports.staffInviteTemplate = (firstName, email, password, loginLink) => {
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -462,7 +462,7 @@ exports.staffInviteTemplate = (firstName, username, password, loginLink) => {
 
 							<!-- Credentials -->
 							<p style="margin:10px 0; color:#374151; font-size:15px;">
-								<strong>Username:</strong> ${username}
+								<strong>Email:</strong> ${email}
 							</p>
 
 							<p style="margin:10px 0; color:#374151; font-size:15px;">

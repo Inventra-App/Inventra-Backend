@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const { Router } = require('express')
-const {getAllItems, getOneProduct, updateProduct} = require('../controllers/productController')
+const {getAllProducts, getOneProduct, updateProduct} = require('../controllers/productController')
 const {authentication} = require('../middlewares/auth')
 const { authenticate } = require('passport')
 
@@ -118,7 +118,7 @@ const { authenticate } = require('passport')
  *                   example: Something went wrong
  */
 
-router.get('/getAll', authentication ,getAllItems)
+router.get('/getAll', authentication ,getAllProducts)
 
 /**
  * @swagger
@@ -182,10 +182,80 @@ router.get('/getAll', authentication ,getAllItems)
  *                   example: Something went wrong
  */
 
+router.get('/getOne/:id', authentication ,getOneProduct);
 
-
-
-router.get('/getOne/:id', authentication ,getOneProduct)
+// /**
+//  * @swagger
+//  * /api/v1/products/category/{categoryId}:
+//  *   get:
+//  *     summary: Get all products by category
+//  *     description: Returns all products under a specific category for the authenticated supermarket.
+//  *     tags:
+//  *       - Products
+//  *     security:
+//  *       - bearerAuth: []
+//  *     parameters:
+//  *       - in: path
+//  *         name: categoryId
+//  *         required: true
+//  *         schema:
+//  *           type: string
+//  *         description: The ID of the category
+//  *         example: 685f1234567890abc1234567
+//  *     responses:
+//  *       200:
+//  *         description: Products fetched successfully
+//  *         content:
+//  *           application/json:
+//  *             schema:
+//  *               type: object
+//  *               properties:
+//  *                 message:
+//  *                   type: string
+//  *                   example: Products fetched successfully
+//  *                 total:
+//  *                   type: number
+//  *                   example: 5
+//  *                 data:
+//  *                   type: array
+//  *                   items:
+//  *                     type: object
+//  *                     properties:
+//  *                       _id:
+//  *                         type: string
+//  *                         example: 685f1234567890abc1234568
+//  *                       productName:
+//  *                         type: string
+//  *                         example: Maltina Can
+//  *                       categoryId:
+//  *                         type: string
+//  *                         example: 685f1234567890abc1234567
+//  *                       packageType:
+//  *                         type: string
+//  *                         example: carton
+//  *                       packageQuantity:
+//  *                         type: number
+//  *                         example: 24
+//  *                       unitPerPackage:
+//  *                         type: number
+//  *                         example: 6
+//  *                       unitPrice:
+//  *                         type: number
+//  *                         example: 350
+//  *                       supplier:
+//  *                         type: string
+//  *                         example: Nigerian Breweries
+//  *                       createdAt:
+//  *                         type: string
+//  *                         format: date-time
+//  *       404:
+//  *         description: No products found for this category
+//  *       401:
+//  *         description: Unauthorized - Token missing or invalid
+//  *       500:
+//  *         description: Internal server error
+//  */
+// router.get('/products/category/:categoryId', authentication, getProductsByCategory);
 
 /**
  * @swagger

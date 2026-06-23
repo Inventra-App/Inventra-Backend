@@ -45,13 +45,13 @@ const productSchema = new mongoose.Schema(
 
     packageQuantity: {
       type: Number,
-      required: true,
+      // required: true,
       min: 1
     },
 
     unitPerPackage: {
       type: Number,
-      required: true,
+      // required: true,
       min: 1
     },
 

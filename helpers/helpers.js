@@ -65,17 +65,19 @@ exports.generateBatchCode = () => {
 //     return " "
 // }
 
-
-
 exports.padStart = (tableLength) => {
     return (tableLength + 1).toString().padStart(3, '0');
 };
 
 exports.generateUserSlug = (name, tableLength) => {
-    const parts = name.trim().toUpperCase().split(' ');
+    if (typeof name !== 'string') {
+        throw new Error('Name must be a string');
+    }
+
+    const parts = name.trim().toUpperCase().split(/\s+/);
 
     if (parts.length < 2) {
-        throw new Error('Name must contain at least two words');
+        return `${parts[0].slice(0, 3)}-INV-${exports.padStart(tableLength)}`;
     }
 
     return `${parts[0].slice(0, 3)}-${parts[1].slice(0, 3)}-${exports.padStart(tableLength)}`;
@@ -92,17 +94,76 @@ exports.mapPricesAndAddSale = (serviceArray) => {
 
 const staffModel = require('../models/staff')
 
-let SId;
 exports.filterRole = async (id, role) => {
     console.log(id)
     if (role === 'admin') {
-        return id
-    } else {
-        const staff = await staffModel.findById(id);
-        Sid = staff.adminId
-        const extId = Sid.toString()
-        // console.log(Sid.toString())
-        return extId;
+        return id;
     }
-    return " ";
+
+    const staff = await staffModel.findById(id);
+    if (!staff || !staff.adminId) {
+        throw new Error('Staff or associated supermarket not found');
+    }
+
+    return staff.adminId;
 }
+
+
+
+exports.findStaff = async (id) => {
+    const staff =  await staffModel.findById(id)
+    return staff.firstName
+}
+
+// const logActivity = async () => {
+
+// }
+
+
+// let description = '';
+
+// switch (action) {
+//     case 'PRODUCT_CREATED':
+//         description = `${role} created product ${details.name}`;
+//         break;
+
+//     case 'SALE_COMPLETED':
+//         description = `${role} completed sale worth ₦${details.totalAmount}`;
+//         break;
+
+//     case 'STAFF_CREATED':
+//         description = `${role} invited new staff ${details.staffName}`;
+//         break;
+
+//     case 'CATEGORY_CREATED':
+//         description = `${role} created category ${details.categoryName}`;
+//         break;
+
+//     default:
+//         description = `${role} performed ${action}`;
+// }
+
+const ActivityLog = require('../models/activityLog');
+
+exports.logActivity = async ({
+    supermarket,
+    user,
+    title,
+    module,
+    description,
+    amount = null,
+    entityId = null,
+    action = null,
+    entity = null 
+}) => {
+    await ActivityLog.create({
+        supermarket,
+        user,
+        action: action || title,
+        module,
+        entity: entity || module,
+        description,
+        amount,
+        entityId
+    });
+};

@@ -53,7 +53,22 @@ const batchSchema = new mongoose.Schema({
       required: true
     },
 
-    status: {
+    packageType: {
+    type: String,
+    trim: true
+   },
+
+   packageQuantity: {
+    type: Number,
+    min: 1
+   },
+
+   unitPerPackage: {
+    type: Number,
+    min: 1
+  },
+
+  status: {
       type: String,
       enum: [
         'active',

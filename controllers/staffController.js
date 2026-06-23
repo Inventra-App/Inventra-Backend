@@ -2,6 +2,7 @@ const staffModel = require('../models/staff');
 const SupermarketModel = require('../models/supermarket');
 const { staffInviteTemplate } = require('../helpers/emailTemplates');
 const { brevo } = require('../helpers/brevo');
+const { logActivity } = require('../helpers/helpers');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otp = require('otp-generator');
@@ -49,20 +50,26 @@ exports.createStaff = async (req, res, next) => {
             role
         }); 
         console.log(staff)
-        const link = 'http://localhost:7878/api/v1/documentation/#/Staff/post_api_v1_staff_login'
+        await staff.save()
+        
+        const roleLinks = {
+            manager: 'https://inventra-frontend-lmm6.vercel.app/staff-login',
+            cashier: 'https://inventra-frontend-lmm6.vercel.app/cashier-login'
+        };
+
+        const link = roleLinks[staff.role];
 
         const info = process.env.NODE_ENV
         if (info === "production") {
-             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.username, genPass, link))   
+             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.email, genPass, link))   
         } else{
              await sendMail({
                 email: staff.email, 
                 subject: 'Welcome', 
-                html: staffInviteTemplate(staff.firstName, staff.username, genPass, link)
+                html: staffInviteTemplate(staff.firstName, staff.email, genPass, link)
             })
         }
 
-        await staff.save()
 
         res.status(201).json({
             message: "Staff created successfully",  
@@ -74,10 +81,6 @@ exports.createStaff = async (req, res, next) => {
         next(error)
     }
 };
-
-
-
-
 
 // previous code 
 // exports.createStaff = async (req, res, next) => {
@@ -136,9 +139,9 @@ exports.createStaff = async (req, res, next) => {
 
 exports.loginStaff = async (req, res, next) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
         
-        const staff = await staffModel.findOne({ username: username.toLowerCase() });
+        const staff = await staffModel.findOne({ email: email.toLowerCase() });
         if (!staff) {
             return res.status(404).json({
                 message: `Invalid credentials. Please contact your administrator.`
@@ -167,6 +170,15 @@ exports.loginStaff = async (req, res, next) => {
             { expiresIn: '1day' }
         )
 
+        await logActivity({
+            supermarket: staff.adminId || null,
+            user: staff._id,
+            title: 'Login successful',
+            module: 'AUTH',
+            description: `Staff login successful for ${staff.firstName}`,
+            entityId: staff._id
+        });
+
         res.status(200).json({
             message: `Login sucesssful. You may pass!`,
             data: staff,
@@ -188,3 +200,32 @@ exports.requestPasswordChange = async (req, res, next) => {
         next(error)
     }
 }
+
+exports.getAllStaff = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+
+        const supermarketId = await filterRole(id, role);
+
+        const staff = await UserModel.find({
+            supermarketId,
+            role: { $in: ['manager', 'cashier'] }
+        }).select('-password');
+
+        if (!staff.length) {
+            return res.status(404).json({
+                message: 'No staff found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Staff fetched successfully',
+            count: staff.length,
+            data: staff
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};  

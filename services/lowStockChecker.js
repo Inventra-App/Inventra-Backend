@@ -1,119 +1,130 @@
-const InventoryModel = require('../models/inventory');
-const { sendMail } = require('../helpers/brevo');
+// const InventoryModel = require('../models/inventory');
+// const ProductModel = require('../models/product');
 
-// const checkLowStock = async () => {
+// let lowStockCache = {};
+
+// const checkLowStock = async (supermarketId) => {
 //     try {
 //         const LOW_STOCK_LIMIT = 10;
 
-//         return await InventoryModel.find({
-//             availableStock: { $lte: LOW_STOCK_LIMIT }
+//         const lowStockItems = await InventoryModel.find({
+//             supermarketId,
+//             totalStock: { $lte: LOW_STOCK_LIMIT }
 //         }).populate('productId');
 
 //         if (!lowStockItems.length) {
-//             console.log('No low stock products found.');
+//             lowStockCache[supermarketId] = [];
 //             return [];
 //         }
 
-//         for (const item of lowStockItems) {
+//         const productId = lowStockItems.find( product => product.productId )
+
+//         const products = lowStockItems.map(async item => {
 //             let stockLevel = 'LOW';
 
 //             if (item.availableStock <= 5) {
 //                 stockLevel = 'CRITICAL';
 //             }
 
+//             const product = await ProductModel.find({
+//                 productId,
+//                 supermarketId
+//             })
+
 //             console.log({
-//                 product: item.productId.name,
+//                 productId: item.productId?._id,
+//                 productName: product.productName,
 //                 totalStock: item.totalStock,
 //                 availableStock: item.availableStock,
 //                 reservedStock: item.reservedStock,
 //                 stockLevel
 //             });
+//             return {
+//                 productId: item.productId?._id,
+//                 productName: product.productName,
+//                 totalStock: item.totalStock,
+//                 availableStock: item.availableStock,
+//                 reservedStock: item.reservedStock,
+//                 stockLevel
+//             };
 
-//             await sendMail({
-//                 to: process.env.ADMIN_EMAIL,
-//                 subject: `Low Stock Alert - ${item.productId.name}`,
-//                 text: `
-//             Product: ${item.productId.name}
-//             Category: ${item.categoryName}
-//             Total Stock: ${item.totalStock}
-//             Available Stock: ${item.availableStock}
-//             Reserved Stock: ${item.reservedStock}
-//             Stock Level: ${stockLevel}
+//         });
 
-//          Please restock this product.
-//                 `
-//             });
-//         }
+//         lowStockCache[supermarketId] = products;
 
-//         return lowStockItems;
+//         return products;
 
 //     } catch (error) {
-//         console.log(error);
-//          throw error;
+//         console.log(error.message);
+//         throw error;
 //     }
 // };
 
-// module.exports = {checkLowStock};
+// const getLowStock = (supermarketId) => {
+//     return lowStockCache[supermarketId] || [];
+// };
+
+// module.exports = {
+//     checkLowStock,
+//     getLowStock
+// };
 
 
+const InventoryModel = require('../models/inventory');
+const ProductModel = require('../models/product');
 
-// const InventoryModel = require('../models/inventory');
-// const { sendMail } = require('../helpers/brevo');
+let lowStockCache = {};
 
-let lowStockCache = [];
-
-const checkLowStock = async () => {
+const checkLowStock = async (supermarketId) => {
     try {
         const LOW_STOCK_LIMIT = 10;
 
         const lowStockItems = await InventoryModel.find({
+            supermarketId,
             totalStock: { $lte: LOW_STOCK_LIMIT }
         }).populate('productId');
 
         if (!lowStockItems.length) {
-            console.log('No low stock products found.');
-            lowStockCache = [];
+            lowStockCache[supermarketId] = [];
             return [];
         }
 
-        lowStockCache = lowStockItems.map(item => {
-            let stockLevel = 'LOW';
+        const products = await Promise.all(
+            lowStockItems.map(async (item) => {
+                let stockLevel = 'LOW';
 
-            if (item.availableStock <= 5) {
-                stockLevel = 'CRITICAL';
-            }
+                if (item.availableStock <= 5) {
+                    stockLevel = 'CRITICAL';
+                }
 
-            return {
-                productId: item.productId?._id,
-                productName: item.productId?.productName || 'Unknown Product',
-                categoryName: item.categoryName,
-                totalStock: item.totalStock,
-                availableStock: item.availableStock,
-                reservedStock: item.reservedStock,
-                stockLevel
-            };
-        });
+                const product = await ProductModel.findOne({
+                    _id: item.productId._id,
+                    supermarketId
+                });
 
-        console.log(lowStockCache);
+                console.log({
+                    productId: item.productId?._id,
+                    productName: product?.productName,
+                    totalStock: item.totalStock,
+                    availableStock: item.availableStock,
+                    reservedStock: item.reservedStock,
+                    stockLevel
+                });
 
-//         for (const item of lowStockCache) {
-//             await sendMail({
-//                 to: process.env.ADMIN_EMAIL,
-//                 subject: `Low Stock Alert - ${item.productName}`,
-//                 text: `
-// Product: ${item.productName}
-// Category: ${item.categoryName}
-// Total Stock: ${item.totalStock}
-// Available Stock: ${item.availableStock}
-// Reserved Stock: ${item.reservedStock}
-// Stock Level: ${item.stockLevel}
+                return {
+                    productId: item.productId?._id,
+                    productName: product?.productName,
+                    totalStock: item.totalStock,
+                    availableStock: item.availableStock,
+                    reservedStock: item.reservedStock,
+                    stockLevel
+                };
+            })
+        );
 
-// Please restock this product.
-//                 `
-//             });
-//         }
+        lowStockCache[supermarketId] = products;
 
-        return lowStockCache;
+        return products;
 
     } catch (error) {
         console.log(error.message);
@@ -121,8 +132,8 @@ const checkLowStock = async () => {
     }
 };
 
-const getLowStock = () => {
-    return lowStockCache;
+const getLowStock = (supermarketId) => {
+    return lowStockCache[supermarketId] || [];
 };
 
 module.exports = {

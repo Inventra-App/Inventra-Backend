@@ -3,8 +3,9 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale } = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug} = require('../helpers/helpers');
 const { getPagination } = require('../helpers/pagination');
+const SupermarketModel = require('../models/supermarket');
 
 // exports.createSale = async (req, res, next) => {
 //     try {
@@ -94,7 +95,7 @@ exports.checkoutSale = async (req, res, next) => {
         for (const item of items) {
             const { productId, quantity } = item; 
 
-            const product = await ProductModel.findById(productId);
+            const product = await ProductModel.findOne({ _id: productId, supermarketId });
             // console.log(product)
             if (!product) {
                 return res.status(404).json({
@@ -102,7 +103,7 @@ exports.checkoutSale = async (req, res, next) => {
                 });
             }
 
-            const inventory = await InventoryModel.findOne({productId: productId});
+            const inventory = await InventoryModel.findOne({ productId: productId, supermarketId });
             console.log(inventory)
             if ( inventory.availableStock < quantity ) {
                 return res.status(400).json({
@@ -115,6 +116,7 @@ exports.checkoutSale = async (req, res, next) => {
             totalAmount += subtotal;
 
             inventory.availableStock -= quantity;
+            inventory.totalStock -= quantity;
             await inventory.save();
 
             saleItems.push({
@@ -129,8 +131,9 @@ exports.checkoutSale = async (req, res, next) => {
         }
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
         // console.log(totalItems)
-        const saleCount = await saleModel.countDocuments()
-        const saleNumber = padStart(saleCount)
+        const saleCount = await saleModel.countDocuments({ supermarketId })
+        const supermarket = await SupermarketModel.findById(supermarketId)
+        const saleNumber = `${generateUserSlug(supermarket.firstName, saleCount)}`
 
         // console.log(saleItems)
         // console.log(count)
@@ -151,6 +154,16 @@ exports.checkoutSale = async (req, res, next) => {
                 ...item
             }))
         );
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Completed sale',
+            module: 'SALE',
+            description: `Sold ${totalItems} items for ₦${totalAmount}`,
+            amount: totalAmount,
+            entityId: sale._id
+        });
+     
 
         console.log(saleItems)
 
@@ -170,7 +183,9 @@ exports.checkoutSale = async (req, res, next) => {
 
 exports.countSales = async (req, res, next) => {
     try {
-        const totalSales = await saleModel.countDocuments();
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const totalSales = await saleModel.countDocuments({ supermarketId });
 
         if (!totalSales) {
             return res.status(404).json({
@@ -188,14 +203,15 @@ exports.countSales = async (req, res, next) => {
     }
 }
 
-
 exports.getAllSales = async (req, res, next) => {
     try {
         const { page, limit, skip } = getPagination(req);
 
-        const totalSales = await saleModel.countDocuments();
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const totalSales = await saleModel.countDocuments({ supermarketId });
 
-        const sales = await saleModel.find()
+        const sales = await saleModel.find({ supermarketId })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
@@ -228,7 +244,9 @@ exports.getAllSales = async (req, res, next) => {
 };
 exports.countSalesAmount = async (req, res, next) => {
     try {
-        const salesAmount = await saleModel.find();
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const salesAmount = await saleModel.find({ supermarketId });
         const totalSalesAmount = mapPricesAndAddSale(salesAmount)
         console.log(totalSalesAmount)
 

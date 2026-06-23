@@ -1,11 +1,10 @@
 const InventoryModel = require('../models/inventory');
 const SupermarketModel = require('../models/supermarket');
 const CategoryModel = require('../models/category');
-const { generateBatchCode, padStart, generateUserSlug, filterRole } = require('../helpers/helpers');
+const { generateBatchCode, padStart, generateUserSlug, filterRole, logActivity } = require('../helpers/helpers');
 const staffModel = require('../models/staff');
 const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
-const { getPagination } = require('../helpers/pagination');
 
 
 
@@ -25,14 +24,22 @@ exports.addProducts = async (req, res, next) => {
             productName,
             categoryId,
             packageType,
-            packageQuantity,
-            unitPerPackage,
             unitPrice,
+            availableStock,
+            reservedStock,
             expiryDate
+
+            // productName,
+            // categoryId,
+            // packageType,
+            // packageQuantity,
+            // unitPerPackage,
+            // unitPrice,
+            // expiryDate
         } = req.body;
 
         
-        const ifCategory = await CategoryModel.findById(categoryId)
+        const ifCategory = await CategoryModel.findOne({ _id: categoryId, supermarketId })
         console.log(ifCategory)
         if (!ifCategory) {
             return res.status(404).json({
@@ -40,7 +47,7 @@ exports.addProducts = async (req, res, next) => {
             })
         }
 
-        const ifProduct = await ProductModel.findOne({productName: productName})
+        const ifProduct = await ProductModel.findOne({ productName: productName, supermarketId })
         console.log(ifProduct)
         if (ifProduct) {
             return res.status(400).json({
@@ -81,29 +88,52 @@ exports.addProducts = async (req, res, next) => {
             productName: newProduct.productName,
             SKU: newProduct.SKU,
             categoryName: newProduct.categoryName,
-            totalStock: unitPerPackage * packageQuantity, 
+            totalStock: unitPerPackage * packageQuantity,
+            // availableStock: unitPerPackage * packageQuantity,
+            reservedStock: 0,
             updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         }
         const newInventoryInput = new InventoryModel(inventoryInput);
         await newInventoryInput.save()
         console.log(`INVENTORY: `, inventoryInput)
 
-        const batch = {
+         
+          
+           const batch = {
+
             supermarketId,
             inventoryId: newInventoryInput._id,
             productId: newProduct._id,
             batchCode: code,
-            quantity: unitPerPackage * packageQuantity,
-            quantityRemaining: unitPerPackage * packageQuantity,
+            quantity: totalStock,
+            quantityRemaining: totalStock,
             unitCost: newProduct.unitPrice,
             expiryDate,
             createdBy: id
+
+            // supermarketId,
+            // inventoryId: newInventoryInput._id,
+            // productId: newProduct._id,
+            // batchCode: code,
+            // quantity: unitPerPackage * packageQuantity,
+            // quantityRemaining: unitPerPackage * packageQuantity,
+            // unitCost: newProduct.unitPrice,
+            // expiryDate,
+            // createdBy: id
         }
 
         const newBatch = new BatchModel(batch);
         await newBatch.save()
         console.log(`BATCH: `, batch)
 
+        await logActivity({
+            supermarket: supermarketId,
+            user: req.user.id,
+            title: 'Created product',
+            module: 'INVENTORY',
+            description: `Added ${newProduct.productName} with ${newBatch.quantity} units`,
+            entityId: newProduct._id
+        });
 
         res.status(201).json({
             message: `Product added sucessfully`,
@@ -114,6 +144,7 @@ exports.addProducts = async (req, res, next) => {
             }
         })
 
+
     } catch (error) {
         console.log(error)
         next(error)
@@ -123,7 +154,7 @@ exports.addProducts = async (req, res, next) => {
 exports.moveProducts = async (req, res, next) => {
     try {
         const { id, role } = req.user;
-           if (role === 'admin' && role === 'sales') {
+        if (role !== 'admin' && role !== 'manager') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
             })
@@ -135,12 +166,21 @@ exports.moveProducts = async (req, res, next) => {
         const { actionType, moveFrom, moveTo, quantity } = req.body;
         const { inventoryId } = req.params;
 
-        const inventory = await InventoryModel.findById(inventoryId);
+        const inventory = await InventoryModel.findOne({ _id: inventoryId, supermarketId });
         if (!inventory) {
             return res.status(404).json({
                 message: `product does not exist or has been changed`
             })
         }
+
+        const product = await ProductModel.findOne({ _id: inventory.productId, supermarketId });
+        if (!product) {
+            return res.status(404).json({
+                message: `Product not found`
+            })
+        }
+
+        const oldQuantity = inventory.availableStock || 0;
 
         console.log(inventory)
 
@@ -189,6 +229,16 @@ exports.moveProducts = async (req, res, next) => {
         console.log(inventory);
         await inventory.save();
 
+        const newQuantity = inventory.availableStock || 0;
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Updated stock',
+            module: 'INVENTORY',
+            description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
+            entityId: product._id
+        });
+
         res.status(200).json({
             message: `Items moved sucesfully`,
             data: inventory
@@ -199,81 +249,133 @@ exports.moveProducts = async (req, res, next) => {
     }
 }
 
-
 exports.getAllItems = async (req, res, next) => {
-    try {
-        const { page, limit, skip } = getPagination(req);
+   try { 
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const items = await InventoryModel.find({ supermarketId });
 
-        const totalProducts = await InventoryModel.countDocuments();
-
-        const items = await InventoryModel.find()
-            .skip(skip)
-            .limit(limit);
-
-        if (items.length === 0) {
+        if (!items) {
             return res.status(404).json({
-                message: 'No products found'
-            });
+                message: `Nothing found here. Please upload your products`
+            })
         }
 
-        const totalPages = Math.ceil(totalProducts / limit);
-
         res.status(200).json({
-            message: 'Products fetched successfully',
-            data: items,
-            pagination: {
-                currentPage: page,
-                perPage: limit,
-                totalProducts,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPreviousPage: page > 1
-            }
-        });
-
+            message: `Product details fetched sucessfully`,
+            data: items
+        })
     } catch (error) {
-        console.log(error);
-        next(error);
+        console.log(error)
+        next(error)
     }
-};
+}
 
+// exports.recordStockEntry = async (req, res, next) => {
+//     try {
+//         const { id, role } = req.user;
 
-
-
-
-
-
-
-// exports.getAllItems = async (req, res, next) => {
-//    try { 
-//         const items = await InventoryModel.find();
-
-//          const page = parseInt(req.query.page) || 1;
-//         const limit = parseInt(req.query.limit) || 5;
-//         const skip = (page - 1) * limit;
-
-
-//         const [items, total] = await Promise.all([
-//             InventoryModel.find(filter)
-//                 .sort({ createdAt: -1 }) // Show newest items first
-//                 .skip(skip)
-//                 .limit(limit)
-//                 .lean(), // Converts Mongoose docs to plain JSON (faster)
-//             InventoryModel.countDocuments(filter)
-//         ]);
-
-
-
-//         if (!items.length === 0) {
-//             return res.status(404).json({
-//                 message: `Nothing found here. Please upload your products`
+//         if (role !== 'admin' && role !== 'manager') {
+//             return res.status(403).json({
+//                 message: `You are not authorised to perform this action!`
 //             })
+//         };
+//         const supermarketId = await filterRole(id, role);
+
+//         const {
+//             productId,
+//             supplier,
+//             expiryDate,
+//             packageType,
+//             packageQuantity,
+//             unitPerPackage,
+//             availableStock,
+//             reservedStock,
+//         } = req.body;
+
+//         const totalIncomingStock = unitPerPackage * packageQuantity;
+
+//         // Block invalid stock allocation
+//         if ((availableStock + reservedStock) > totalIncomingStock) {
+//             return res.status(400).json({
+//                 message: `Allocated stock exceeds total incoming stock`
+//             });
 //         }
 
-//         res.status(200).json({
-//             message: `Product details fetched sucessfully`,
-//             data: items
+//         // Block incomplete allocation
+//         if ((availableStock + reservedStock) < totalIncomingStock) {
+//             return res.status(400).json({
+//                 message: `Stock allocation is incomplete. Remaining ${
+//                     totalIncomingStock - (availableStock + reservedStock)
+//                 } units unallocated`
+//             });
+//         }
+
+
+
+//         const inventoryItem = await InventoryModel.findOne({ productId: productId, supermarketId })
+//         const previousStock = inventoryItem?.totalStock;
+//         console.log(inventoryItem)
+//         if (!inventoryItem) {
+//             return res.status(404).json({
+//                 message: `Product not found`
+//             })
+//         }
+//         const checkProduct = await ProductModel.findOne({ _id: inventoryItem.productId, supermarketId })
+//         const productCount = await BatchModel.countDocuments()
+//         console.log(productCount)
+
+//         const code = `${generateBatchCode()}${padStart(productCount)}`;
+//         console.log(code)
+
+//         const newBatch = new BatchModel({
+//             supermarketId,
+//             inventoryId: inventoryItem._id,
+//             productId: inventoryItem.productId,
+//             batchCode: code,
+//             supplier,
+//             quantity: totalIncomingStock,
+//             quantityRemaining: totalIncomingStock,
+//             unitCost: checkProduct.unitPrice,
+//             expiryDate,
+//             createdBy: id
 //         })
+
+//         console.log(newBatch)
+//         await newBatch.save()
+        
+//         inventoryItem.totalStock += newBatch.quantity;
+//         inventoryItem.availableStock += availableStock;
+//         inventoryItem.reservedStock += reservedStock;
+
+//         await inventoryItem.save()
+        
+//         await logActivity({
+//             supermarket: supermarketId,
+//             user: id,
+//             title: 'Recorded delivery',
+//             module: 'INVENTORY',
+//             description: `Received ${totalIncomingStock} units of ${checkProduct.productName} from ${supplier}`,
+//             entityId: newBatch._id
+//         });
+
+//         res.status(201).json({
+//             message: `Done`,
+//             data: {
+//                 newBatch,
+//                 product: inventoryItem, 
+//                 success: {
+//                     message: `Stock Entry: ${totalIncomingStock} units revieved from ${supplier}`,
+//                     product: checkProduct.productName,
+//                     previousStock,
+//                     updatedStock: inventoryItem.totalStock,
+//                     availableStock: inventoryItem.availableStock,
+//                     reservedStock: inventoryItem.reservedStock
+//                 }
+//              }
+//         })
+
+
 //     } catch (error) {
 //         console.log(error)
 //         next(error)
@@ -284,13 +386,13 @@ exports.recordStockEntry = async (req, res, next) => {
     try {
         const { id, role } = req.user;
 
-        if (role !== 'admin' && role !== 'manager') {
+        if (!['admin', 'manager'].includes(role)) {
             return res.status(403).json({
-                message: `You are not authorised to perform this action!`
-            })
-        };
-        const supermarketId = await filterRole(id, role);
+                message: 'You are not authorised to perform this action!'
+            });
+        }
 
+        const supermarketId = await filterRole(id, role); 
         const {
             productId,
             supplier,
@@ -298,88 +400,109 @@ exports.recordStockEntry = async (req, res, next) => {
             packageType,
             packageQuantity,
             unitPerPackage,
-            availableStock,
-            reservedStock,
+            // availableStock,
+            // reservedStock
         } = req.body;
 
-        const totalIncomingStock = unitPerPackage * packageQuantity;
+        const totalIncomingStock = packageQuantity * unitPerPackage;
+        // const allocatedStock = availableStock + reservedStock;
 
-        // Block invalid stock allocation
-        if ((availableStock + reservedStock) > totalIncomingStock) {
-            return res.status(400).json({
-                message: `Allocated stock exceeds total incoming stock`
-            });
-        }
+        // // Prevent over-allocation
+        // if (allocatedStock > totalIncomingStock) {
+        //     return res.status(400).json({
+        //         message: 'Allocated stock exceeds total incoming stock'
+        //     });
+        // }
 
-        // Block incomplete allocation
-        if ((availableStock + reservedStock) < totalIncomingStock) {
-            return res.status(400).json({
-                message: `Stock allocation is incomplete. Remaining ${
-                    totalIncomingStock - (availableStock + reservedStock)
-                } units unallocated`
-            });
-        }
+        // // Prevent under-allocation
+        // if (allocatedStock < totalIncomingStock) {
+        //     return res.status(400).json({
+        //         message: `Stock allocation is incomplete. Remaining ${
+        //             totalIncomingStock - allocatedStock
+        //         } units unallocated`
+        //     });
+        // }
 
+        const inventoryItem = await InventoryModel.findOne({
+            productId,
+            supermarketId
+        });
 
-
-        const inventoryItem = await InventoryModel.findOne({productId: productId})
-        const previousStock = inventoryItem.totalStock;
-        console.log(inventoryItem)
         if (!inventoryItem) {
             return res.status(404).json({
-                message: `Product not found`
-            })
+                message: 'Inventory item not found'
+            });
         }
-        const checkProduct = await ProductModel.findById(inventoryItem.productId)
-        const productCount = await BatchModel.countDocuments()
-        console.log(productCount)
 
-        const code = `${generateBatchCode()}${padStart(productCount)}`;
-        console.log(code)
+        const product = await ProductModel.findOne({
+            _id: productId,
+            supermarketId
+        });
 
-        const newBatch = new BatchModel({
+        if (!product) {
+            return res.status(404).json({
+                message: 'Product not found'
+            });
+        }
+
+        const previousStock = inventoryItem.totalStock;
+
+        const batchCount = await BatchModel.countDocuments({
+            supermarketId
+        });
+
+        const batchCode = `${generateBatchCode()}${padStart(batchCount + 1)}`;
+
+        const newBatch = await BatchModel.create({
             supermarketId,
             inventoryId: inventoryItem._id,
-            productId: inventoryItem.productId,
-            batchCode: code,
+            productId,
+            batchCode,
             supplier,
+            packageType,
             quantity: totalIncomingStock,
             quantityRemaining: totalIncomingStock,
-            unitCost: checkProduct.unitPrice,
+            unitCost: product.unitPrice,
             expiryDate,
             createdBy: id
-        })
+        });
 
-        console.log(newBatch)
-        await newBatch.save()
-        
-        inventoryItem.totalStock += newBatch.quantity;
+        // Update stock safely
         inventoryItem.availableStock += availableStock;
         inventoryItem.reservedStock += reservedStock;
 
-        await inventoryItem.save()
-        
+        // Add only the new stock received
+        inventoryItem.totalStock += totalIncomingStock;
 
+        await inventoryItem.save();
+
+        await logActivity({
+            supermarket: supermarketId,
+            user: id,
+            title: 'Recorded delivery',
+            module: 'INVENTORY',
+            description: `Received ${totalIncomingStock} units of ${product.productName} from ${supplier}`,
+            entityId: newBatch._id
+        });
 
         res.status(201).json({
-            message: `Done`,
+            message: 'Stock entry recorded successfully',
             data: {
-                newBatch,
-                product: inventoryItem, 
-                success: {
-                    message: `Stock Entry: ${totalIncomingStock} units revieved from ${supplier}`,
-                    product: checkProduct.productName,
+                batch: newBatch,
+                inventory: inventoryItem,
+                summary: {
+                    message: `Stock Entry: ${totalIncomingStock} units received from ${supplier}`,
+                    product: product.productName,
                     previousStock,
                     updatedStock: inventoryItem.totalStock,
                     availableStock: inventoryItem.availableStock,
                     reservedStock: inventoryItem.reservedStock
                 }
-             }
-        })
-
+            }
+        });
 
     } catch (error) {
-        console.log(error)
-        next(error)
+        console.log(error);
+        next(error);
     }
-}
+};

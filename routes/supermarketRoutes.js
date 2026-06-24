@@ -11,9 +11,22 @@ const {
   addBusinessName,
   logout,
   verifyPasswordOtp,
+  changePassword,
+  updateUserProfile,
   getOne
 } = require('../controllers/supermarketController');
-const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
+
+const { 
+  signUpValidator, 
+  verifyUserValidator, 
+  loginValidator, 
+  forgotPasswordValidator, 
+  resetPasswordValidator, 
+  resendOtpValidator, 
+  changePasswordValidator, 
+  updateUserProfileValidator
+} = require('../middlewares/validator');
+
 const { profile, loginProfile } = require('../middlewares/passport')
 const { authentication } = require('../middlewares/auth')
 
@@ -532,8 +545,6 @@ router.post('/reset', resetPasswordValidator, resetPassword);
  */
 router.patch('/business-name', authentication, addBusinessName)
 
-router.get('/user/profile', authentication, getOne);
-
 /** 
  * @swagger
  * /api/v1/logout:
@@ -653,6 +664,190 @@ router.get('/auth/google', profile);
  *         description: Authentication failed
  */
 router.get('/auth/google/callback', loginProfile, loginWithGoogle);
+
+/**
+ * @swagger
+ * /api/v1/user/change-password:
+ *   patch:
+ *     tags: [supermarket]
+ *     summary: Change supermarket password
+ *     description: Allows the authenticated supermarket owner to change their password after confirming the current password.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - currentPassword
+ *               - newPassword
+ *               - confirmPassword
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *                 example: OldSecret123!
+ *               newPassword:
+ *                 type: string
+ *                 example: NewSecret123!
+ *               confirmPassword:
+ *                 type: string
+ *                 example: NewSecret123!
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: password changed successfully
+ *       403:
+ *         description: Wrong current password or unauthorized role
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Wrong Password. Please try again
+ *       404:
+ *         description: Supermarket not found
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ */
+router.patch('/user/change-password', authentication, changePasswordValidator, changePassword);
+
+/**
+ * @swagger
+ * /api/v1/user/profile:
+ *   patch:
+ *     tags: [supermarket]
+ *     summary: Update supermarket profile
+ *     description: Allows the authenticated supermarket owner to update their name, business details, phone number, and email.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - businessName
+ *               - phoneNumber
+ *               - email
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: John Smith
+ *               businessName:
+ *                 type: string
+ *                 example: Smart Mart Ltd
+ *               phoneNumber:
+ *                 type: string
+ *                 example: 08012345678
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Business name updated successfully
+ *       403:
+ *         description: Unauthorized role or unregistered business
+ *       401:
+ *         description: Unauthorized - invalid or missing token
+ *       404:
+ *         description: Supermarket not found
+ */
+router.patch('/user/profile', authentication, updateUserProfileValidator, updateUserProfile);
+
+/**
+ * @swagger
+ * /api/v1/supermarket/profile:
+ *   get:
+ *     summary: Get supermarket profile
+ *     description: Retrieve the authenticated supermarket profile details.
+ *     tags:
+ *       - Supermarket
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Supermarket fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Supermarket fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6857ac12d34b5c0012345678
+ *                     firstName:
+ *                       type: string
+ *                       example: John
+ *                     lastName:
+ *                       type: string
+ *                       example: Doe
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     businessName:
+ *                       type: string
+ *                       example: Inventra Stores
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: +2348012345678
+ *                     role:
+ *                       type: string
+ *                       example: admin
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2026-06-24T10:00:00.000Z
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       404:
+ *         description: Supermarket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Supermarket not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/profile', authentication, getOne);
 
 module.exports = router;
 

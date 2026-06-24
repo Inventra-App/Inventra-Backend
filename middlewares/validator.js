@@ -326,12 +326,81 @@ exports.createSubscriptionPlanValidator = (req, res, next) => {
     next();
 };
 
+exports.updateUserProfileValidator = (req, res, next) => {
+    const schema = Joi.object({
+        fullName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'Full name is required',
+            'string.min': 'Full name must be at least 2 characters'
+        }),
+        businessName: Joi.string().trim().min(2).required().messages({
+            'string.empty': 'Business name is required',
+            'string.min': 'Business name must be at least 2 characters'
+        }),
+        phoneNumber: Joi.string().pattern(/^\d{10,15}$/).required().messages({
+            'string.empty': 'Phone number is required',
+            'string.pattern.base': 'Phone number must be between 10 and 15 digits'
+        }),
+        email: Joi.string().trim().lowercase().email().required().messages({
+            'string.empty': 'Email is required',
+            'string.email': 'Please provide a valid email address'
+        })
+        ,
+        address: Joi.string().trim().min(5).required().messages({
+            'string.empty': 'Address is required',
+            'string.min': 'Address must be at least 5 characters'
+        })
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
 exports.contactUsValidator = (req, res, next) => {
     const schema = Joi.object({
         firstName: Joi.string().trim().required(),
         email: Joi.string().trim().lowercase().email().required(),
         phoneNumber: Joi.string().pattern(/^\d{10,15}$/).required(),
         message: Joi.string().trim().min(10).required()
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};
+
+exports.changePasswordValidator = (req, res, next) => {
+    const schema = Joi.object({
+        currentPassword: Joi.string().required().messages({
+            'string.empty': 'Current password is required'
+        }),
+        newPassword: Joi.string()
+            .pattern(passwordPattern)
+            .required()
+            .messages({
+                'string.empty': 'New password is required',
+                'string.pattern.base':
+                    'Password must be at least 8 characters long and include uppercase, lowercase, a number, and a special character'
+            }),
+        confirmPassword: Joi.string()
+            .valid(Joi.ref('newPassword'))
+            .required()
+            .messages({
+                'string.empty': 'Confirm password is required',
+                'any.only': 'Passwords do not match'
+            })
     });
 
     const { error } = schema.validate(req.body, { abortEarly: false });

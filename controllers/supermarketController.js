@@ -36,7 +36,7 @@ exports.signUp = async (req, res, next) => {
         const supermarket = new SupermarketModel({
             firstName,
             lastName,
-            email,
+            email: email.toLowerCase(),
             businessName,
             phoneNumber,
             password: hashedPassword,
@@ -158,7 +158,7 @@ exports.login = async( req, res, next) => {
     try {
         const { email, password } = req.body
 
-        const supermarket = await SupermarketModel.findOne({ email })
+        const supermarket = await SupermarketModel.findOne({ email: email.toLowerCase() })
         if (!supermarket) {
             return next({
                 message: 'Supermarket not found',
@@ -473,3 +473,104 @@ exports.getOne = async(req, res, next) => {
         next(error)
     }
 };
+
+exports.changePassword = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+
+        if (role !== 'admin') {
+            return res.status(403).json({
+                message: 'Only supermarket owners can change this password'
+            });
+        }
+        
+        const {
+            currentPassword,
+            newPassword,
+            confirmPassword
+        } = req.body;
+
+        const supermarket = await SupermarketModel.findById(id);
+        if (!supermarket) {
+            return res.status(404).json({
+                message: 'Supermarket not found'
+            });
+        }
+
+        const checkPassword = await bcrypt.compare(currentPassword, supermarket.password);
+
+        if (!checkPassword) {
+            return res.status(403).json({
+                message: `Wrong Password. Please try again`
+            })
+        }
+
+        const newpassword = await bcrypt.hash(newPassword, 10)
+
+        supermarket.password = newpassword;
+        await supermarket.save();
+
+        res.status(200).json({
+            message: `password changed successfully`
+        })
+
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+exports.updateUserProfile = async (req, res, next) => {
+    try {
+    const { id: supermarketId, role } = req.user;
+
+    if (role !== 'admin') {
+        return res.status(403).json({
+            message: 'Only supermarket owners can update this profile'
+        });
+    }
+
+    const ifSupermarket = await SupermarketModel.findById(supermarketId)
+    if (!ifSupermarket) {
+        return res.status(403).json({
+            message: `You are not a registered business!`
+        })
+    };
+
+        const {
+            fullName,
+            businessName,
+            phoneNumber,
+            email,
+            address
+        } = req.body;
+
+        const split = fullName.split(' ');
+        const addressNormalized = address ? address.toLowerCase() : '';
+
+        const supermarket = await SupermarketModel.findByIdAndUpdate(
+            supermarketId,
+            { 
+                firstName: split[0], 
+                lastName: split[split.length - 1], 
+                businessName, 
+                phoneNumber, 
+                email,
+                address: addressNormalized
+            },
+            { new: true, runValidators: true }
+        );
+
+        await supermarket.save();
+        console.log(supermarket);
+        res.status(200).json({
+            message: `Business name updated successfully`
+        });
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+};
+ 

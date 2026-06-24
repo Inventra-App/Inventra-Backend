@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const saleModel = require('../models/sale');
 const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
@@ -253,6 +254,84 @@ exports.countSalesAmount = async (req, res, next) => {
             message: `Here's how much you've sold!`,
             data: totalSalesAmount
         })
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+exports.getDailySalesTotal = async (req, res, next) => {
+    try {
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+        const { date, startDate, endDate } = req.query;
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+        if (date && !dateRegex.test(date)) {
+            return res.status(400).json({
+                message: 'Date must be in YYYY-MM-DD format'
+            });
+        }
+
+        if (startDate && !dateRegex.test(startDate)) {
+            return res.status(400).json({
+                message: 'Start date must be in YYYY-MM-DD format'
+            });
+        }
+
+        if (endDate && !dateRegex.test(endDate)) {
+            return res.status(400).json({
+                message: 'End date must be in YYYY-MM-DD format'
+            });
+        }
+
+        const dailyMatch = {};
+        if (date) {
+            dailyMatch._id = date;
+        } else {
+            if (startDate) dailyMatch._id = { ...dailyMatch._id, $gte: startDate };
+            if (endDate) dailyMatch._id = { ...dailyMatch._id, $lte: endDate };
+        }
+
+        const sales = await saleModel.aggregate([
+            {
+                $match: {
+                    supermarketId: new mongoose.Types.ObjectId(supermarketId),
+                    status: 'completed'
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: '%Y-%m-%d',
+                            date: '$createdAt',
+                            timezone: 'Africa/Lagos'
+                        }
+                    },
+                    totalAmount: { $sum: '$totalAmount' },
+                    totalSales: { $sum: 1 },
+                    totalItems: { $sum: '$totalItems' }
+                }
+            },
+            ...(Object.keys(dailyMatch).length ? [{ $match: dailyMatch }] : []),
+            { $sort: { _id: -1 } },
+            {
+                $project: {
+                    _id: 0,
+                    date: '$_id',
+                    totalAmount: 1,
+                    totalSales: 1,
+                    totalItems: 1
+                }
+            }
+        ]);
+
+        res.status(200).json({
+            message: 'Daily sales total fetched successfully',
+            data: sales
+        });
 
     } catch (error) {
         console.log(error)

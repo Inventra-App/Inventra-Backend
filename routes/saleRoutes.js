@@ -4,7 +4,8 @@ const {
     checkoutSale,
     countSales,
     countSalesAmount,
-    getAllSales
+    getAllSales,
+    getDailySalesTotal
 } = require('../controllers/salesController');
 const { authentication } = require('../middlewares/auth');
 const { checkoutSaleValidator } = require('../middlewares/validator');
@@ -166,6 +167,8 @@ router.post('/pos/sale', authentication, checkoutSale);
  */
 
 router.get('/sales/count', authentication, countSales)
+
+router.get('/sales/daily-total', authentication, getDailySalesTotal);
 
 /**
  * @swagger

@@ -619,3 +619,100 @@ exports.contactUsTemplate = (firstName, email, phoneNumber, message) => {
 </body>
 </html>`;
 };
+
+exports.bookDemoTemplate = (firstName, email, message) => {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Demo Booking Request</title>
+</head>
+
+<body style="margin:0; padding:0; background-color:#f4f7fb; font-family:Arial, Helvetica, sans-serif;">
+
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f4f7fb; padding:40px 0;">
+		<tr>
+			<td align="center">
+
+				<table width="600" cellpadding="0" cellspacing="0" border="0"
+					style="background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.06);">
+
+					<!-- Header -->
+					<tr>
+						<td align="center" style="background:#111827; padding:32px 24px;">
+							<h1 style="margin:0; color:#ffffff; font-size:32px; font-weight:bold;">
+								Inventra
+							</h1>
+
+							<p style="margin:10px 0 0; color:#9ca3af; font-size:14px;">
+								New Demo Request
+							</p>
+						</td>
+					</tr>
+
+					<!-- Body -->
+					<tr>
+						<td style="padding:40px 32px;">
+
+							<h2 style="margin:0 0 20px; color:#111827; font-size:24px;">
+								A customer wants to book a demo
+							</h2>
+
+							<p style="margin:0 0 24px; color:#4b5563; font-size:16px; line-height:1.7;">
+								A visitor has requested a demo for Inventra. Please review the details below and follow up with them.
+							</p>
+
+							<!-- Demo Details -->
+							<table width="100%" cellpadding="0" cellspacing="0" border="0"
+								style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:20px;">
+
+								<tr>
+									<td style="padding:10px 0; font-size:15px; color:#374151;">
+										<strong>Name:</strong> ${firstName}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding:10px 0; font-size:15px; color:#374151;">
+										<strong>Email:</strong> ${email}
+									</td>
+								</tr>
+
+								<tr>
+									<td style="padding:10px 0; font-size:15px; color:#374151;">
+										<strong>Demo Request Details:</strong>
+										<p style="margin:10px 0 0; line-height:1.7; color:#4b5563;">
+											${message}
+										</p>
+									</td>
+								</tr>
+
+							</table>
+
+						</td>
+					</tr>
+
+					<!-- Footer -->
+					<tr>
+						<td style="
+							padding:24px 32px;
+							background:#f9fafb;
+							border-top:1px solid #e5e7eb;
+							text-align:center;
+						">
+							<p style="margin:0; color:#9ca3af; font-size:13px;">
+								Â© 2026 Inventra. All rights reserved.
+							</p>
+						</td>
+					</tr>
+
+				</table>
+
+			</td>
+		</tr>
+	</table>
+
+</body>
+</html>`;
+};

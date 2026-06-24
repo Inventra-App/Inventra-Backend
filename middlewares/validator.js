@@ -344,3 +344,21 @@ exports.contactUsValidator = (req, res, next) => {
 
     next();
 };
+
+exports.bookDemoValidator = (req, res, next) => {
+    const schema = Joi.object({
+        firstName: Joi.string().trim().min(2).required(),
+        email: Joi.string().trim().lowercase().email().required(),
+        message: Joi.string().trim().min(10).required()
+    });
+
+    const { error } = schema.validate(req.body, { abortEarly: false });
+
+    if (error) {
+        return res.status(400).json({
+            message: error.details.map(err => err.message)
+        });
+    }
+
+    next();
+};

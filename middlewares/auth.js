@@ -1,4 +1,5 @@
 const staffModel = require("../models/staff")
+const SupermarketModel = require("../models/supermarket")
 const jwt = require('jsonwebtoken')
 
 exports.authentication = async (req, res, next) => {
@@ -19,7 +20,41 @@ exports.authentication = async (req, res, next) => {
         }
 
         const data = jwt.verify(token, jwtSecret)
+
         console.log(data)
+
+        if (data.role === 'admin') {
+            const supermarket = await SupermarketModel.findById(data.id);
+
+            if (!supermarket) {
+                return res.status(401).json({
+                    message: 'Supermarket account no longer exists. Please sign up again'
+                });
+            }
+
+            if (!supermarket.isVerified) {
+                return res.status(403).json({
+                    message: 'Supermarket account is not verified. Please verify your email'
+                });
+            }
+        }
+
+        if (['manager', 'cashier'].includes(data.role)) {
+            const staff = await staffModel.findById(data.id);
+
+            if (!staff) {
+                return res.status(401).json({
+                    message: 'Staff account no longer exists. Please contact your administrator'
+                });
+            }
+
+            if (!staff.isActive || !staff.isVerified) {
+                return res.status(403).json({
+                    message: 'Staff account is not active. Please contact your administrator'
+                });
+            }
+        }
+
         req.user = data
 
         next()

@@ -50,7 +50,7 @@ const batchSchema = new mongoose.Schema({
 
     expiryDate: {
       type: Date,
-      required: true
+      // required: true
     },
 
     status: {

@@ -777,12 +777,11 @@ router.patch('/user/profile', authentication, updateUserProfileValidator, update
 
 /**
  * @swagger
- * /api/v1/supermarket/profile:
+ * /api/v1/profile:
  *   get:
  *     summary: Get supermarket profile
  *     description: Retrieve the authenticated supermarket profile details.
- *     tags:
- *       - Supermarket
+ *     tags: [supermarket]
  *     security:
  *       - bearerAuth: []
  *     responses:

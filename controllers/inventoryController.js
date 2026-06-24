@@ -195,7 +195,16 @@ exports.moveProducts = async (req, res, next) => {
 
             inventory.availableStock -= quantity;
             inventory.backroomStock += quantity;
+        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'available stock') {
+            return res.status(400).json({
+                message: `Source and Destination cannot be the same`
+            })
+        } else if (moveFrom.toLowerCase() === 'backroom stock' && moveTo.toLowerCase() === 'backroom stock') {
+             return res.status(400).json({
+                message: `Source and Destination cannot be the same`
+            })
         }
+        
         console.log(inventory);
         await inventory.save();
 

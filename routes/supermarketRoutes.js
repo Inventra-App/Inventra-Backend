@@ -10,7 +10,8 @@ const {
   loginWithGoogle,
   addBusinessName,
   logout,
-  verifyPasswordOtp
+  verifyPasswordOtp,
+  getOne
 } = require('../controllers/supermarketController');
 const { signUpValidator, verifyUserValidator, loginValidator, forgotPasswordValidator, resetPasswordValidator, resendOtpValidator } = require('../middlewares/validator');
 const { profile, loginProfile } = require('../middlewares/passport')
@@ -530,6 +531,8 @@ router.post('/reset', resetPasswordValidator, resetPassword);
  *                   example: Something went wrong
  */
 router.patch('/business-name', authentication, addBusinessName)
+
+router.get('/user/profile', authentication, getOne);
 
 /** 
  * @swagger

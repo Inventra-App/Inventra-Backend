@@ -47,9 +47,7 @@ exports.countSales = async (req, res, next) => {
         const totalSales = await SaleModel.countDocuments({ supermarketId });
 
         if (!totalSales) {
-            return res.status(404).json({
-                message: `Nothing sold yet. Come back when you make a sale!`
-            })
+            return []
         }
 
         res.status(200).json({

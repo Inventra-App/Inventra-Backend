@@ -168,8 +168,6 @@ router.post('/pos/sale', authentication, checkoutSale);
 
 router.get('/sales/count', authentication, countSales)
 
-router.get('/sales/daily-total', authentication, getDailySalesTotal);
-
 /**
  * @swagger
  * /api/v1/sales:
@@ -294,5 +292,85 @@ router.get('/sales', authentication, getAllSales);
  *         description: Internal server error
  */
 router.get('/sale/amount', authentication, countSalesAmount);
+
+/**
+ * @swagger
+ * /api/v1/sales/daily-total:
+ *   get:
+ *     summary: Get daily sales totals
+ *     description: Retrieve total sales, total revenue, and total items sold for a specific day or within a date range.
+ *     tags:
+ *       - Sales
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema:
+ *           type: string
+ *           example: 2026-06-24
+ *         description: Fetch sales for a specific day (YYYY-MM-DD)
+ *
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           example: 2026-06-01
+ *         description: Start date for filtering sales (YYYY-MM-DD)
+ *
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           example: 2026-06-24
+ *         description: End date for filtering sales (YYYY-MM-DD)
+ *
+ *     responses:
+ *       200:
+ *         description: Daily sales total fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Daily sales total fetched successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       date:
+ *                         type: string
+ *                         example: 2026-06-24
+ *                       totalAmount:
+ *                         type: number
+ *                         example: 150000
+ *                       totalSales:
+ *                         type: number
+ *                         example: 25
+ *                       totalItems:
+ *                         type: number
+ *                         example: 120
+ *
+ *       400:
+ *         description: Invalid date format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Date must be in YYYY-MM-DD format
+ *
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/sales/daily-total', authentication, getDailySalesTotal);
 
 module.exports = router;

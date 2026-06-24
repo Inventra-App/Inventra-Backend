@@ -1,6 +1,6 @@
 const router = require('express').Router();
-const { receiveContactRequest } = require('../controllers/contactUs');
-const { contactUsValidator } = require('../middlewares/validator');
+const { receiveContactRequest, receiveDemoRequest } = require('../controllers/contactUs');
+const { contactUsValidator, bookDemoValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
@@ -55,5 +55,48 @@ const { contactUsValidator } = require('../middlewares/validator');
  *         description: Validation error
  */
 router.post('/contact-us',contactUsValidator, receiveContactRequest);
+
+/**
+ * @swagger
+ * /api/v1/book-demo:
+ *   post:
+ *     tags: [Contact]
+ *     summary: Submit a demo booking request
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - firstName
+ *               - email
+ *               - message
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: Jane
+ *               email:
+ *                 type: string
+ *                 example: jane@example.com
+ *               message:
+ *                 type: string
+ *                 example: "We would like to book a demo for our team next week."
+ *     responses:
+ *       201:
+ *         description: Demo request submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *       400:
+ *         description: Validation error
+ */
+router.post('/book-demo', bookDemoValidator, receiveDemoRequest);
 
 module.exports = router;

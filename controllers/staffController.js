@@ -26,7 +26,7 @@ exports.createStaff = async (req, res, next) => {
             role
         } = req.body;
 
-        const checkExistingEmail = await staffModel.findOne({email: email})
+        const checkExistingEmail = await staffModel.findOne({email: email.toLowerCase()})
         // console.log(checkExistingEmail)
         console.log(email)
         if (checkExistingEmail) {
@@ -209,14 +209,11 @@ exports.getAllStaff = async (req, res, next) => {
         const supermarketId = await filterRole(id, role);
 
         const staff = await staffModel.find({
-            supermarketId,
-            role: { $in: ['manager', 'cashier'] }
-        }).select('-password');
+            supermarketId
+        })
 
         if (!staff.length) {
-            return res.status(404).json({
-                message: 'No staff found'
-            });
+            return []
         }
 
         res.status(200).json({

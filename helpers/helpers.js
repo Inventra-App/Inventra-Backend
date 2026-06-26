@@ -87,9 +87,12 @@ exports.filterRole = async (id, role) => {
 
 
 
-exports.findStaff = async (id) => {
+exports.findStaffInfo = async (id) => {
     const staff =  await staffModel.findById(id)
-    return staff.firstName
+    if (!staff) {
+        return `Admin`
+    }
+    return `${staff.firstName} ${staff.lastName}`
 }
 
 // const logActivity = async () => {
@@ -121,10 +124,12 @@ exports.findStaff = async (id) => {
 // }
 
 const ActivityLog = require('../models/activityLog');
+const staff = require('../models/staff');
 
 exports.logActivity = async ({
     supermarket,
-    user,
+    staffId,
+    staffName,
     title,
     module,
     description,
@@ -135,7 +140,8 @@ exports.logActivity = async ({
 }) => {
     await ActivityLog.create({
         supermarket,
-        user,
+        staffId,
+        staffName,
         action: action || title,
         module,
         entity: entity || module,

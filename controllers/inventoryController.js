@@ -1,7 +1,7 @@
 const InventoryModel = require('../models/inventory');
 const SupermarketModel = require('../models/supermarket');
 const CategoryModel = require('../models/category');
-const { generateBatchCode, padStart, generateUserSlug, filterRole, logActivity } = require('../helpers/helpers');
+const { generateBatchCode, padStart, generateUserSlug, filterRole, logActivity, findStaffInfo } = require('../helpers/helpers');
 const staffModel = require('../models/staff');
 const BatchModel = require('../models/batch');
 const ProductModel = require('../models/product');
@@ -107,9 +107,12 @@ exports.addProducts = async (req, res, next) => {
         await newBatch.save()
         console.log(`BATCH: `, batch)
 
+        const userName = await findStaffInfo(req.user.id);
+        
         await logActivity({
             supermarket: supermarketId,
-            user: req.user.id,
+            staffId: req.user.id,
+            staffName: userName,
             title: 'Created product',
             module: 'INVENTORY',
             description: `Added ${newProduct.productName} with ${newBatch.quantity} units`,
@@ -135,6 +138,7 @@ exports.addProducts = async (req, res, next) => {
 exports.moveProducts = async (req, res, next) => {
     try {
         const { id, role } = req.user;
+        console.log(`here: `, id)
         if (role !== 'admin' && role !== 'manager') {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
@@ -143,6 +147,8 @@ exports.moveProducts = async (req, res, next) => {
 
         const supermarketId = await filterRole(id, role);
         console.log(supermarketId)
+
+        const userName = await findStaffInfo(id)
 
         const { actionType, moveFrom, moveTo, quantity } = req.body;
         const { inventoryId } = req.params;
@@ -204,14 +210,25 @@ exports.moveProducts = async (req, res, next) => {
                 message: `Source and Destination cannot be the same`
             })
         }
-        
+
         console.log(inventory);
         await inventory.save();
 
         const newQuantity = inventory.availableStock || 0;
-        await logActivity({
+
+        console.log({
             supermarket: supermarketId,
-            user: id,
+            staffId: id,
+            userName,
+            title: 'Updated stock',
+            module: 'INVENTORY',
+            description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
+            entityId: product._id
+        })
+        const activityDetails = await logActivity({
+            supermarket: supermarketId,
+            staffId: id,
+            staffName: userName,
             title: 'Updated stock',
             module: 'INVENTORY',
             description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
@@ -431,9 +448,12 @@ exports.restockItem = async (req, res, next) => {
         inventoryItem.backroomStock += totalIncomingStock;
         await inventoryItem.save();
 
+        const userName = await findStaffInfo(id);
+        
         await logActivity({
             supermarket: supermarketId,
-            user: id,
+            staffId: id,
+            staffName: userName,
             title: 'Recorded delivery',
             module: 'INVENTORY',
             description: `Received ${totalIncomingStock} units of ${product.productName} from ${supplier}`,

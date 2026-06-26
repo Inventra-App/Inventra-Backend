@@ -28,8 +28,9 @@ exports.getActivityLog = async (req, res, next) => {
         const logs = await ActivityLog.find({
             supermarket: supermarketId
         })
-        .populate('user', 'firstName lastName')
         .sort({ createdAt: -1 });
+
+        console.log(logs)
 
         res.status(200).json({
             message: 'Activity logs fetched successfully',

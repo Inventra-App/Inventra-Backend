@@ -112,11 +112,6 @@ const InventorySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'staff'
     },
-
-    isComplete: {
-      type: Boolean,
-      default: false
-    }
   },
   {
     timestamps: true,
@@ -129,6 +124,8 @@ const InventorySchema = new mongoose.Schema(
 InventorySchema.virtual('totalStock').get(function () {
   return this.availableStock + this.backroomStock;
 });
+
+
 
 // Virtual status
 InventorySchema.virtual('status').get(function () {

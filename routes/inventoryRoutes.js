@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const { addProducts, moveProducts, getAllItems, restockItem } = require('../controllers/inventoryController');
+const { addProducts, moveProducts, getAllItems, restockItem, getOneItem } = require('../controllers/inventoryController');
 const { authentication } = require('../middlewares/auth');
 const { addProductValidator, moveProductsValidator, recordStockEntryValidator } = require('../middlewares/validator');
 
@@ -533,5 +533,84 @@ router.get('/i/all', authentication, getAllItems);
  *         description: Internal server error
  */
 router.post('/stock/entry', authentication, restockItem)
+
+
+/**
+ * @swagger
+ * /api/v1/inventory/{inventoryId}:
+ *   get:
+ *     summary: Get a single inventory item
+ *     description: Retrieve a specific inventory item and check if all its batches are expiring.
+ *     tags:
+ *       - Inventory
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: inventoryId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Inventory item ID
+ *         example: 6857ac12d34b5c0012345678
+ *
+ *     responses:
+ *       200:
+ *         description: Inventory item details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Inventory item details fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     item:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                           example: 6857ac12d34b5c0012345678
+ *                         productName:
+ *                           type: string
+ *                           example: Indomie Noodles
+ *                         totalStock:
+ *                           type: number
+ *                           example: 200
+ *                         availableStock:
+ *                           type: number
+ *                           example: 150
+ *                         reservedStock:
+ *                           type: number
+ *                           example: 50
+ *                         price:
+ *                           type: number
+ *                           example: 250
+ *                     isExpiring:
+ *                       type: boolean
+ *                       example: false
+ *                       description: Returns true only if all batches for this inventory item are marked as expiring
+ *
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *
+ *       404:
+ *         description: Inventory item not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Inventory item not found
+ *
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/inventory/:inventoryId', authentication, getOneItem);
 
 module.exports = router;

@@ -68,9 +68,18 @@ const batchSchema = new mongoose.Schema({
       ref: 'staff',
       required: true
     }
-}, {timestamps: true})
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+})
+
+batchSchema.virtual('isExpiring').get(function () {
+  if (this.expiryDate === null) return false;
+  if (this.expiryDate !== null) return true;
+  return 'isExpiring';
+});
 
 const BatchModel = mongoose.model('batch', batchSchema);
 
 module.exports = BatchModel;
-

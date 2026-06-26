@@ -4,7 +4,7 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug} = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug, findStaffInfo} = require('../helpers/helpers');
 const { getPagination } = require('../helpers/pagination');
 const SupermarketModel = require('../models/supermarket');
 
@@ -154,9 +154,12 @@ exports.checkoutSale = async (req, res, next) => {
                 ...item
             }))
         );
+        const userName = await findStaffInfo(id);
+        
         await logActivity({
             supermarket: supermarketId,
-            user: id,
+            staffId: id,
+            staffName: userName,
             title: 'Completed sale',
             module: 'SALE',
             description: `Sold ${totalItems} items for ₦${totalAmount}`,

@@ -561,3 +561,61 @@
 //     checkLowStock,
 //     getLowStock
 // };
+
+
+const info = [
+    {
+        name: 'hello Kitty',
+        quantity: 21
+    },
+    {
+        name: 'hello Kitty',
+        quantity: 23 
+    },
+    {
+        name: 'hello Kitty',
+        quantity: 25 
+    },
+    {
+        name: 'hello Kitty',
+        quantity: 27 
+    },
+    {
+        name: 'hello Kitty',
+        quantity: 29 
+    }
+]
+
+let sellInfo = info.map(e => e.quantity)
+let reduceInfo = sellInfo.reduce((acc, curr) => acc + curr, 0)
+
+console.log(reduceInfo)
+
+console.log(sellInfo)
+
+const sell = (quantity) => {
+    if (quantity <= 0) {
+        console.log('low input')
+    } else {
+        if (sellInfo[0] < quantity) {
+            for (i = 0; i < sellInfo.length; i++) {
+                if (i = sellInfo[0]) {
+                    i++
+                }
+                if (sellInfo[i] >= quantity) {
+                    sellInfo[i] -= quantity;
+                    reduceInfo -= quantity;
+                    console.log(sellInfo)
+                    console.log(reduceInfo)
+                }
+            }
+        }
+        reduceInfo -= quantity;
+        console.log(reduceInfo)
+        sellInfo[0] -= quantity;
+        console.log(sellInfo)
+
+    }
+}
+
+sell(24)

@@ -4,8 +4,7 @@ const CategoryModel = require('../models/category');
 const ProductModel = require('../models/product');
 const UserModel = require('../models/supermarket');
 const { getPagination } = require('../helpers/pagination');
-const { filterRole } = require('../helpers/helpers');
-const { logActivity } = require('../helpers/helpers');
+const { filterRole, logActivity, findStaffInfo } = require('../helpers/helpers');
 
 
 
@@ -34,9 +33,12 @@ exports.createCategory = async (req, res, next) => {
             description
         });
 
+        const userName = await findStaffInfo(id);
+        
         await logActivity({
             supermarket: supermarketId,
-            user: id,
+            staffId: id,
+            staffName: userName,
             title: 'Created category',
             module: 'CATEGORY',
             description: `Created category ${newCategory.categoryName}`,
@@ -60,14 +62,8 @@ exports.getCategories = async (req, res, next) => {
         const supermarketId = await filterRole(id, role);
         const allCategories = await CategoryModel.find({ supermarketId }).sort('desc');
 
-        if (!allCategories) {
-            return res.status(404).json({
-                message: `No content!`
-            })
-        }
-
         res.status(200).json({
-            message: `All categories Feteched Sucessfuly`,
+            message: allCategories.length ? `All categories fetched successfully` : `No categories found`,
             data: allCategories
         })
     } catch (error) {
@@ -145,9 +141,12 @@ exports.updateCategory = async (req, res, next) => {
 
         await category.save();
 
+        const userName = await findStaffInfo(userId);
+        
         const info = await logActivity({
             supermarket: supermarketId,
-            user: userId,
+            staffId: userId,
+            staffName: userName,
             title: 'Updated category',
             module: 'CATEGORY',
             description: `Updated category ${category.categoryName}`,
@@ -202,9 +201,12 @@ exports.deleteCategory = async (req, res, next) => {
             supermarketId
         });
 
+        const userName = await findStaffInfo(userId);
+        
         await logActivity({
             supermarket: supermarketId,
-            user: userId,
+            staffId: userId,
+            staffName: userName,
             title: 'Deleted category',
             module: 'CATEGORY',
             description: `Deleted category ${category.categoryName}`,

@@ -207,7 +207,8 @@ exports.login = async( req, res, next) => {
 
         await logActivity({
             supermarket: supermarket._id,
-            user: supermarket._id,
+            staffId: supermarket._id,
+            staffName: 'Admin',
             title: 'Login successful',
             module: 'AUTH',
             description: `Supermarket login successful for ${supermarket.businessName}`,

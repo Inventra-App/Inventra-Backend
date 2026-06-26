@@ -53,8 +53,8 @@ exports.createStaff = async (req, res, next) => {
         await staff.save()
         
         const roleLinks = {
-            manager: 'https://inventra-frontend-lmm6.vercel.app/staff-login',
-            cashier: 'https://inventra-frontend-lmm6.vercel.app/cashier-login'
+            manager: 'https://inventra-app.vercel.app/staff-login',
+            cashier: 'https://inventra-app.vercel.app/cashier-login'
         };
 
         const link = roleLinks[staff.role];
@@ -208,7 +208,7 @@ exports.getAllStaff = async (req, res, next) => {
 
         const supermarketId = await filterRole(id, role);
 
-        const staff = await UserModel.find({
+        const staff = await staffModel.find({
             supermarketId,
             role: { $in: ['manager', 'cashier'] }
         }).select('-password');

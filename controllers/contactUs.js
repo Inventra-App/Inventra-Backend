@@ -45,7 +45,7 @@ exports.receiveDemoRequest = async (req, res, next) => {
     try {
         const { firstName, email, message } = req.body;
 
-        const newRequest = await ContactUs.create({
+        const newRequest = new ContactUs({
             firstName,
             email,
             message
@@ -66,7 +66,8 @@ exports.receiveDemoRequest = async (req, res, next) => {
                 html: bookDemoTemplate(firstName, email, message)
             });
         }
-
+        
+        await newRequest.save();
         res.status(201).json({
             message: `Thank you for requesting a demo, we'll get back to you as soon as possible`,
             data: newRequest

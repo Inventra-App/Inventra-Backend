@@ -345,7 +345,7 @@ exports.updateUserProfileValidator = (req, res, next) => {
             'string.email': 'Please provide a valid email address'
         })
         ,
-        address: Joi.string().trim().min(5).required().messages({
+        buisnessAddress: Joi.string().trim().min(5).required().messages({
             'string.empty': 'Address is required',
             'string.min': 'Address must be at least 5 characters'
         })

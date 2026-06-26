@@ -544,11 +544,11 @@ exports.updateUserProfile = async (req, res, next) => {
             businessName,
             phoneNumber,
             email,
-            address
+            buisnessAddress
         } = req.body;
 
         const split = fullName.split(' ');
-        const addressNormalized = address ? address.toLowerCase() : '';
+        const addressNormalized = address.toLowerCase();
 
         const supermarket = await SupermarketModel.findByIdAndUpdate(
             supermarketId,
@@ -558,7 +558,7 @@ exports.updateUserProfile = async (req, res, next) => {
                 businessName, 
                 phoneNumber, 
                 email,
-                address: addressNormalized
+                buisnessAddress: addressNormalized
             },
             { new: true, runValidators: true }
         );

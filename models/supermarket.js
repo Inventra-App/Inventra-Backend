@@ -32,7 +32,7 @@ const supermarketSchema = new mongoose.Schema({
         required: true
     },
 
-    address: {
+    buisnessAddress: {
         type: String,
         trim: true
     },

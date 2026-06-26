@@ -597,25 +597,21 @@ const sell = (quantity) => {
     if (quantity <= 0) {
         console.log('low input')
     } else {
-        if (sellInfo[0] < quantity) {
-            for (i = 0; i < sellInfo.length; i++) {
-                if (i = sellInfo[0]) {
-                    i++
-                }
-                if (sellInfo[i] >= quantity) {
-                    sellInfo[i] -= quantity;
-                    reduceInfo -= quantity;
-                    console.log(sellInfo)
-                    console.log(reduceInfo)
-                }
+        for (let i = 0; i < sellInfo.length; i++) {
+            if (sellInfo[i] <= quantity) {
+                console.log('hello')
+                const lo = quantity - sellInfo[i];
+                const ol = sellInfo[i] - ol;
+                sellInfo[i] - ol;
+                continue;
+            } else if (sellInfo[i] > quantity) {
+                reduceInfo -= quantity;
+                sellInfo[i] -= quantity;
+                break;
             }
         }
-        reduceInfo -= quantity;
-        console.log(reduceInfo)
-        sellInfo[0] -= quantity;
-        console.log(sellInfo)
-
     }
+        console.log(reduceInfo)
+        console.log(sellInfo)
 }
-
 sell(24)

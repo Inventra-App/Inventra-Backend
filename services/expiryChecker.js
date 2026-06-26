@@ -113,7 +113,7 @@ exports.checkExpiringProducts = async (supermarketId) => {
 
             let urgencyLevel = 'SAFE';
 
-            if (daysLeft < 0) urgencyLevel = 'EXPIRED';
+            if (daysLeft <= 3) urgencyLevel = 'EXPIRED';
             else if (daysLeft <= 7) urgencyLevel = 'WARNING';
             else if (daysLeft <= 14) urgencyLevel = 'INFO';
 

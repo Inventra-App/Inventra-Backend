@@ -209,16 +209,15 @@ exports.getAllStaff = async (req, res, next) => {
         const supermarketId = await filterRole(id, role);
 
         const staff = await staffModel.find({
-            supermarketId
-        })
+            adminId: supermarketId
+        }).select('-password');
 
-        if (!staff.length) {
-            return []
-        }
+        if (!staff) {
+            return [];
+  ``      }
 
         res.status(200).json({
             message: 'Staff fetched successfully',
-            count: staff.length,
             data: staff
         });
 

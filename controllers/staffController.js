@@ -209,9 +209,8 @@ exports.getAllStaff = async (req, res, next) => {
         const supermarketId = await filterRole(id, role);
 
         const staff = await staffModel.find({
-            supermarketId,
-            role: { $in: ['manager', 'cashier'] }
-        }).select('-password');
+            supermarketId
+        })
 
         if (!staff.length) {
             return []

@@ -544,7 +544,7 @@ exports.updateUserProfile = async (req, res, next) => {
             businessName,
             phoneNumber,
             email,
-            buisnessAddress
+            businessAddress
         } = req.body;
 
         const split = fullName.split(' ');
@@ -558,7 +558,7 @@ exports.updateUserProfile = async (req, res, next) => {
                 businessName, 
                 phoneNumber, 
                 email,
-                buisnessAddress: addressNormalized
+                businessAddress: addressNormalized
             },
             { new: true, runValidators: true }
         );

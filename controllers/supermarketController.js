@@ -70,7 +70,7 @@ exports.verifyUser = async (req,res,next) =>{
     try{
         const { email, otp } = req.body;
         console.log(email)
-        const supermarket = await SupermarketModel.findOne({email})
+        const supermarket = await SupermarketModel.findOne({email: email.toLowerCase()})
         console.log(supermarket)
 
         if (!supermarket) {

@@ -58,7 +58,7 @@ exports.addProducts = async (req, res, next) => {
         console.log(code)
 
         // const checkProduct = await InventoryModel.
-        
+                
 
         const product = {
             supermarketId,
@@ -77,6 +77,7 @@ exports.addProducts = async (req, res, next) => {
         console.log(`PRODUCT: `, newProduct)
         await newProduct.save()
 
+
         const inventoryInput = {
             supermarketId,
             productId: newProduct._id,
@@ -85,8 +86,10 @@ exports.addProducts = async (req, res, next) => {
             categoryName: newProduct.categoryName,
             availableStock,
             backroomStock,
-            updatedBy: id                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+            updatedBy: id,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         }
+
+        console.log(inventoryInput)
         const newInventoryInput = new InventoryModel(inventoryInput);
         await newInventoryInput.save()
         console.log(`INVENTORY: `, inventoryInput)
@@ -99,7 +102,7 @@ exports.addProducts = async (req, res, next) => {
             quantity: unitPerPackage * packageQuantity,
             quantityRemaining: unitPerPackage * packageQuantity,
             unitCost: newProduct.unitPrice,
-            expiryDate,
+            expiryDate: expiryDate? expiryDate: null,
             createdBy: id
         }
 
@@ -250,6 +253,8 @@ exports.getAllItems = async (req, res, next) => {
         const { id, role } = req.user;
         const supermarketId = await filterRole(id, role);
         const items = await InventoryModel.find({ supermarketId });
+        const batches = await BatchModel.find({ supermarketId });
+
 
         if (!items) {
             return res.status(404).json({
@@ -265,118 +270,43 @@ exports.getAllItems = async (req, res, next) => {
         console.log(error)
         next(error)
     }
+};
+
+exports.getOneItem = async (req, res, next) => {
+    try {
+        const { inventoryId } = req.params;
+        const { id, role } = req.user;
+        const supermarketId = await filterRole(id, role);
+
+        const item = await InventoryModel.findOne({ _id: inventoryId, supermarketId });
+        const batches = await BatchModel.find({ inventoryId });
+
+        if (!item) {
+            return res.status(404).json({
+                message: `Inventory item not found`
+            });
+        }
+
+        const isExpiring = batches.every(
+            batch => batch.isExpiring === true
+        );
+
+        res.status(200).json({
+            message: `Inventory item details fetched successfully`,
+            data: {
+                item,
+                isExpiring
+            }
+        });
+
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
 }
 
-// exports.recordStockEntry = async (req, res, next) => {
-//     try {
-//         const { id, role } = req.user;
 
-//         if (role !== 'admin' && role !== 'manager') {
-//             return res.status(403).json({
-//                 message: `You are not authorised to perform this action!`
-//             })
-//         };
-//         const supermarketId = await filterRole(id, role);
-
-//         const {
-//             productId,
-//             supplier,
-//             expiryDate,
-//             packageType,
-//             packageQuantity,
-//             unitPerPackage,
-//             availableStock,
-//             backroomStock,
-//         } = req.body;
-
-//         const totalIncomingStock = unitPerPackage * packageQuantity;
-
-//         // Block invalid stock allocation
-//         if ((availableStock + backroomStock) > totalIncomingStock) {
-//             return res.status(400).json({
-//                 message: `Allocated stock exceeds total incoming stock`
-//             });
-//         }
-
-//         // Block incomplete allocation
-//         if ((availableStock + backroomStock) < totalIncomingStock) {
-//             return res.status(400).json({
-//                 message: `Stock allocation is incomplete. Remaining ${
-//                     totalIncomingStock - (availableStock + backroomStock)
-//                 } units unallocated`
-//             });
-//         }
-
-
-
-//         const inventoryItem = await InventoryModel.findOne({ productId: productId, supermarketId })
-//         const previousStock = inventoryItem?.totalStock;
-//         console.log(inventoryItem)
-//         if (!inventoryItem) {
-//             return res.status(404).json({
-//                 message: `Product not found`
-//             })
-//         }
-//         const checkProduct = await ProductModel.findOne({ _id: inventoryItem.productId, supermarketId })
-//         const productCount = await BatchModel.countDocuments()
-//         console.log(productCount)
-
-//         const code = `${generateBatchCode()}${padStart(productCount)}`;
-//         console.log(code)
-
-//         const newBatch = new BatchModel({
-//             supermarketId,
-//             inventoryId: inventoryItem._id,
-//             productId: inventoryItem.productId,
-//             batchCode: code,
-//             supplier,
-//             quantity: totalIncomingStock,
-//             quantityRemaining: totalIncomingStock,
-//             unitCost: checkProduct.unitPrice,
-//             expiryDate,
-//             createdBy: id
-//         })
-
-//         console.log(newBatch)
-//         await newBatch.save()
-        
-//         inventoryItem.totalStock += newBatch.quantity;
-//         inventoryItem.availableStock += availableStock;
-//         inventoryItem.backroomStock += backroomStock;
-
-//         await inventoryItem.save()
-        
-//         await logActivity({
-//             supermarket: supermarketId,
-//             user: id,
-//             title: 'Recorded delivery',
-//             module: 'INVENTORY',
-//             description: `Received ${totalIncomingStock} units of ${checkProduct.productName} from ${supplier}`,
-//             entityId: newBatch._id
-//         });
-
-//         res.status(201).json({
-//             message: `Done`,
-//             data: {
-//                 newBatch,
-//                 product: inventoryItem, 
-//                 success: {
-//                     message: `Stock Entry: ${totalIncomingStock} units revieved from ${supplier}`,
-//                     product: checkProduct.productName,
-//                     previousStock,
-//                     updatedStock: inventoryItem.totalStock,
-//                     availableStock: inventoryItem.availableStock,
-//                     backroomStock: inventoryItem.backroomStock
-//                 }
-//              }
-//         })
-
-
-//     } catch (error) {
-//         console.log(error)
-//         next(error)
-//     }
-// }
 
 exports.restockItem = async (req, res, next) => {
     try {
@@ -441,7 +371,7 @@ exports.restockItem = async (req, res, next) => {
             quantity: totalIncomingStock,
             quantityRemaining: totalIncomingStock,
             unitCost: product.unitPrice,
-            expiryDate,
+            expiryDate: expiryDate? expiryDate: null,
             createdBy: id
         });
 
@@ -481,3 +411,4 @@ exports.restockItem = async (req, res, next) => {
         next(error);
     }
 };
+

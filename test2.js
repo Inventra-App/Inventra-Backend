@@ -26,7 +26,7 @@ const get = async (req, res, next) => {
         const getBatches = await BatchModel.find({
             supermarketId: id
         })
-        .select('quantity quantityRemaining')
+        .select('quantity', 'quantityRemaining')
         .sort({ createdAt: 1 });
         console.log(getBatches);
         res.json(getBatches);

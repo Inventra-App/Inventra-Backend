@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { createStaff,loginStaff, getAllStaff, logoutStaff } = require('../controllers/staffController');
+const { createStaff, loginStaff, getAllStaff, logoutStaff, changeStaffPassword, getOneStaff, suspendStaff, changeStaffRole } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
 const { authentication, authorize, staffInvite } = require('../middlewares/auth');
 
@@ -327,6 +327,135 @@ router.get('/staff', authentication, authorize('admin'), getAllStaff);
  *         description: Internal server error
  */
 router.post('/staff/logout', authentication, logoutStaff);
+/**
+ * @swagger
+ * /api/v1/staff/change-password:
+ *   patch:
+ *     summary: Reset staff password
+ *     description: Admin resets a staff member's password. A new random password is generated and returned.
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *     responses:
+ *       200:
+ *         description: Password reset successfully
+ *       404:
+ *         description: Staff not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/staff/change-password', authentication, authorize('admin'), changeStaffPassword);
+
+/**
+ * @swagger
+ * /api/v1/staff/{staffId}:
+ *   get:
+ *     summary: Get a single staff member
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Staff fetched successfully
+ *       404:
+ *         description: Staff not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/staff/:staffId', authentication, authorize('admin', 'manager'), getOneStaff);
+
+/**
+ * @swagger
+ * /api/v1/staff/suspend/{staffId}:
+ *   patch:
+ *     summary: Suspend a staff member
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Staff suspended successfully
+ *       404:
+ *         description: Staff not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/staff/suspend/:staffId', authentication, authorize('admin'), suspendStaff);
+
+/**
+ * @swagger
+ * /api/v1/staff/change-role/{staffId}:
+ *   patch:
+ *     summary: Change staff role
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [cashier, manager]
+ *     responses:
+ *       200:
+ *         description: Staff role updated successfully
+ *       400:
+ *         description: Invalid role value
+ *       404:
+ *         description: Staff not found
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/staff/change-role/:staffId', authentication, authorize('admin'), changeStaffRole);
 
     
 module.exports = router

@@ -12,7 +12,8 @@ exports.createStaff = async (req, res, next) => {
     try {
         const adminId = req.user.id;
         const admin = await SupermarketModel.findById(adminId);
-        const genPass = Math.ceil(Math.random() * 1000000);
+        const genPass = `${Math.ceil(Math.random() * 1000000)}`;
+        console.log(genPass)
         if (!admin) {
             return res.status(404).json({
                 message: `You are not authourised to perform this action. Please contact your administrator`
@@ -148,10 +149,8 @@ exports.loginStaff = async (req, res, next) => {
                 message: `Invalid credentials. Please contact your administrator.`
             })
         }
-        console.log(staff)
 
         const checkPassword = await bcrypt.compare(password, staff.password)
-        console.log(checkPassword)
         if (!checkPassword) {
             return res.status(400).json({
                 message: `Invalid credentials. Please contact your administrator`
@@ -211,7 +210,7 @@ exports.changeStaffPassword = async (req, res, next) => {
                 message: 'Staff not found'
             });
         }
-        const genPass = Math.ceil(Math.random() * 1000000);
+        const genPass = `${Math.ceil(Math.random() * 1000000)}`;
 
         const newPassword = await bcrypt.hash(genPass, 10);
 

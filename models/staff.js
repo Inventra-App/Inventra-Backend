@@ -39,13 +39,16 @@ const staffSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isSuspended :{
+        type: Boolean,
+        default: false
+    },
     role: {
         type: String,
         enum: ['cashier', 'manager'],
         required: true
     },
 }, { timestamps: true});
-
 const staffModel = mongoose.model('Staff', staffSchema);
 
 module.exports = staffModel;

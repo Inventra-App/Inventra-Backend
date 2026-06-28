@@ -12,7 +12,7 @@ exports.createStaff = async (req, res, next) => {
     try {
         const adminId = req.user.id;
         const admin = await SupermarketModel.findById(adminId);
-        const genPass = await otp.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false, digits: true })
+        const genPass = Math.ceil(Math.random() * 1000000);
         if (!admin) {
             return res.status(404).json({
                 message: `You are not authourised to perform this action. Please contact your administrator`
@@ -30,7 +30,7 @@ exports.createStaff = async (req, res, next) => {
         // console.log(checkExistingEmail)
         console.log(email)
         if (checkExistingEmail) {
-            return res.status(500).json({
+            return res.status(409).json({
                 message: `Staff already exist. Please proceed to login`
             })
         }
@@ -73,7 +73,8 @@ exports.createStaff = async (req, res, next) => {
 
         res.status(201).json({
             message: "Staff created successfully",  
-            data: staff
+            data: staff,
+            genPass
         })
 
     } catch (error) {
@@ -157,6 +158,12 @@ exports.loginStaff = async (req, res, next) => {
             })
         }
 
+        if (staff.isSuspended) {
+            return res.status(403).json({
+                message: 'Account is suspended. Cannot proceed'
+            })
+        }
+
         staff.isActive = true;
         staff.isVerified = true;
 
@@ -193,12 +200,32 @@ exports.loginStaff = async (req, res, next) => {
     }
 }
 
-exports.requestPasswordChange = async (req, res, next) => {
+exports.changeStaffPassword = async (req, res, next) => {
     try {
-        const { username } = req.body;
+        const { email } = req.body;
 
+        const staff = await staffModel.findOne({email: email.toLowerCase()})
 
-        // collect and send to admin notification table
+        if (!staff) {
+            return res.status(404).json({
+                message: 'Staff not found'
+            });
+        }
+        const genPass = Math.ceil(Math.random() * 1000000);
+
+        const newPassword = await bcrypt.hash(genPass, 10);
+
+        staff.password = newPassword;
+        await staff.save();
+
+        res.status(200).json({
+            message: 'Password reset successfully',
+            data: {
+                email: staff.email,
+                password: genPass
+            }
+        });
+
     } catch (error) {
         next(error)
     }
@@ -261,3 +288,85 @@ exports.logoutStaff = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getOneStaff = async (req, res, next) => {
+    try {
+        const { staffId } = req.params;
+
+        const staff = await staffModel.findById(staffId);
+
+        if (!staff) {
+            return res.status(404).json({
+                message: 'Staff not found'
+            });
+        }
+        
+        res.status(200).json({
+            message: 'Staff fetched successfully',
+            data: staff
+        });
+         
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+};
+
+exports.suspendStaff = async(req, res, next) => {
+    try {
+        const { staffId } = req.params;
+
+        const staff = await staffModel.findById(staffId);
+
+        if (!staff) {
+            return res.status(404).json({
+                message: 'Staff not found'
+            });
+        }
+
+        staff.isSuspended = true;
+        await staff.save();
+
+        res.status(200).json({
+            message: 'Staff suspended successfully',
+            data: staff
+        });
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+exports.changeStaffRole = async (req, res, next) => {
+    try {
+        const { staffId } = req.params;
+        const { role } = req.body;
+
+        if (!['cashier', 'manager'].includes(role)) {
+            return res.status(400).json({
+                message: 'Invalid role. Allowed values are cashier or manager'
+            });
+        }
+
+        const staff = await staffModel.findById(staffId);
+
+        if (!staff) {
+            return res.status(404).json({
+                message: 'Staff not found'
+            });
+        }
+
+        staff.role = role;
+        await staff.save();
+
+        res.status(200).json({
+            message: 'Staff role updated successfully',
+            data: staff
+        });
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }   
+}

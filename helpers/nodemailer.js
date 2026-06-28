@@ -22,7 +22,7 @@ const sendMail = async(options)=>{
     from: `"Inventra" <${process.env.SMTP_USER}>`, // sender address
     to: options.email, // list of recipients
     subject: options.subject, // subject line
-    // text: "Hello world?", // plain text body
+    // text: "Hello world?", // plain text body 
     html: options.html, // HTML body
   });
 

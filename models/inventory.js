@@ -108,6 +108,12 @@ const InventorySchema = new mongoose.Schema(
       min: 0
     },
 
+    writtenOff: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+
     updatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'staff'

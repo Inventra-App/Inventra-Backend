@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { createCategoryValidator } = require('../middlewares/validator');
 const { createCategory, getCategories, getOneCategory, updateCategory, deleteCategory } = require('../controllers/categoryConroller');
-const {authentication} = require('../middlewares/auth')
+const { authentication, authorize, adminManager } = require('../middlewares/auth')
 
 
 /**
@@ -76,7 +76,7 @@ const {authentication} = require('../middlewares/auth')
  *       500:
  *         description: Internal server error
  */
-router.post('/category', authentication, createCategory);
+router.post('/category', authentication, adminManager, createCategory);
 
 
 /**
@@ -259,7 +259,7 @@ router.get('/category/:id', authentication, getOneCategory);
  *                   example: Something went wrong
  */
 
-router.delete('/d/category/:categoryId', authentication, deleteCategory);
+router.delete('/d/category/:categoryId', authentication, adminManager, deleteCategory);
 
 /**
  * @swagger
@@ -324,6 +324,6 @@ router.delete('/d/category/:categoryId', authentication, deleteCategory);
  *       500:
  *         description: Internal server error
  */
-router.patch('/category/:id', authentication, updateCategory);
+router.patch('/category/:id', authentication, adminManager, updateCategory);
 
 module.exports = router;

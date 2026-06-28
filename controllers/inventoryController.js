@@ -141,112 +141,169 @@ exports.addProducts = async (req, res, next) => {
 exports.moveProducts = async (req, res, next) => {
     try {
         const { id, role } = req.user;
-        console.log(`here: `, id)
-        if (role !== 'admin' && role !== 'manager') {
+
+        if (!['admin', 'manager'].includes(role)) {
             return res.status(403).json({
                 message: `You are not authorised to perform this action`
-            })
+            });
         }
 
         const supermarketId = await filterRole(id, role);
-        console.log(supermarketId)
-
-        const userName = await findStaffInfo(id)
+        const userName = await findStaffInfo(id);
 
         const { actionType, moveFrom, moveTo, quantity } = req.body;
         const { inventoryId } = req.params;
 
-        const inventory = await InventoryModel.findOne({ _id: inventoryId, supermarketId });
-        if (!inventory) {
-            return res.status(404).json({
-                message: `product does not exist or has been changed`
-            })
+        if (!moveFrom || !moveTo || !quantity) {
+            return res.status(400).json({
+                message: `Move source, destination and quantity are required`
+            });
         }
 
-        const product = await ProductModel.findOne({ _id: inventory.productId, supermarketId });
+        const inventory = await InventoryModel.findOne({
+            _id: inventoryId,
+            supermarketId
+        });
+
+        if (!inventory) {
+            return res.status(404).json({
+                message: `Product does not exist or has been changed`
+            });
+        }
+
+        const product = await ProductModel.findOne({
+            _id: inventory.productId,
+            supermarketId
+        });
+
         if (!product) {
             return res.status(404).json({
                 message: `Product not found`
-            })
+            });
         }
-
-        const oldQuantity = inventory.availableStock || 0;
-
-        console.log(inventory)
 
         if (quantity <= 0) {
             return res.status(400).json({
-                message: "Quantity must be greater than 0"
+                message: `Quantity must be greater than 0`
             });
         }
 
         inventory.availableStock = inventory.availableStock || 0;
         inventory.backroomStock = inventory.backroomStock || 0;
+        inventory.writtenOffStock = inventory.writtenOffStock || 0;
 
-        if (moveFrom.toLowerCase() === 'backroom stock' && moveTo.toLowerCase() === 'available stock') {
+        const oldState = {
+            availableStock: inventory.availableStock,
+            backroomStock: inventory.backroomStock,
+            writtenOffStock: inventory.writtenOffStock
+        };
 
+        // Prevent same source and destination
+        if (moveFrom.toLowerCase() === moveTo.toLowerCase()) {
+            return res.status(400).json({
+                message: `Source and Destination cannot be the same`
+            });
+        }
+
+        // Backroom → Available
+        if (
+            moveFrom.toLowerCase() === 'backroom stock' &&
+            moveTo.toLowerCase() === 'available stock'
+        ) {
             if (inventory.backroomStock < quantity) {
                 return res.status(400).json({
-                    message: `Not enough products`
+                    message: `Not enough products in backroom stock`
                 });
             }
 
             inventory.backroomStock -= quantity;
             inventory.availableStock += quantity;
+        }
 
-        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'backroom stock') {
-
+        // Available → Backroom
+        else if (
+            moveFrom.toLowerCase() === 'available stock' &&
+            moveTo.toLowerCase() === 'backroom stock'
+        ) {
             if (inventory.availableStock < quantity) {
                 return res.status(400).json({
-                    message: `Not enough products`
+                    message: `Not enough products in available stock`
                 });
             }
 
             inventory.availableStock -= quantity;
             inventory.backroomStock += quantity;
-        } else if (moveFrom.toLowerCase() === 'available stock' && moveTo.toLowerCase() === 'available stock') {
-            return res.status(400).json({
-                message: `Source and Destination cannot be the same`
-            })
-        } else if (moveFrom.toLowerCase() === 'backroom stock' && moveTo.toLowerCase() === 'backroom stock') {
-             return res.status(400).json({
-                message: `Source and Destination cannot be the same`
-            })
         }
 
-        console.log(inventory);
+        // Available → Write-off
+        else if (
+            moveFrom.toLowerCase() === 'available stock' &&
+            moveTo.toLowerCase() === 'write-off stock'
+        ) {
+            if (inventory.availableStock < quantity) {
+                return res.status(400).json({
+                    message: `Not enough products in available stock`
+                });
+            }
+
+            inventory.availableStock -= quantity;
+            inventory.writtenOffStock += quantity;
+        }
+
+        // Backroom → Write-off
+        else if (
+            moveFrom.toLowerCase() === 'backroom stock' &&
+            moveTo.toLowerCase() === 'write-off stock'
+        ) {
+            if (inventory.backroomStock < quantity) {
+                return res.status(400).json({
+                    message: `Not enough products in backroom stock`
+                });
+            }
+
+            inventory.backroomStock -= quantity;
+            inventory.writtenOffStock += quantity;
+        }
+
+        // Invalid movement
+        else {
+            return res.status(400).json({
+                message: `Invalid stock movement`
+            });
+        }
+
         await inventory.save();
 
-        const newQuantity = inventory.availableStock || 0;
+        const newState = {
+            availableStock: inventory.availableStock,
+            backroomStock: inventory.backroomStock,
+            writtenOffStock: inventory.writtenOffStock
+        };
 
-        console.log({
-            supermarket: supermarketId,
-            staffId: id,
-            userName,
-            title: 'Updated stock',
-            module: 'INVENTORY',
-            description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
-            entityId: product._id
-        })
-        const activityDetails = await logActivity({
+        await logActivity({
             supermarket: supermarketId,
             staffId: id,
             staffName: userName,
-            title: 'Updated stock',
+            title: actionType || 'Updated stock',
             module: 'INVENTORY',
-            description: `Adjusted ${product.productName} quantity from ${oldQuantity} to ${newQuantity} units`,
+            description: `Moved ${quantity} units of ${product.productName} from ${moveFrom} to ${moveTo}`,
             entityId: product._id
         });
 
         res.status(200).json({
-            message: `Items moved sucesfully`,
-            data: inventory
-        })
+            message: `Items moved successfully`,
+            data: {
+                inventory,
+                oldState,
+                newState
+            }
+        });
+
     } catch (error) {
-        console.log(error),
-        next(error)
+        console.log(error);
+        next(error);
     }
-}
+};
 
 exports.getAllItems = async (req, res, next) => {
    try { 
@@ -257,7 +314,7 @@ exports.getAllItems = async (req, res, next) => {
 
 
         if (!items) {
-            return res.status(404).json({
+            return res.status(200).json({
                 message: `Nothing found here. Please upload your products`
             })
         }

@@ -63,7 +63,9 @@ exports.getCategories = async (req, res, next) => {
         const allCategories = await CategoryModel.find({ supermarketId }).sort('desc');
 
         res.status(200).json({
-            message: allCategories.length ? `All categories fetched successfully` : `No categories found`,
+            message: allCategories.length
+                ? 'Categories fetched successfully'
+                : 'No categories found',
             data: allCategories
         })
     } catch (error) {

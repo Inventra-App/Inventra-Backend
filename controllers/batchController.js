@@ -72,7 +72,42 @@ exports.getAllBatchesByInventoryItem = async(req , res ,next)=>{
         console.log(error)
         next(error)
     }
+}   
 
+exports.deleteBatch = async(req, res, next) => {
+    try {
+        const { batchId } = req.params;
+
+        const findBatch = await BatchModel.findOne({ _id: batchId });
+        
+        if (!findBatch) {
+            return res.status(404).json({
+                message: "Batch not found!"
+            });
+        }
+
+        if (findBatch.supermarketId.toString() !== req.user.id) {
+            return res.status(403).json({
+                message: "You are not authorized to delete this batch"
+            });
+        }
+
+        if (findBatch.status !== 'expired' && findBatch.status !== 'depleted') {
+            return res.status(400).json({
+                message: "Cannot delete batch that is active or still has remaining quantity"
+            });
+        }
+
+        const deletedBatch = await BatchModel.findByIdAndDelete(batchId);
+
+        res.status(200).json({
+            message: "Batch deleted successfully",
+            data: deletedBatch
+        });
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
 }
 
 

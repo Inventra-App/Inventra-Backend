@@ -7,8 +7,8 @@ const {
     getAllSales,
     getDailySalesTotal
 } = require('../controllers/salesController');
-const { authentication } = require('../middlewares/auth');
-const { checkoutSaleValidator } = require('../middlewares/validator');
+const { authentication, authorize, adminCashier } = require('../middlewares/auth');
+// const { checkoutSaleValidator } = require('../middlewares/validator');
 
 /**
  * @swagger
@@ -124,7 +124,7 @@ const { checkoutSaleValidator } = require('../middlewares/validator');
  *         description: Internal server error
  */
 
-router.post('/pos/sale', authentication, checkoutSale);
+router.post('/pos/sale', authentication, adminCashier, checkoutSale);
 
 
 /**

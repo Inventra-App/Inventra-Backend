@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const { createStaff,loginStaff, createPassword, getAllStaff } = require('../controllers/staffController');
+const { createStaff,loginStaff, getAllStaff, logoutStaff } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
-const { authentication, staffInvite } = require('../middlewares/auth');
+const { authentication, authorize, staffInvite } = require('../middlewares/auth');
 
 /**
  * @swagger
@@ -141,7 +141,7 @@ const { authentication, staffInvite } = require('../middlewares/auth');
  *                   type: string
  *                   example: Something went wrong
  */
-router.post('/create-staff', authentication, createStaffValidator, createStaff);
+router.post('/create-staff', authentication, authorize('admin'), createStaffValidator, createStaff);
 
 
 /**
@@ -275,7 +275,58 @@ router.post('/staff/login', loginStaffValidator, loginStaff);
  *       500:
  *         description: Internal server error
  */
-router.get('/staff', authentication, getAllStaff);
+router.get('/staff', authentication, authorize('admin'), getAllStaff);
+
+
+/**
+ * @swagger
+ * /api/v1/staff/logout:
+ *   post:
+ *     summary: Logout staff
+ *     description: Logs out the authenticated staff by setting their active status to false and records the logout activity in the activity log..
+ *     tags:
+ *       - Staff
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Logged out successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
+ *
+ *       401:
+ *         description: Unauthorized - Authentication required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *
+ *       404:
+ *         description: Staff not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff not found
+ *
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/staff/logout', authentication, logoutStaff);
 
     
 module.exports = router

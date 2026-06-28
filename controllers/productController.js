@@ -71,7 +71,7 @@ exports.getProductsByCategory = async (req, res, next) => {
         });
 
         if (!products.length) {
-            return res.status(404).json({
+            return res.status(200).json({
                 message: 'No products found for this category'
             });
         }

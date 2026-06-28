@@ -53,16 +53,6 @@ const batchSchema = new mongoose.Schema({
       // required: true
     },
 
-    status: {
-      type: String,
-      enum: [
-        'active',
-        'expired',
-        'depleted'
-      ],
-      default: 'active'
-    },
-
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'staff',
@@ -78,6 +68,20 @@ batchSchema.virtual('isExpiring').get(function () {
   if (this.expiryDate === null) return false;
   if (this.expiryDate !== null) return true;
   return 'isExpiring';
+});
+
+batchSchema.virtual('status').get(function () {
+    const today = new Date();
+
+    if (this.quantityRemaining <= 0) {
+        return 'depleted';
+    }
+
+    if (this.expiryDate && this.expiryDate < today) {
+        return 'expired';
+    }
+
+    return 'active';
 });
 
 const BatchModel = mongoose.model('batch', batchSchema);

@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const {getAllBatches, getOneBatch, checkExpiringProducts, getAllBatchesByInventoryItem}= require('../controllers/batchController')
+const {getAllBatches, getOneBatch, checkExpiringProducts, getAllBatchesByInventoryItem, deleteBatch}= require('../controllers/batchController')
 const {authentication} = require('../middlewares/auth')
 
 
@@ -271,6 +271,89 @@ router.get('/getOne/:id',authentication ,getOneBatch)
  *       500:
  *         description: Internal server error
  */
-router.get('/batches/:inventoryId', authentication, getAllBatchesByInventoryItem)
+router.get('/batches/:inventoryId', authentication, getAllBatchesByInventoryItem);
+
+/**
+ * @swagger
+ * /api/v1/batch/{batchId}:
+ *   delete:
+ *     summary: Delete a batch
+ *     description: Deletes a batch only if its status is expired or depleted.
+ *     tags:
+ *       - Batch
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     parameters:
+ *       - in: path
+ *         name: batchId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the batch to delete
+ *         example: 6860d2f5a8b5f2c9b0d8a123
+ *
+ *     responses:
+ *       200:
+ *         description: Batch deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Batch deleted successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6860d2f5a8b5f2c9b0d8a123
+ *                     batchCode:
+ *                       type: string
+ *                       example: BATCH001
+ *                     quantityRemaining:
+ *                       type: number
+ *                       example: 0
+ *
+ *       400:
+ *         description: Batch cannot be deleted because it is still active
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Cannot delete batch that is active or still has remaining quantity
+ *
+ *       403:
+ *         description: Unauthorized to delete this batch
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: You are not authorized to delete this batch
+ *
+ *       404:
+ *         description: Batch not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Batch not found!
+ *
+ *       500:
+ *         description: Internal server error
+ */
+
+router.delete('/batch/:batchId', authentication, deleteBatch);
 
 module.exports = router;

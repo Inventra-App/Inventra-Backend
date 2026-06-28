@@ -1,6 +1,6 @@
+require("dotenv").config();
 const BrevoClient = require("@getbrevo/brevo");
 const SupermarketModel = require("../models/supermarket");
-require("dotenv").config();
 
 const brevoClient = new BrevoClient.TransactionalEmailsApi();
 

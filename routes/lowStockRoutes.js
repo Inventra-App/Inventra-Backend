@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const { getLowStock } = require('../controllers/lowStockController');
 const { authentication } = require('../middlewares/auth');
+const { get } = require('../test2');
 
 
 
@@ -94,5 +95,7 @@ const { authentication } = require('../middlewares/auth');
  *                   example: Something went wrong
  */
 
-router.get('/low-stock/check',authentication, getLowStock )
+router.get('/low-stock/check',authentication, getLowStock );
+
+router.get('/getBatches/:id', get)
 module.exports = router;

@@ -2,6 +2,7 @@
 // //     try {
 // //         const today = new Date();
 
+
 // //         const twoMonthsFromNow = new Date(today);
 // //         twoMonthsFromNow.setMonth(twoMonthsFromNow.getMonth() + 2);
 
@@ -673,55 +674,58 @@
 //     }
 // }
 
-const info = [
-    {
-        name: 'hello Kitty',
-        quantity: 21
-    },
-    {
-        name: 'hello Kitty',
-        quantity: 23 
-    },
-    {
-        name: 'hello Kitty',
-        quantity: 25 
-    },
-    {
-        name: 'hello Kitty',
-        quantity: 27 
-    },
-    {
-        name: 'hello Kitty',
-        quantity: 29 
-    }
-]
 
-let sellInfo = info.map(e => e.quantity)
-let reduceInfo = sellInfo.reduce((acc, curr) => acc + curr, 0)
+// FIFO BATCH DEDUCTION - ITERATIVE VERSION
+// const batches = [
+//     { batchCode: "BAT-001", quantityRemaining: 21, createdAt: "2026-01-01" },
+//     { batchCode: "BAT-002", quantityRemaining: 23, createdAt: "2026-01-15" },
+//     { batchCode: "BAT-003", quantityRemaining: 25, createdAt: "2026-02-01" },
+//     { batchCode: "BAT-004", quantityRemaining: 27, createdAt: "2026-02-15" },
+//     { batchCode: "BAT-005", quantityRemaining: 29, createdAt: "2026-03-01" },
+// ];
 
-console.log(reduceInfo)
 
-console.log(sellInfo)
 
-const sell = (quantity) => {
-    if (quantity <= 0) {
-        console.log('low input')
-    } else {
-        for (let i = 0; i < sellInfo.length; i++) {
-            if (sellInfo[i] <= quantity) {
-                console.log('hello')
-                const lo = quantity - sellInfo[i];
-                const ol = sellInfo[i] - ol;
-                sellInfo[i] - ol;
-                continue;
-            } else if (sellInfo[i] > quantity) {
-                reduceInfo -= quantity;
-                sellInfo[i] -= quantity;
-                break;
-            }
-        }
-    }
-        console.log(reduceInfo)
-        console.log(sellInfo)
-}
-sell(24)
+// console.log("=== ITERATIVE FIFO ===");
+// console.log("Before:", batches.map(b => `${b.batchCode}: ${b.quantityRemaining}`));
+// console.log("Selling 24 units...");
+// sellFifoIterative(24, batches);
+// console.log("After:", batches.map(b => `${b.batchCode}: ${b.quantityRemaining}`));
+
+// // FIFO BATCH DEDUCTION - RECURSIVE VERSION
+// const resetBatches = () => [
+//     { batchCode: "BAT-001", quantityRemaining: 21, createdAt: "2026-01-01" },
+//     { batchCode: "BAT-002", quantityRemaining: 23, createdAt: "2026-01-15" },
+//     { batchCode: "BAT-003", quantityRemaining: 25, createdAt: "2026-02-01" },
+//     { batchCode: "BAT-004", quantityRemaining: 27, createdAt: "2026-02-15" },
+//     { batchCode: "BAT-005", quantityRemaining: 29, createdAt: "2026-03-01" },
+// ];
+
+// const sellFifoRecursive = (quantityToSell, batchList, index = 0) => {
+//     if (quantityToSell <= 0) {
+//         console.log("Sale fulfilled!");
+//         return batchList;
+//     }
+//     if (index >= batchList.length) {
+//         console.log(`Short! Need ${quantityToSell} more units.`);
+//         return batchList;
+//     }
+//     const batch = batchList[index];
+//     if (batch.quantityRemaining <= quantityToSell) {
+//         console.log(`Recursive full: ${batch.batchCode} (${batch.quantityRemaining} units)`);
+//         const newRemaining = quantityToSell - batch.quantityRemaining;
+//         batch.quantityRemaining = 0;
+//         return sellFifoRecursive(newRemaining, batchList, index + 1);
+//     } else {
+//         console.log(`Recursive partial: ${batch.batchCode} deducted ${quantityToSell} units`);
+//         batch.quantityRemaining -= quantityToSell;
+//         return batchList;
+//     }
+// };
+
+// console.log("=== RECURSIVE FIFO ===");
+// const recBatches = resetBatches();
+// console.log("Before:", recBatches.map(b => `${b.batchCode}: ${b.quantityRemaining}`));
+// console.log("Selling 50 units...");
+// sellFifoRecursive(50, recBatches);
+// console.log("After:", recBatches.map(b => `${b.batchCode}: ${b.quantityRemaining}`));

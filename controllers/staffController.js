@@ -12,7 +12,7 @@ exports.createStaff = async (req, res, next) => {
     try {
         const adminId = req.user.id;
         const admin = await SupermarketModel.findById(adminId);
-        const genPass = await otp.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: true, digits: true })
+        const genPass = await otp.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false, digits: true })
         if (!admin) {
             return res.status(404).json({
                 message: `You are not authourised to perform this action. Please contact your administrator`
@@ -26,7 +26,7 @@ exports.createStaff = async (req, res, next) => {
             role
         } = req.body;
 
-        const checkExistingEmail = await staffModel.findOne({email: email.toLowerCase()})
+        const checkExistingEmail = await staffModel.findOne({adminId, email: email.toLowerCase()})
         // console.log(checkExistingEmail)
         console.log(email)
         if (checkExistingEmail) {
@@ -50,30 +50,30 @@ exports.createStaff = async (req, res, next) => {
             role
         }); 
         console.log(staff)
-        await staff.save()
         
         const roleLinks = {
             manager: 'https://inventra-app.vercel.app/staff-login',
             cashier: 'https://inventra-app.vercel.app/cashier-login'
         };
-
+        console.log(genPass)
         const link = roleLinks[staff.role];
-
+        
         const info = process.env.NODE_ENV
         if (info === "production") {
-             await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.email, genPass, link))   
+            await brevo(staff.email, staff.firstName, staffInviteTemplate(staff.firstName, staff.email, genPass, link))   
         } else{
-             await sendMail({
+            await sendMail({
                 email: staff.email, 
                 subject: 'Welcome', 
                 html: staffInviteTemplate(staff.firstName, staff.email, genPass, link)
             })
         }
-
+        
+        await staff.save()
 
         res.status(201).json({
             message: "Staff created successfully",  
-            data: staff  
+            data: staff
         })
 
     } catch (error) {
@@ -147,8 +147,10 @@ exports.loginStaff = async (req, res, next) => {
                 message: `Invalid credentials. Please contact your administrator.`
             })
         }
+        console.log(staff)
 
         const checkPassword = await bcrypt.compare(password, staff.password)
+        console.log(checkPassword)
         if (!checkPassword) {
             return res.status(400).json({
                 message: `Invalid credentials. Please contact your administrator`
@@ -212,12 +214,10 @@ exports.getAllStaff = async (req, res, next) => {
             adminId: supermarketId
         }).select('-password');
 
-        if (!staff) {
-            return [];
-  ``      }
-
         res.status(200).json({
-            message: 'Staff fetched successfully',
+            message: staff.length
+                ? 'Staff fetched successfully'
+                : 'No staff found',
             data: staff
         });
 
@@ -226,3 +226,38 @@ exports.getAllStaff = async (req, res, next) => {
         next(error);
     }
 };  
+
+
+exports.logoutStaff = async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        const staff = await staffModel.findById(id);
+
+        if (!staff) {
+            return res.status(404).json({
+                message: "Staff not found"
+            });
+        }
+
+        staff.isActive = false;
+        await staff.save();
+
+        await logActivity({
+            supermarket: staff.adminId || null,
+            staffId: staff._id,
+            staffName: `${staff.firstName} ${staff.lastName}`,
+            title: 'Logout successful',
+            module: 'AUTH',
+            description: `Staff logout successful for ${staff.firstName}`,
+            entityId: staff._id
+        });
+
+        return res.status(200).json({
+            message: "Logged out successfully"
+        });
+
+    } catch (error) {
+        console.log(error);
+        next(error);
+    }
+};

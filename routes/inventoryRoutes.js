@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const { addProducts, moveProducts, getAllItems, restockItem, getOneItem } = require('../controllers/inventoryController');
-const { authentication } = require('../middlewares/auth');
+const { authentication, authorize, adminManager } = require('../middlewares/auth');
 const { addProductValidator, moveProductsValidator, recordStockEntryValidator } = require('../middlewares/validator');
 
 
@@ -206,18 +206,16 @@ const { addProductValidator, moveProductsValidator, recordStockEntryValidator } 
  *         description: Internal server error
  */
 
-router.post('/product', authentication, addProducts);
+router.post('/product', authentication, adminManager, addProducts);
 
 /**
  * @swagger
- * /api/v1/p/move/{inventoryId}:
- *   put:
- *     summary: Move stock between available and backroom inventory
- *     tags: [Inventory]
- *     description: >
- *       Admin or Manager only. Moves stock between availableStock and backroomStock.
- *       Ensures stock integrity and prevents overdrawing from either location.
- *       totalStock is virtual and not modified (availableStock + backroomStock).
+ * /api/v1/inventory/move/{inventoryId}:
+ *   patch:
+ *     summary: Move products between stock locations
+ *     description: Allows an admin or manager to move stock between available stock, backroom stock, and write-off stock.
+ *     tags:
+ *       - Inventory
  *     security:
  *       - bearerAuth: []
  *
@@ -227,8 +225,8 @@ router.post('/product', authentication, addProducts);
  *         required: true
  *         schema:
  *           type: string
- *         description: Inventory record ID
- *         example: 64abc123def456ghi789
+ *         description: The inventory ID
+ *         example: 68602bc5d1f5dbe5fcb12345
  *
  *     requestBody:
  *       required: true
@@ -241,26 +239,30 @@ router.post('/product', authentication, addProducts);
  *               - moveTo
  *               - quantity
  *             properties:
+ *               actionType:
+ *                 type: string
+ *                 example: Stock Transfer
  *               moveFrom:
  *                 type: string
- *                 description: Source stock location
- *                 enum: [available stock, backroom stock]
- *                 example: available stock
- *
+ *                 enum:
+ *                   - available stock
+ *                   - backroom stock
+ *                   - write-off stock
+ *                 example: backroom stock
  *               moveTo:
  *                 type: string
- *                 description: Destination stock location
- *                 enum: [available stock, backroom stock]
- *                 example: backroom stock
- *
+ *                 enum:
+ *                   - available stock
+ *                   - backroom stock
+ *                   - write-off stock
+ *                 example: available stock
  *               quantity:
  *                 type: number
- *                 description: Quantity of stock to move
- *                 example: 50
+ *                 example: 20
  *
  *     responses:
  *       200:
- *         description: Stock moved successfully
+ *         description: Items moved successfully
  *         content:
  *           application/json:
  *             schema:
@@ -272,21 +274,35 @@ router.post('/product', authentication, addProducts);
  *                 data:
  *                   type: object
  *                   properties:
- *                     availableStock:
- *                       type: number
- *                       example: 190
- *
- *                     backroomStock:
- *                       type: number
- *                       example: 50
- *
- *                     totalStock:
- *                       type: number
- *                       description: Virtual field (availableStock + backroomStock)
- *                       example: 240
+ *                     inventory:
+ *                       type: object
+ *                     oldState:
+ *                       type: object
+ *                       properties:
+ *                         availableStock:
+ *                           type: number
+ *                           example: 50
+ *                         backroomStock:
+ *                           type: number
+ *                           example: 100
+ *                         writtenOffStock:
+ *                           type: number
+ *                           example: 10
+ *                     newState:
+ *                       type: object
+ *                       properties:
+ *                         availableStock:
+ *                           type: number
+ *                           example: 70
+ *                         backroomStock:
+ *                           type: number
+ *                           example: 80
+ *                         writtenOffStock:
+ *                           type: number
+ *                           example: 10
  *
  *       400:
- *         description: Invalid request or insufficient stock
+ *         description: Bad request (invalid stock movement, insufficient stock, same source/destination)
  *         content:
  *           application/json:
  *             schema:
@@ -294,10 +310,16 @@ router.post('/product', authentication, addProducts);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Not enough products
+ *                   examples:
+ *                     invalidMovement:
+ *                       value: Invalid stock movement
+ *                     sameSource:
+ *                       value: Source and Destination cannot be the same
+ *                     insufficientStock:
+ *                       value: Not enough products in backroom stock
  *
  *       403:
- *         description: Forbidden - only admin or manager allowed
+ *         description: Unauthorized action
  *         content:
  *           application/json:
  *             schema:
@@ -308,7 +330,7 @@ router.post('/product', authentication, addProducts);
  *                   example: You are not authorised to perform this action
  *
  *       404:
- *         description: Inventory not found
+ *         description: Product or inventory not found
  *         content:
  *           application/json:
  *             schema:
@@ -316,16 +338,16 @@ router.post('/product', authentication, addProducts);
  *               properties:
  *                 message:
  *                   type: string
- *                   example: Product does not exist or has been changed
- *
- *       401:
- *         description: Unauthorized - invalid or missing token
+ *                   examples:
+ *                     inventoryNotFound:
+ *                       value: Product does not exist or has been changed
+ *                     productNotFound:
+ *                       value: Product not found
  *
  *       500:
  *         description: Internal server error
  */
-
-router.put('/p/move/:inventoryId', authentication, moveProducts);
+router.put('/p/move/:inventoryId', authentication, adminManager, moveProducts);
 
 /**
  * @swagger
@@ -532,7 +554,7 @@ router.get('/i/all', authentication, getAllItems);
  *       500:
  *         description: Internal server error
  */
-router.post('/stock/entry', authentication, restockItem)
+router.post('/stock/entry', authentication, adminManager, restockItem)
 
 
 /**

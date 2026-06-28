@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { authentication } = require('../middlewares/auth');
+const { authentication, authorize, adminManager } = require('../middlewares/auth');
 const { getActivityDescriptions, getActivityLog, getStockMovementLog } = require('../controllers/activityLogContoller');
 
 /**
@@ -181,6 +181,6 @@ router.get('/activity-logs', authentication, getActivityLog);
  *       500:
  *         description: Internal server error
  */
-router.get('/stock/log/:inventoryId', authentication, getStockMovementLog)
+router.get('/stock/log/:inventoryId', authentication, adminManager, getStockMovementLog)
 
 module.exports = router;

@@ -190,12 +190,12 @@ exports.moveProducts = async (req, res, next) => {
 
         inventory.availableStock = inventory.availableStock || 0;
         inventory.backroomStock = inventory.backroomStock || 0;
-        inventory.writtenOffStock = inventory.writtenOffStock || 0;
+        inventory.writtenOff = inventory.writtenOff || 0;
 
         const oldState = {
             availableStock: inventory.availableStock,
             backroomStock: inventory.backroomStock,
-            writtenOffStock: inventory.writtenOffStock
+            writtenOffStock: inventory.writtenOff
         };
 
         // Prevent same source and destination
@@ -247,7 +247,7 @@ exports.moveProducts = async (req, res, next) => {
             }
 
             inventory.availableStock -= quantity;
-            inventory.writtenOffStock += quantity;
+            inventory.writtenOff += quantity;
         }
 
         // Backroom → Write-off
@@ -262,7 +262,7 @@ exports.moveProducts = async (req, res, next) => {
             }
 
             inventory.backroomStock -= quantity;
-            inventory.writtenOffStock += quantity;
+            inventory.writtenOff += quantity;
         }
 
         // Invalid movement
@@ -277,7 +277,7 @@ exports.moveProducts = async (req, res, next) => {
         const newState = {
             availableStock: inventory.availableStock,
             backroomStock: inventory.backroomStock,
-            writtenOffStock: inventory.writtenOffStock
+            writtenOffStock: inventory.writtenOff
         };
 
         await logActivity({

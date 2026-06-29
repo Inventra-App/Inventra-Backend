@@ -118,32 +118,36 @@ exports.checkoutSale = async (req, res, next) => {
 
             inventory.availableStock -= quantity;
 
-            const { id } = req.params;
-            const getBatches = await BatchModel.find({
-                supermarketId: id,
-                productId: productId
-            })
-            .select('quantity quantityRemaining')
-            .sort({ createdAt: 1 });
-        
-            const updatedBatches = sellFifoIterative(quantity, getBatches);
-            await BatchModel.bulkWrite(updatedBatches.map(batch => ({
-                updateOne: {
-                    filter: { _id: batch._id },
-                    update: { $set: { quantityRemaining: batch.quantityRemaining } }
-                }
-                })));
-                
-            await inventory.save();
-            saleItems.push({
-                productId,
-                productName: product.productName,
-                quantity,
-                unitPrice: product.unitPrice,
-                subtotal
+          const getBatches = await BatchModel.find({
+            supermarketId,
+            productId
+        })
+        .select('batchCode quantity quantityRemaining')
+        .sort({ createdAt: 1 });
+
+        if (!getBatches.length) {
+            return res.status(404).json({
+                message: `${product.productName} has no batch records`
             });
-            count ++
-            console.log(inventory)
+        }
+        
+        const updatedBatches = sellFifoIterative(quantity, getBatches);
+        await BatchModel.bulkWrite(updatedBatches.map(batch => ({
+            updateOne: {
+                filter: { _id: batch._id },
+                update: { $set: { quantityRemaining: batch.quantityRemaining } }
+            }
+        })));
+        await inventory.save();
+        saleItems.push({
+            productId,
+            productName: product.productName,
+            quantity,
+            unitPrice: product.unitPrice,
+            subtotal
+        });
+        count ++
+        console.log(inventory)
         }
         const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
         // console.log(totalItems)

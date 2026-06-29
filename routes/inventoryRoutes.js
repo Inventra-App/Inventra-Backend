@@ -210,7 +210,7 @@ router.post('/product', authentication, adminManager, addProducts);
 
 /**
  * @swagger
- * /api/v1/inventory/move/{inventoryId}:
+ * /api/v1/p/move/{inventoryId}:
  *   patch:
  *     summary: Move products between stock locations
  *     description: Allows an admin or manager to move stock between available stock, backroom stock, and write-off stock.

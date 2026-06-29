@@ -56,9 +56,10 @@ exports.getStockMovementLog = async (req, res, next) => {
         const { inventoryId } = req.params;
 
         const getInventoryInfo = await InventoryModel.findById(inventoryId)
+        console.log(getInventoryInfo)
         const invId = getInventoryInfo.productId;
         
-        const allActions = await ActivityLog.find({action: 'Updated stock', entityId: invId})
+        const allActions = await ActivityLog.find({entity: 'MOVEMENT', entityId: invId})
         
         res.status(200).json({
             message: `Movement History fetched successfully`,

@@ -4,7 +4,7 @@ const SaleItemModel = require('../models/saleItem');
 const ProductModel = require('../models/product');
 const InventoryModel = require('../models/inventory');
 const BatchModel = require('../models/batch');
-const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug, findStaffInfo} = require('../helpers/helpers');
+const { filterRole, padStart, mapPricesAndAdd, mapPricesAndAddSale, logActivity, generateUserSlug, findStaffInfo, sellFifoIterative} = require('../helpers/helpers');
 const { getPagination } = require('../helpers/pagination');
 const SupermarketModel = require('../models/supermarket');
 
@@ -117,8 +117,24 @@ exports.checkoutSale = async (req, res, next) => {
             totalAmount += subtotal;
 
             inventory.availableStock -= quantity;
-            await inventory.save();
 
+            const { id } = req.params;
+            const getBatches = await BatchModel.find({
+                supermarketId: id,
+                productId: productId
+            })
+            .select('quantity quantityRemaining')
+            .sort({ createdAt: 1 });
+        
+            const updatedBatches = sellFifoIterative(quantity, getBatches);
+            await BatchModel.bulkWrite(updatedBatches.map(batch => ({
+                updateOne: {
+                    filter: { _id: batch._id },
+                    update: { $set: { quantityRemaining: batch.quantityRemaining } }
+                }
+                })));
+                
+            await inventory.save();
             saleItems.push({
                 productId,
                 productName: product.productName,

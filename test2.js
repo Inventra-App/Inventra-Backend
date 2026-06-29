@@ -1,3 +1,4 @@
+const { sellFifoIterative } = require('./helpers/helpers');
 const BatchModel = require('./models/batch');
 
 exports.sellFifoIterative = (quantityToSell, batchList) => {
@@ -26,15 +27,24 @@ const get = async (req, res, next) => {
         const getBatches = await BatchModel.find({
             supermarketId: id
         })
-        .select('quantity', 'quantityRemaining')
+        .select('quantity quantityRemaining')
         .sort({ createdAt: 1 });
         console.log(getBatches);
-        res.json(getBatches);
+        const updatedBatches = sellFifoIterative(600, getBatches);
+        await BatchModel.bulkWrite(updatedBatches.map(batch => ({
+            updateOne: {
+                filter: { _id: batch._id },
+                update: { $set: { quantityRemaining: batch.quantityRemaining } }
+            }
+        })));
+       
+        res.json(updatedBatches);
 
     } catch (error) {
         console.log(error)
         next(error);
     }
 }
+
 
 module.exports = { get };

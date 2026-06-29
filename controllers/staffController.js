@@ -12,7 +12,7 @@ exports.createStaff = async (req, res, next) => {
     try {
         const adminId = req.user.id;
         const admin = await SupermarketModel.findById(adminId);
-        const genPass = `${Math.ceil(Math.random() * 1000000)}`;
+        const genPass = otp.generate(10, { lowerCaseAlphabets: true, upperCaseAlphabets: true, specialChars: false, digits: true });
         console.log(genPass)
         if (!admin) {
             return res.status(404).json({
@@ -36,10 +36,10 @@ exports.createStaff = async (req, res, next) => {
             })
         }
 
-        const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(genPass, salt);
+
+        const username = `${firstName.toLowerCase()}${Math.floor(Math.random() * 10000)}`;
 
         const staff = new staffModel({
             adminId,
@@ -150,7 +150,10 @@ exports.loginStaff = async (req, res, next) => {
             })
         }
 
-        const checkPassword = await bcrypt.compare(password, staff.password)
+        const checkPassword = await bcrypt.compare(password, staff.password);
+        console.log(password)
+        console.log(staff.password)
+
         if (!checkPassword) {
             return res.status(400).json({
                 message: `Invalid credentials. Please contact your administrator`
@@ -162,6 +165,8 @@ exports.loginStaff = async (req, res, next) => {
                 message: 'Account is suspended. Cannot proceed'
             })
         }
+
+        
 
         staff.isActive = true;
         staff.isVerified = true;

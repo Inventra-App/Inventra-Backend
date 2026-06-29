@@ -286,6 +286,7 @@ exports.moveProducts = async (req, res, next) => {
             staffName: userName,
             title: actionType || 'Updated stock',
             module: 'INVENTORY',
+            entity: 'MOVEMENT',
             description: `Moved ${quantity} units of ${product.productName} from ${moveFrom} to ${moveTo}`,
             entityId: product._id
         });

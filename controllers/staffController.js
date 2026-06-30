@@ -53,8 +53,8 @@ exports.createStaff = async (req, res, next) => {
         console.log(staff)
         
         const roleLinks = {
-            manager: 'https://inventra-app.vercel.app/staff-login',
-            cashier: 'https://inventra-app.vercel.app/cashier-login'
+            manager: `https://inventra-app.vercel.app/staff-login/tenant=${staff.adminId}`,
+            cashier: `https://inventra-app.vercel.app/cashier-login/tenant=${staff.adminId}`
         };
         console.log(genPass)
         const link = roleLinks[staff.role];
@@ -141,9 +141,9 @@ exports.createStaff = async (req, res, next) => {
 
 exports.loginStaff = async (req, res, next) => {
     try {
-        const { email, password } = req.body;
+        const { tenant, email, password } = req.body;
         
-        const staff = await staffModel.findOne({ email: email.toLowerCase() });
+        const staff = await staffModel.findOne({ adminId: tenant, email: email.toLowerCase() });
         if (!staff) {
             return res.status(404).json({
                 message: `Invalid credentials. Please contact your administrator.`

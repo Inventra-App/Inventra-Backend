@@ -293,7 +293,10 @@ exports.moveProductsValidator = (req, res, next) => {
 exports.loginStaffValidator = (req, res, next) => {
     const schema = Joi.object({
         email: Joi.string().trim().lowercase().email().required(),
-        password: Joi.string().required()
+        password: Joi.string().required(),
+        tenant: Joi.string().trim().required().messages({
+            'string.empty': 'Tenant is required'
+        })
     });
 
     const { error } = schema.validate(req.body, { abortEarly: false });

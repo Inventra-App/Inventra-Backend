@@ -53,8 +53,8 @@ exports.createStaff = async (req, res, next) => {
         console.log(staff)
         
         const roleLinks = {
-            manager: `https://inventra-app.vercel.app/staff-login/tenant=${staff.adminId}`,
-            cashier: `https://inventra-app.vercel.app/cashier-login/tenant=${staff.adminId}`
+            manager: `https://inventra-app.vercel.app/staff-login?tenant=${staff.adminId}`,
+            cashier: `https://inventra-app.vercel.app/cashier-login?tenant=${staff.adminId}`
         };
         console.log(genPass)
         const link = roleLinks[staff.role];
@@ -141,6 +141,7 @@ exports.createStaff = async (req, res, next) => {
 
 exports.loginStaff = async (req, res, next) => {
     try {
+        console.log(req.body)
         const { tenant, email, password } = req.body;
         
         const staff = await staffModel.findOne({ adminId: tenant, email: email.toLowerCase() });

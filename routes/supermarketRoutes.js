@@ -13,7 +13,8 @@ const {
   verifyPasswordOtp,
   changePassword,
   updateUserProfile,
-  getOne
+  getOne,
+  getOneById
 } = require('../controllers/supermarketController');
 
 const { 
@@ -847,6 +848,89 @@ router.patch('/user/profile', authentication, updateUserProfileValidator, update
  *         description: Internal server error
  */
 router.get('/profile', authentication, getOne);
+
+/**
+ * @swagger
+ * /api/v1/supermarket/{supermarketId}:
+ *   get:
+ *     tags: [supermarket]
+ *     summary: Get supermarket details by ID
+ *     description: Retrieves detailed information about a specific supermarket using its ID. Sensitive fields like password, OTP, and login attempts are excluded.
+ *     parameters:
+ *       - in: path
+ *         name: supermarketId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the supermarket
+ *         example: 6857ac12d34b5c0012345678
+ *     responses:
+ *       200:
+ *         description: Supermarket details fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Supermarket fetched successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 6857ac12d34b5c0012345678
+ *                     firstName:
+ *                       type: string
+ *                       example: John
+ *                     lastName:
+ *                       type: string
+ *                       example: Doe
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     businessName:
+ *                       type: string
+ *                       example: Inventra Stores
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: +2348012345678
+ *                     address:
+ *                       type: string
+ *                       example: 123 Main Street, Lagos
+ *                     role:
+ *                       type: string
+ *                       example: admin
+ *                     isActive:
+ *                       type: boolean
+ *                       example: true
+ *                     isVerified:
+ *                       type: boolean
+ *                       example: true
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2026-06-24T10:00:00.000Z
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: 2026-06-24T10:00:00.000Z
+ *       404:
+ *         description: Supermarket not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Supermarket not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/supermarket/:supermarketId', getOneById);
+
 
 module.exports = router;
 

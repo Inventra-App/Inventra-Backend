@@ -375,3 +375,29 @@ exports.changeStaffRole = async (req, res, next) => {
         next(error)
     }   
 }
+
+exports.activateStaff = async(req, res, next) => {
+    try {
+        const { staffId } = req.params;
+
+        const staff = await staffModel.findById(staffId);
+
+        if (!staff) {
+            return res.status(404).json({
+                message: 'Staff not found'
+            });
+        }
+
+        staff.isSuspended = false;
+        await staff.save();
+
+        res.status(200).json({
+            message: 'Staff activated successfully',
+            data: staff
+        });
+
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}

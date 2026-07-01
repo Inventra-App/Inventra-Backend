@@ -574,4 +574,26 @@ exports.updateUserProfile = async (req, res, next) => {
         next(error)
     }
 };
- 
+
+exports.getOneById = async(req, res, next) => {
+    try {
+        const { supermarketId } = req.params;
+
+        const supermarket = await SupermarketModel.findById(supermarketId)
+            .select('-password -otp -otpExpires -loginAttempts -lockUntil');
+
+        if (!supermarket) {
+            return res.status(404).json({
+                message: 'Supermarket not found'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Supermarket fetched successfully',
+            data: supermarket
+        });
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+};

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const { createStaff, loginStaff, getAllStaff, logoutStaff, changeStaffPassword, getOneStaff, suspendStaff, changeStaffRole } = require('../controllers/staffController');
+const { createStaff, loginStaff, getAllStaff, logoutStaff, changeStaffPassword, getOneStaff, suspendStaff, changeStaffRole, activateStaff } = require('../controllers/staffController');
 const { createStaffValidator, loginStaffValidator } = require('../middlewares/validator');
 const { authentication, authorize, staffInvite } = require('../middlewares/auth');
 
@@ -456,6 +456,61 @@ router.patch('/staff/suspend/:staffId', authentication, authorize('admin'), susp
  *         description: Internal server error
  */
 router.patch('/staff/change-role/:staffId', authentication, authorize('admin'), changeStaffRole);
+
+/**
+ * @swagger
+ * /api/v1/staff/activate/{staffId}:
+ *   patch:
+ *     tags: [Staff]
+ *     summary: Activate a suspended staff member
+ *     description: Re-activates a previously suspended staff member by setting isSuspended to false. Only admins can perform this action.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: staffId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The unique identifier of the staff member to activate
+ *         example: 685f1234567890abc1234567
+ *     responses:
+ *       200:
+ *         description: Staff activated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff activated successfully
+ *                 data:
+ *                   $ref: '#/components/schemas/Staff'
+ *       404:
+ *         description: Staff not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Staff not found
+ *       401:
+ *         description: Unauthorized - Authentication required or insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/staff/activate/:staffId', authentication, authorize('admin'), activateStaff);
 
     
 module.exports = router
